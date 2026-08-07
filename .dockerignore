@@ -1,0 +1,26 @@
+# 根级构建上下文裁剪（防御性，正式构建由 compose 的 submodule context 决定）
+# compose 中 backend.context=./CS-Web-Backend、cs-website.context=./CS-Web-Frontend，
+# 各子仓库的 .dockerignore 已裁剪自身。此文件仅覆盖根级上下文可能误带的内容。
+
+.env
+.env.*
+!.env.example
+
+.git
+.gitmodules
+codebuddy/
+.codebuddy/
+
+data/
+backups/
+logs/
+*.log
+
+.DS_Store
+Thumbs.db
+
+docs/
+deploy/
+Makefile
+README.md
+docker-compose.yml

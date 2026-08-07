@@ -1,0 +1,163 @@
+# ============ FztbuCS-Project 全栈一键部署（方案②：根级编排）============
+# 统一编排：PostgreSQL + FastAPI 后端 + Next.js 前端(BFF) + Caddy(自动 HTTPS)
+#
+# 使用：
+#   1. cp .env.example .env 并填写全部 CHANGE_ME 值
+#   2. docker compose up -d --build
+#   3. 有域名：改 deploy/caddy/Caddyfile 为你的域名 → Caddy 自动申请证书
+#      无域名：可去掉 caddy 服务，直接访问 http://<host>:2333
+#
+# 架构：
+#   - 前端(BFF) 通过内部网络 cs-net 把 /api 转发到 backend:8000
+#   - PostgreSQL 数据持久化在 pgdata 卷
+#   - 公网只暴露 Caddy（80/443）
+#   - 后端/前端 build.context 指向各自 submodule 目录，Dockerfile 内路径相对自身，无需改动
+
+services:
+  # ============ 后端 FastAPI（BFF 转发目标）============
+  db:
+    image: postgres:16-alpine
+    container_name: cs-backend-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-domefff}
+      POSTGRES_USER: ${DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?请在 .env 中设置 DATABASE_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-postgres} -d ${DATABASE_NAME:-domefff}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+      - cs-net
+
+  backend:
+    build:
+      context: ./CS-Web-Backend
+    container_name: cs-backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # 容器内连 db 服务，覆盖 .env 中的 localhost
+      DATABASE_HOST: db
+      DATABASE_PORT: "5432"
+      DATABASE_NAME: ${DATABASE_NAME:-domefff}
+      DATABASE_USER: ${DATABASE_USER:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      # 空库自动建库 + 自动迁移到 head
+      DB_AUTO_CREATE_DATABASE: "true"
+      DB_AUTO_MIGRATE: "true"
+      SECRET_KEY: ${SECRET_KEY}
+      TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY}
+      PASSWORD_RESET_DEFAULT: ${PASSWORD_RESET_DEFAULT:-}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      REQUIRE_REDIS_FOR_SECURITY: "false"
+      # 跨实例事件广播（ADR-014）：MULTI_INSTANCE=true 经 arq/redis 广播事件。
+      # 单实例部署保持 false（零开销，行为与改造前一致）。
+      MULTI_INSTANCE: ${MULTI_INSTANCE:-false}
+      QUEUE_ENABLED: ${QUEUE_ENABLED:-true}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+    expose:
+      - "8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - cs-net
+
+  # ============ Redis（事件总线/队列 broker）============
+  redis:
+    image: redis:7-alpine
+    container_name: cs-redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    networks:
+      - cs-net
+
+  # ============ arq worker（跨实例事件广播落地 + 异步任务）============
+  worker:
+    build:
+      context: ./CS-Web-Backend
+    container_name: cs-worker
+    restart: unless-stopped
+    command: arq app.core.queue.worker.WorkerSettings
+    env_file: .env
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: "5432"
+      DATABASE_NAME: ${DATABASE_NAME:-domefff}
+      DATABASE_USER: ${DATABASE_USER:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      SECRET_KEY: ${SECRET_KEY}
+      TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      MULTI_INSTANCE: ${MULTI_INSTANCE:-false}
+      QUEUE_ENABLED: ${QUEUE_ENABLED:-true}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - cs-net
+
+  # ============ 前端 Next.js（BFF）============
+  cs-website:
+    build:
+      context: ./CS-Web-Frontend
+      dockerfile: tools/deploy/Dockerfile
+    container_name: cs-website
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=2333
+      # BFF 转发目标：容器内直连后端，无需暴露公网
+      - BACKEND_URL=http://backend:8000
+      - AUTH_SESSION_SECRET=${AUTH_SESSION_SECRET}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+      # 纯 BFF：前端不持有任何数据库，移除 SQLite 挂载（原 SQLITE_DB_PATH 仅历史残留）
+      - TRUST_PROXY=true
+    volumes:
+      # 持久化：用户上传文件等本地数据
+      - ./data:/app/data
+      - ./backups:/app/backups
+    networks:
+      - cs-net
+    depends_on:
+      - backend
+
+  # ============ Caddy 反向代理（自动 HTTPS）============
+  caddy:
+    image: caddy:2-alpine
+    container_name: cs-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - cs-net
+    depends_on:
+      - cs-website
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
+
+networks:
+  cs-net:
+    driver: bridge

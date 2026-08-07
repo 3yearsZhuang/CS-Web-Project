@@ -3,4 +3,4 @@
 	url = git@github.com:KashiwagiEri233/CS-Web-Backend.git
 [submodule "CS-Web-Frontend"]
 	path = CS-Web-Frontend
-	url = git@github.com:KashiwagiEri233/CS-Web-Frontend.git
+	url = git@github.com:3yearsZhuang/CS-Web-Frontend.git

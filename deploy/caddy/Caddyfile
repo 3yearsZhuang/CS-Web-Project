@@ -1,0 +1,31 @@
+# ============ 根级 Caddy 配置 ============
+# 部署时将 cs.yourdomain.com 替换为你的实际域名
+# Caddy 会自动申请 Let's Encrypt 证书并续期
+# 无域名：可去掉 caddy 服务，直接访问 http://<host>:2333
+
+cs.yourdomain.com {
+	# 反向代理到前端（BFF）容器
+	reverse_proxy cs-website:2333
+
+	# 传递客户端真实 IP 与协议（供速率限制与安全校验使用）
+	header_up X-Real-IP {remote_host}
+	header_up X-Forwarded-For {remote_host}
+	header_up X-Forwarded-Proto {scheme}
+
+	# 压缩响应
+	encode gzip zstd
+
+	# 静态资源缓存（Next.js 构建产物带 hash，可长期缓存）
+	@static {
+		path /_next/static/*
+	}
+	header @static Cache-Control "public, max-age=31536000, immutable"
+
+	# 安全头（补充 Caddy 层，与 next.config.ts 中的配置呼应）
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+}
