@@ -2,7 +2,7 @@
 
 > 更新人：3yearsZ
 > 最后更新：2026-08-05（统一 RootDoc 命名）
-> 根级编排层的部署唯一权威。覆盖：本地开发并行启动、容器化全栈部署（db+backend+redis+worker+frontend）、回滚、数据卷与备份。
+> 根级编排层的部署唯一权威。覆盖：本地开发并行启动、容器化全栈部署（外部 PostgreSQL+外部 Redis+backend+worker+frontend）、回滚、数据卷与备份。
 > 深链接（各端专项，勿在此重复）：前端 `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md`（Docker/外部反向代理/SLO/Runbook）、后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md`（运维端点 `/health /readyz /metrics/json /status`）。跨端 SLO 与可观测性基线见本文 **§七**（原 `BackDoc-SLO.md` 已并入）。
 
 ---
@@ -13,14 +13,14 @@
 浏览器 ──> 外部反向代理（可选）──> 127.0.0.1:2333 cs-website(Next.js BFF)
                                           │ BACKEND_URL=http://backend:8000
                                           ▼
-                                     backend(FastAPI :8000) ──> db(PostgreSQL:5432)
+                                     backend(FastAPI :8000) ──> 外部 PostgreSQL(:5432)
 ```
 
 - 前端 BFF 通过内部网络 `cs-net` 直连后端，后端不暴露公网端口（容器 `expose: 8000`，仅内网）。
 
 > 端口约定：容器编排内后端服务端口固定为 **8000**（前端 `BACKEND_URL=http://backend:8000`）；本地开发经 `Makefile` 的 `run.py --port 9000` 暴露 **9000** 供宿主机直连。两者指向同一服务，仅场景不同。
 - 前端仅绑定宿主机回环地址 `127.0.0.1:2333`；后续由部署者自行配置外部反向代理和 HTTPS。
-- 数据卷：`pgdata`（PostgreSQL）、根级 `data/`（上传文件）。前端为纯 BFF 层，无本地数据库备份（业务数据统一由 PostgreSQL 承载，原 Litestream/SQLite 备份体系已移除）。
+- PostgreSQL 使用服务器已有实例，不由 Compose 创建或持久化；仅持久化根级 `data/`（上传文件）。前端为纯 BFF 层，无本地数据库备份（业务数据统一由 PostgreSQL 承载，原 Litestream/SQLite 备份体系已移除）。
 
 ---
 
@@ -30,13 +30,18 @@
 
 | 变量 | 用途 | 必填 |
 |------|------|------|
-| `DATABASE_PASSWORD` | PostgreSQL 密码 | ✅ |
+| `DATABASE_HOST` / `DATABASE_PORT` | 服务器 PostgreSQL 地址和端口 | 生产 ✅ |
+| `DATABASE_NAME` / `DATABASE_USER` / `DATABASE_PASSWORD` | 外部 PostgreSQL 数据库连接信息 | 生产 ✅ |
 | `SECRET_KEY` | 后端 JWT 签名密钥（≥32B） | ✅ |
 | `TOTP_ENCRYPTION_KEY` | 后端 2FA 加密密钥（≥32B） | ✅ |
 | `AUTH_SESSION_SECRET` | 前端 Session 密钥（≥32B） | ✅ |
 | `ALLOWED_ORIGINS` | 前后端 CORS / Origin 白名单 | 生产 ✅ |
 | `NEXT_PUBLIC_SITE_URL` | 站点 URL | 生产 ✅ |
 | `TRUST_PROXY` | 是否信任反向代理头（默认 `false`；外部反代配置后设为 `true`） | 按部署方式 |
+| `DB_AUTO_CREATE_DATABASE` | 是否允许后端自动创建外部数据库 | 默认 `false` |
+| `DB_AUTO_MIGRATE` | 启动时执行 Alembic 迁移 | 默认 `true` |
+| `REDIS_URL` | 服务器 Redis 连接地址 | 生产 ✅ |
+| `REQUIRE_REDIS_FOR_SECURITY` | Redis 不可用时是否阻止生产启动 | 生产建议 `true` |
 
 > 本地覆盖用不跟踪的 `.env.local`；后端开发模板 `.env.development`（最全参考样板），见后端 `docs/BackDoc-Conv.md` §7。
 
@@ -60,8 +65,10 @@ make dev-up        # 并行起后端(:9000 热重载) + 前端(:2333 dev)
 ```bash
 make setup        # 首次：cp .env.example .env，并填写全部密钥
 # 编辑 .env：DATABASE_PASSWORD / SECRET_KEY / TOTP_ENCRYPTION_KEY / AUTH_SESSION_SECRET
+# 确认服务器 PostgreSQL 已创建 DATABASE_NAME，并允许 Docker 容器访问
+# 确认服务器 Redis 已运行，并允许 Docker 容器访问
 # 前端默认绑定 127.0.0.1:2333；后续由部署者自行配置 HTTPS 反向代理
-make up           # docker compose up -d --build（db+backend+redis+worker+frontend）
+make up           # docker compose up -d --build（外部 PostgreSQL+外部 Redis+backend+worker+frontend）
 make ps           # 查看状态
 make logs         # 跟踪日志
 make rebuild      # 强制重建并重启
@@ -75,7 +82,8 @@ make down         # 停止
 > 生产模式使用 `Secure` Cookie。正式使用必须由外部反向代理提供 HTTPS；直接使用 HTTP 端口主要用于部署验证。
 
 **关键行为**：
-- 后端 `DB_AUTO_CREATE_DATABASE=true` + `DB_AUTO_MIGRATE=true` → 空库自动建库并 `alembic upgrade head`。
+- 后端默认 `DB_AUTO_CREATE_DATABASE=false` + `DB_AUTO_MIGRATE=true` → 使用服务器已有数据库并执行 `alembic upgrade head`。
+- 如需由后端创建数据库，必须显式设置 `DB_AUTO_CREATE_DATABASE=true`，且 PostgreSQL 用户需具备建库权限。
 - `build.context` 指向各自 submodule 目录（`./CS-Web-Backend`、`./CS-Web-Frontend`），Dockerfile 内路径相对自身，无需改动。
 
 ---
@@ -97,7 +105,7 @@ make down         # 停止
 
 - **后端回滚**：迁移可 `alembic downgrade`（见后端 `tools/docs/BackDoc-Infra.md` §六 迁移验证）；代码回滚 = 重建该 submodule 镜像。
 - **前端回滚**：重建 `cs-website` 镜像（前端为纯 BFF，无本地状态库）。
-- **数据卷**：`pgdata` 持久化 PG；`data/` 持久化上传文件；删除容器不删卷（`docker compose down` 不加 `-v`）。
+- **数据卷**：仅 `data/` 持久化上传文件；PostgreSQL 数据由服务器已有实例负责备份和持久化。
 
 > 专项 Runbook（Docker 部署细节、外部反向代理接入、恢复演练）见前端 `FrontDoc-Ops.md`。
 
@@ -116,12 +124,12 @@ make down         # 停止
 # 或指定目录
 ./scripts/export_db_to_desktop.sh /path/to/out
 
-# 也可用后端脚本直接备份（容器内 db 服务名可直连时）
+# 也可用后端脚本直接备份（脚本通过 .env 连接服务器 PostgreSQL）
 ./CS-Web-Backend/tools/scripts/backup_db.sh /path/to/backup
 ```
 
 - 连接参数取自根 `.env` 的 `DATABASE_HOST/PORT/NAME/USER/PASSWORD`。
-- 根 `.env` 中 `DATABASE_HOST=db` 是 docker-compose 容器内服务名，宿主机不可直连。`export_db_to_desktop.sh` 已内置回退：当 `.env` 为 `db` 且未显式指定时自动改用 `localhost`；也可用 `DATABASE_HOST_OVERRIDE=localhost` 强制指定。
+- 根 `.env` 中 `DATABASE_HOST` 必须填写服务器 PostgreSQL 的可达地址；同机 Docker 部署可使用 `host.docker.internal`，远程数据库填写实际主机名或 IP。
 - 输出：`domefff_<时间戳>.sql.gz`（`pg_dump --format=custom` + gzip，已做完整性校验）。
 
 ### 2. 传输到生产服务器
@@ -137,22 +145,21 @@ scp /Users/you/Desktop/domefff_*.sql.gz user@prod-host:/opt/cs-backup/
 **情形 A：生产是空库（推荐）**
 
 ```bash
-# 在生产机：先起 db 服务，再用根脚本的 --restore 模式（读取生产 .env）
+# 在生产机：确认外部 PostgreSQL 已运行，再用根脚本的 --restore 模式（读取生产 .env）
 cd /path/to/FztbuCS-Project
 ./CS-Web-Backend/tools/scripts/backup_db.sh --restore /opt/cs-backup/domefff_xxx.sql.gz
-# 或直接在 db 容器内 pg_restore
-docker compose exec -T db pg_restore -U postgres --no-owner --no-privileges -d domefff \
-  < /opt/cs-backup/domefff_xxx.sql
+# 或直接使用服务器上的 pg_restore 连接外部 PostgreSQL
+PGPASSWORD="$DATABASE_PASSWORD" pg_restore -h "$DATABASE_HOST" -p "$DATABASE_PORT" -U "$DATABASE_USER" \
+  --no-owner --no-privileges -d "$DATABASE_NAME" /opt/cs-backup/domefff_xxx.sql
 ```
 
 **情形 B：生产已有 seed 数据（admin 用户、预置角色）**
 
-直接灌会撞主键/唯一约束。需按 `docs/RootDoc-MigEval.md` 的"按 email/username 去重"策略处理，或先清空 `pgdata` 卷再导入：
+直接灌会撞主键/唯一约束。需按 `docs/RootDoc-MigEval.md` 的"按 email/username 去重"策略处理，或先在外部 PostgreSQL 中清空并重建目标数据库再导入：
 
 ```bash
-docker compose down
-docker volume rm fztbucs-project_pgdata   # 卷名以实际为准
-docker compose up -d db
+dropdb -h "$DATABASE_HOST" -p "$DATABASE_PORT" -U "$DATABASE_USER" "$DATABASE_NAME"
+createdb -h "$DATABASE_HOST" -p "$DATABASE_PORT" -U "$DATABASE_USER" "$DATABASE_NAME"
 # 再执行情形 A 的恢复
 ```
 
@@ -161,7 +168,7 @@ docker compose up -d db
 导入后重建所有自增序列，使其对齐当前最大值：
 
 ```bash
-docker compose exec db psql -U postgres -d domefff -c \
+PGPASSWORD="$DATABASE_PASSWORD" psql -h "$DATABASE_HOST" -p "$DATABASE_PORT" -U "$DATABASE_USER" -d "$DATABASE_NAME" -c \
   "SELECT setval(pg_get_serial_sequence(tbl.relname,'id'), COALESCE((SELECT MAX(id) FROM tbl),1)) \
    FROM pg_class tbl JOIN pg_namespace ns ON ns.oid=table(tbl).relnamespace \
    WHERE tbl.relkind='r' AND EXISTS (SELECT 1 FROM information_schema.columns c \

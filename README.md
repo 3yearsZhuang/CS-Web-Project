@@ -14,7 +14,7 @@
 FztbuCS-Project/
 ├── CS-Web-Backend/        # submodule：FastAPI 后端（REST API + PostgreSQL + Alembic）
 ├── CS-Web-Frontend/       # submodule：Next.js 前端（UI + BFF 薄转发）
-├── docker-compose.yml     # 根级全栈编排（db + backend + redis + worker + frontend）
+├── docker-compose.yml     # 根级全栈编排（外部 PostgreSQL + 外部 Redis + backend + worker + frontend）
 ├── .env.example           # 全栈环境变量模板
 ├── Makefile               # 统一命令入口
 └── docs/                  # 根级文档（编排/部署/通用规范，入口见 docs/README.md）
@@ -55,7 +55,7 @@ make dev-up       # 并行起后端(:9000 热重载) + 前端(:2333 dev)
 make setup        # 首次：cp .env.example .env，并填写全部密钥
 # 编辑 .env：DATABASE_PASSWORD / SECRET_KEY / TOTP_ENCRYPTION_KEY / AUTH_SESSION_SECRET
 # 前端默认绑定 127.0.0.1:2333；后续由部署者自行配置 HTTPS 反向代理
-make up           # docker compose up -d --build（db+backend+redis+worker+frontend）
+make up           # docker compose up -d --build（外部 PostgreSQL+外部 Redis+backend+worker+frontend）
 make ps           # 查看状态
 make logs         # 跟踪日志
 make down         # 停止
@@ -126,7 +126,9 @@ A：不能。前端仅 BFF 转发，业务数据全在后端 PG。
 
 | 变量 | 用途 | 必填 |
 |------|------|------|
-| `DATABASE_PASSWORD` | PostgreSQL 密码 | ✅ |
+| `DATABASE_HOST` / `DATABASE_PORT` | 服务器 PostgreSQL 地址和端口 | 生产 ✅ |
+| `DATABASE_NAME` / `DATABASE_USER` / `DATABASE_PASSWORD` | 外部 PostgreSQL 数据库连接信息 | 生产 ✅ |
+| `REDIS_URL` | 服务器 Redis 连接地址 | 生产 ✅ |
 | `SECRET_KEY` | 后端 JWT 签名密钥（≥32B） | ✅ |
 | `TOTP_ENCRYPTION_KEY` | 后端 2FA 加密密钥（≥32B） | ✅ |
 | `AUTH_SESSION_SECRET` | 前端 Session 密钥（≥32B） | ✅ |
@@ -140,13 +142,13 @@ A：不能。前端仅 BFF 转发，业务数据全在后端 PG。
 浏览器 ──> 外部反向代理（可选）──> 127.0.0.1:2333 cs-website(Next.js BFF)
                                           │ BACKEND_URL=http://backend:8000
                                           ▼
-                                     backend(FastAPI :8000) ──> db(PostgreSQL:5432)
+                                     backend(FastAPI :8000) ──> 外部 PostgreSQL(:5432)
 ```
 
 - 前端 BFF 通过内部网络 `cs-net` 直连后端，无需暴露后端公网端口。
 - 生产模式使用安全 Cookie，正式访问应由外部反向代理提供 HTTPS；`http://127.0.0.1:2333` 主要用于部署验证。
 - 前端为纯 BFF/展示层，**不持有业务数据**；全部业务数据由后端 PostgreSQL 承载（前端已 100% 移除 SQLite 相关代码、脚本与依赖）。
-- 数据卷：`pgdata`（PG）、根级 `data/`（上传文件）。
+- 数据卷：根级 `data/`（上传文件）；PostgreSQL 数据由服务器现有实例负责持久化。
 
 ## Submodule 说明
 

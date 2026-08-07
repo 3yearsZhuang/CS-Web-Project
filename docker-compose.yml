@@ -1,38 +1,22 @@
 # ============ FztbuCS-Project 全栈一键部署（方案②：根级编排）============
-# 统一编排：PostgreSQL + Redis + arq worker + FastAPI 后端 + Next.js 前端(BFF)
+# 统一编排：外部 PostgreSQL + 外部 Redis + arq worker + FastAPI 后端 + Next.js 前端(BFF)
 #
 # 使用：
 #   1. cp .env.example .env 并填写全部 CHANGE_ME 值
-#   2. docker compose up -d --build
-#   3. 前端默认绑定宿主机回环地址 http://127.0.0.1:2333
+#   2. 确认服务器 PostgreSQL 已创建 DATABASE_NAME，并允许 Docker 容器访问
+#   3. 确认服务器 Redis 已运行，并允许 Docker 容器访问
+#   4. docker compose up -d --build
+#   5. 前端默认绑定宿主机回环地址 http://127.0.0.1:2333
 #      后续由部署者自行配置 HTTPS 反向代理指向该地址
 #
 # 架构：
 #   - 前端(BFF) 通过内部网络 cs-net 把 /api 转发到 backend:8000
-#   - PostgreSQL 数据持久化在 pgdata 卷
+#   - backend/worker 通过 .env 中的 DATABASE_HOST 访问服务器已有 PostgreSQL 和 REDIS_URL 访问服务器已有 Redis
 #   - 仅前端绑定宿主机回环地址 127.0.0.1:2333，后端不暴露宿主机端口
 #   - 后端/前端 build.context 指向各自 submodule 目录，Dockerfile 内路径相对自身，无需改动
 
 services:
   # ============ 后端 FastAPI（BFF 转发目标）============
-  db:
-    image: postgres:16-alpine
-    container_name: cs-backend-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DATABASE_NAME:-domefff}
-      POSTGRES_USER: ${DATABASE_USER:-postgres}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?请在 .env 中设置 DATABASE_PASSWORD}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-postgres} -d ${DATABASE_NAME:-domefff}"]
-      interval: 5s
-      timeout: 5s
-      retries: 12
-    networks:
-      - cs-net
-
   backend:
     build:
       context: ./CS-Web-Backend
@@ -40,45 +24,30 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      # 容器内连 db 服务，覆盖 .env 中的 localhost
-      DATABASE_HOST: db
-      DATABASE_PORT: "5432"
-      DATABASE_NAME: ${DATABASE_NAME:-domefff}
-      DATABASE_USER: ${DATABASE_USER:-postgres}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      # 空库自动建库 + 自动迁移到 head
-      DB_AUTO_CREATE_DATABASE: "true"
-      DB_AUTO_MIGRATE: "true"
+      # 连接服务器已有 PostgreSQL，不再使用 Compose 内 db 服务
+      DATABASE_HOST: ${DATABASE_HOST:?请在 .env 中设置 DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT:-5432}
+      DATABASE_NAME: ${DATABASE_NAME:?请在 .env 中设置 DATABASE_NAME}
+      DATABASE_USER: ${DATABASE_USER:?请在 .env 中设置 DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:?请在 .env 中设置 DATABASE_PASSWORD}
+      # 外部 PostgreSQL 默认应已建库；保留开关供有权限的环境显式启用
+      DB_AUTO_CREATE_DATABASE: ${DB_AUTO_CREATE_DATABASE:-false}
+      DB_AUTO_MIGRATE: ${DB_AUTO_MIGRATE:-true}
       SECRET_KEY: ${SECRET_KEY}
       TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY}
       PASSWORD_RESET_DEFAULT: ${PASSWORD_RESET_DEFAULT:-}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
-      REQUIRE_REDIS_FOR_SECURITY: "false"
+      REQUIRE_REDIS_FOR_SECURITY: ${REQUIRE_REDIS_FOR_SECURITY:-true}
       # 跨实例事件广播（ADR-014）：MULTI_INSTANCE=true 经 arq/redis 广播事件。
       # 单实例部署保持 false（零开销，行为与改造前一致）。
       MULTI_INSTANCE: ${MULTI_INSTANCE:-false}
       QUEUE_ENABLED: ${QUEUE_ENABLED:-true}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      REDIS_URL: ${REDIS_URL:?请在 .env 中设置 REDIS_URL}
+    extra_hosts:
+      # 服务器 PostgreSQL/Redis 监听宿主机时，可用 host.docker.internal 访问
+      - "host.docker.internal:host-gateway"
     expose:
       - "8000"
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - cs-net
-
-  # ============ Redis（事件总线/队列 broker）============
-  redis:
-    image: redis:7-alpine
-    container_name: cs-redis
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 12
     networks:
       - cs-net
 
@@ -91,22 +60,19 @@ services:
     command: arq app.core.queue.worker.WorkerSettings
     env_file: .env
     environment:
-      DATABASE_HOST: db
-      DATABASE_PORT: "5432"
-      DATABASE_NAME: ${DATABASE_NAME:-domefff}
-      DATABASE_USER: ${DATABASE_USER:-postgres}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_HOST: ${DATABASE_HOST:?请在 .env 中设置 DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT:-5432}
+      DATABASE_NAME: ${DATABASE_NAME:?请在 .env 中设置 DATABASE_NAME}
+      DATABASE_USER: ${DATABASE_USER:?请在 .env 中设置 DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:?请在 .env 中设置 DATABASE_PASSWORD}
       SECRET_KEY: ${SECRET_KEY}
       TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
       MULTI_INSTANCE: ${MULTI_INSTANCE:-false}
       QUEUE_ENABLED: ${QUEUE_ENABLED:-true}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      REDIS_URL: ${REDIS_URL:?请在 .env 中设置 REDIS_URL}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - cs-net
 
@@ -136,12 +102,8 @@ services:
       - cs-net
     depends_on:
       - backend
-
     ports:
       - "127.0.0.1:2333:2333"
-
-volumes:
-  pgdata:
 
 networks:
   cs-net:

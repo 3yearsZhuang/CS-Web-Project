@@ -33,7 +33,8 @@
 | Node.js | 22 | 前端运行 / 构建 |
 | pnpm | 9.0.0 | 前端包管理（CI 锁定此版本） |
 | Docker + Compose | 新版 | 容器化全栈部署 |
-| PostgreSQL | 16（容器自动起） | 生产/测试数据库 |
+| PostgreSQL | 服务器已有实例（外部连接） | 生产数据库 |
+| Redis | 服务器已有实例（外部连接） | 队列 / 跨实例事件总线 |
 
 ### 1.2 克隆仓库（含 submodule）
 
@@ -111,7 +112,7 @@ pnpm run ts-check && pnpm run lint:build
 ```bash
 # 仓库根目录
 make setup
-# 编辑 .env：填齐 4 个密钥；前端默认绑定 127.0.0.1:2333
+# 编辑 .env：填齐 PostgreSQL、Redis 连接信息和 4 个密钥；确认外部 PostgreSQL 已建库、Redis 已运行
 make up            # docker compose up -d --build
 make ps            # 查看状态
 make logs          # 跟踪日志
@@ -119,7 +120,7 @@ make logs          # 跟踪日志
 
 - 前端绑定宿主机回环地址 `127.0.0.1:2333`，后续由部署者自行配置 HTTPS 反向代理。
 - 后端不暴露公网，前端 BFF 经内部网络 `cs-net` 直连 `backend:8000`。
-- 数据卷：`pgdata`（PG）、根级 `data/`（上传文件）、`backups/`（备份）。
+- 数据卷：根级 `data/`（上传文件）、`backups/`（备份）；PostgreSQL 数据由服务器已有实例负责持久化。
 
 > 生产模式使用 `Secure` Cookie。直接访问 HTTP 端口仅用于部署验证；正式使用应由外部反向代理提供 HTTPS，并在 `.env` 中将 `TRUST_PROXY` 设为 `true`。
 
@@ -236,7 +237,7 @@ make logs          # 跟踪日志
 6. **业务异常**：抛 `BaseAppException` 子类，不在路由吞异常。
 7. **中间件短路**：`return JSONResponse(...)`，不 `raise HTTPException`。
 8. **日志**：`get_logger`，不 `print`、不直接配 handler。
-9. **Redis 可降级**：限流/缓存把 Redis 当增强项，非强依赖。
+9. **Redis**：生产 Compose 使用服务器已有 Redis；队列和跨实例事件广播需要 `REDIS_URL` 可达，安全限流功能是否强制依赖由 `REQUIRE_REDIS_FOR_SECURITY` 控制。
 10. **迁移铁律**：全环境仅 Alembic；禁止 `Base.metadata.create_all`；建库用 `DB_AUTO_CREATE_DATABASE`。
 11. **时区**：核心存 UTC，展示走 `settings.TIMEZONE`；必须装 `tzdata`。
 12. **新增 datetime 响应模型必须继承 `TZModel`**，不手写 per-field serializer。

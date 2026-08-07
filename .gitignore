@@ -41,7 +41,5 @@ dump.rdb
 *.rdb
 appendonlydir/
 
-# 注：pgdata 等为 Docker 命名卷，由 Docker 管理，
-# 不落在工作区目录，无需在此忽略。
 
 # ---- 根级无源码，公共段即全部；语言专属段见子模块 .gitignore ----
