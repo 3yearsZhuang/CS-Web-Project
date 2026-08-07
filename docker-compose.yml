@@ -81,6 +81,8 @@ services:
     build:
       context: ./CS-Web-Frontend
       dockerfile: tools/deploy/Dockerfile
+      args:
+        ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:?请在 .env 中设置 ALLOWED_ORIGINS}
     container_name: cs-website
     restart: unless-stopped
     environment:
