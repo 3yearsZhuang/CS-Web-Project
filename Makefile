@@ -8,7 +8,7 @@
 #   make dev-logs     进入 tmux 会话实时看前后端日志（Ctrl+B 再 D 脱离）
 #   make dev-down     一键关停整个 dev 会话（前后端一起停）
 #   make setup        首次：复制 .env.example → .env
-#   make up           全栈 Docker 部署（db+backend+frontend+caddy）
+#   make up           全栈 Docker 部署（db+backend+redis+worker+frontend；前端绑定 127.0.0.1:2333）
 #   make down / logs / ps / rebuild
 #
 # 前置：根目录已 git init 并将前后端作为 submodule 收敛（方案②）。

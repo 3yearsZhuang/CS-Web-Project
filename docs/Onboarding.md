@@ -111,15 +111,17 @@ pnpm run ts-check && pnpm run lint:build
 ```bash
 # 仓库根目录
 make setup
-# 编辑 .env：填齐 4 个密钥；有域名则改 deploy/caddy/Caddyfile 的域名
+# 编辑 .env：填齐 4 个密钥；前端默认绑定 127.0.0.1:2333
 make up            # docker compose up -d --build
 make ps            # 查看状态
 make logs          # 跟踪日志
 ```
 
-- 公网仅暴露 Caddy（80/443），自动申请 HTTPS 证书。
+- 前端绑定宿主机回环地址 `127.0.0.1:2333`，后续由部署者自行配置 HTTPS 反向代理。
 - 后端不暴露公网，前端 BFF 经内部网络 `cs-net` 直连 `backend:8000`。
 - 数据卷：`pgdata`（PG）、根级 `data/`（上传文件）、`backups/`（备份）。
+
+> 生产模式使用 `Secure` Cookie。直接访问 HTTP 端口仅用于部署验证；正式使用应由外部反向代理提供 HTTPS，并在 `.env` 中将 `TRUST_PROXY` 设为 `true`。
 
 ### 3.2 回滚 / 备份
 

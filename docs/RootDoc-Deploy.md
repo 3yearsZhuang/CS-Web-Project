@@ -2,15 +2,15 @@
 
 > 更新人：3yearsZ
 > 最后更新：2026-08-05（统一 RootDoc 命名）
-> 根级编排层的部署唯一权威。覆盖：本地开发并行启动、容器化全栈部署（db+backend+frontend+caddy）、回滚、数据卷与备份。
-> 深链接（各端专项，勿在此重复）：前端 `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md`（Docker/Caddy/SLO/Runbook）、后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md`（运维端点 `/health /readyz /metrics/json /status`）。跨端 SLO 与可观测性基线见本文 **§七**（原 `BackDoc-SLO.md` 已并入）。
+> 根级编排层的部署唯一权威。覆盖：本地开发并行启动、容器化全栈部署（db+backend+redis+worker+frontend）、回滚、数据卷与备份。
+> 深链接（各端专项，勿在此重复）：前端 `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md`（Docker/外部反向代理/SLO/Runbook）、后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md`（运维端点 `/health /readyz /metrics/json /status`）。跨端 SLO 与可观测性基线见本文 **§七**（原 `BackDoc-SLO.md` 已并入）。
 
 ---
 
 ## 一、架构总览
 
 ```text
-浏览器 ──HTTPS──> Caddy(:80/:443) ──> cs-website(Next.js BFF :2333)
+浏览器 ──> 外部反向代理（可选）──> 127.0.0.1:2333 cs-website(Next.js BFF)
                                           │ BACKEND_URL=http://backend:8000
                                           ▼
                                      backend(FastAPI :8000) ──> db(PostgreSQL:5432)
@@ -19,7 +19,7 @@
 - 前端 BFF 通过内部网络 `cs-net` 直连后端，后端不暴露公网端口（容器 `expose: 8000`，仅内网）。
 
 > 端口约定：容器编排内后端服务端口固定为 **8000**（前端 `BACKEND_URL=http://backend:8000`）；本地开发经 `Makefile` 的 `run.py --port 9000` 暴露 **9000** 供宿主机直连。两者指向同一服务，仅场景不同。
-- 公网只暴露 Caddy（80/443，自动 HTTPS）。
+- 前端仅绑定宿主机回环地址 `127.0.0.1:2333`；后续由部署者自行配置外部反向代理和 HTTPS。
 - 数据卷：`pgdata`（PostgreSQL）、根级 `data/`（上传文件）。前端为纯 BFF 层，无本地数据库备份（业务数据统一由 PostgreSQL 承载，原 Litestream/SQLite 备份体系已移除）。
 
 ---
@@ -36,7 +36,7 @@
 | `AUTH_SESSION_SECRET` | 前端 Session 密钥（≥32B） | ✅ |
 | `ALLOWED_ORIGINS` | 前后端 CORS / Origin 白名单 | 生产 ✅ |
 | `NEXT_PUBLIC_SITE_URL` | 站点 URL | 生产 ✅ |
-| `TRUST_PROXY` | 是否信任反向代理头（Caddy 后须 true） | 生产 ✅ |
+| `TRUST_PROXY` | 是否信任反向代理头（默认 `false`；外部反代配置后设为 `true`） | 按部署方式 |
 
 > 本地覆盖用不跟踪的 `.env.local`；后端开发模板 `.env.development`（最全参考样板），见后端 `docs/BackDoc-Conv.md` §7。
 
@@ -60,16 +60,19 @@ make dev-up        # 并行起后端(:9000 热重载) + 前端(:2333 dev)
 ```bash
 make setup        # 首次：cp .env.example .env，并填写全部密钥
 # 编辑 .env：DATABASE_PASSWORD / SECRET_KEY / TOTP_ENCRYPTION_KEY / AUTH_SESSION_SECRET
-# 有域名：把 deploy/caddy/Caddyfile 中的 cs.yourdomain.com 改为你的域名
-make up           # docker compose up -d --build（db+backend+frontend+caddy）
+# 前端默认绑定 127.0.0.1:2333；后续由部署者自行配置 HTTPS 反向代理
+make up           # docker compose up -d --build（db+backend+redis+worker+frontend）
 make ps           # 查看状态
 make logs         # 跟踪日志
 make rebuild      # 强制重建并重启
 make down         # 停止
 ```
 
-- 无域名：去掉 compose 里的 `caddy` 服务，直接访问 `http://<host>:2333`。
+- 前端访问入口：`http://127.0.0.1:2333`（服务器本机验证）；外部反向代理应转发到该地址。
+- 如需临时从其他机器直连测试，可将端口映射改为 `0.0.0.0:2333:2333`，正式环境不建议这样暴露。
 - 后端 Swagger：`http://<host>:9000/docs`（本地 `make dev-up` 暴露；容器编排内后端为 `:8000`，由前端 BFF 经 `backend:8000` 直连，不映射公网）。
+
+> 生产模式使用 `Secure` Cookie。正式使用必须由外部反向代理提供 HTTPS；直接使用 HTTP 端口主要用于部署验证。
 
 **关键行为**：
 - 后端 `DB_AUTO_CREATE_DATABASE=true` + `DB_AUTO_MIGRATE=true` → 空库自动建库并 `alembic upgrade head`。
@@ -96,7 +99,7 @@ make down         # 停止
 - **前端回滚**：重建 `cs-website` 镜像（前端为纯 BFF，无本地状态库）。
 - **数据卷**：`pgdata` 持久化 PG；`data/` 持久化上传文件；删除容器不删卷（`docker compose down` 不加 `-v`）。
 
-> 专项 Runbook（Docker 部署细节、Caddy 配置、恢复演练）见前端 `FrontDoc-Ops.md`。
+> 专项 Runbook（Docker 部署细节、外部反向代理接入、恢复演练）见前端 `FrontDoc-Ops.md`。
 
 ---
 
@@ -179,7 +182,7 @@ docker compose exec db psql -U postgres -d domefff -c \
 
 ---
 
-> 专项 Runbook（Docker 部署细节、Caddy 配置、恢复演练）见前端 `FrontDoc-Ops.md`。
+> 专项 Runbook（Docker 部署细节、外部反向代理接入、恢复演练）见前端 `FrontDoc-Ops.md`。
 
 ---
 

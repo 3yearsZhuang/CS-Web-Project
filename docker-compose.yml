@@ -1,16 +1,16 @@
 # ============ FztbuCS-Project 全栈一键部署（方案②：根级编排）============
-# 统一编排：PostgreSQL + FastAPI 后端 + Next.js 前端(BFF) + Caddy(自动 HTTPS)
+# 统一编排：PostgreSQL + Redis + arq worker + FastAPI 后端 + Next.js 前端(BFF)
 #
 # 使用：
 #   1. cp .env.example .env 并填写全部 CHANGE_ME 值
 #   2. docker compose up -d --build
-#   3. 有域名：改 deploy/caddy/Caddyfile 为你的域名 → Caddy 自动申请证书
-#      无域名：可去掉 caddy 服务，直接访问 http://<host>:2333
+#   3. 前端默认绑定宿主机回环地址 http://127.0.0.1:2333
+#      后续由部署者自行配置 HTTPS 反向代理指向该地址
 #
 # 架构：
 #   - 前端(BFF) 通过内部网络 cs-net 把 /api 转发到 backend:8000
 #   - PostgreSQL 数据持久化在 pgdata 卷
-#   - 公网只暴露 Caddy（80/443）
+#   - 仅前端绑定宿主机回环地址 127.0.0.1:2333，后端不暴露宿主机端口
 #   - 后端/前端 build.context 指向各自 submodule 目录，Dockerfile 内路径相对自身，无需改动
 
 services:
@@ -126,7 +126,8 @@ services:
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
       - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
       # 纯 BFF：前端不持有任何数据库，移除 SQLite 挂载（原 SQLITE_DB_PATH 仅历史残留）
-      - TRUST_PROXY=true
+      # 默认不信任代理头；部署者配置外部反向代理后再显式设置为 true
+      - TRUST_PROXY=${TRUST_PROXY:-false}
     volumes:
       # 持久化：用户上传文件等本地数据
       - ./data:/app/data
@@ -136,27 +137,11 @@ services:
     depends_on:
       - backend
 
-  # ============ Caddy 反向代理（自动 HTTPS）============
-  caddy:
-    image: caddy:2-alpine
-    container_name: cs-caddy
-    restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    networks:
-      - cs-net
-    depends_on:
-      - cs-website
+      - "127.0.0.1:2333:2333"
 
 volumes:
   pgdata:
-  caddy_data:
-  caddy_config:
 
 networks:
   cs-net:

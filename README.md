@@ -14,8 +14,7 @@
 FztbuCS-Project/
 ├── CS-Web-Backend/        # submodule：FastAPI 后端（REST API + PostgreSQL + Alembic）
 ├── CS-Web-Frontend/       # submodule：Next.js 前端（UI + BFF 薄转发）
-├── deploy/caddy/          # Caddy 反向代理配置（自动 HTTPS）
-├── docker-compose.yml     # 根级全栈编排（db + backend + frontend + caddy）
+├── docker-compose.yml     # 根级全栈编排（db + backend + redis + worker + frontend）
 ├── .env.example           # 全栈环境变量模板
 ├── Makefile               # 统一命令入口
 └── docs/                  # 根级文档（编排/部署/通用规范，入口见 docs/README.md）
@@ -55,14 +54,15 @@ make dev-up       # 并行起后端(:9000 热重载) + 前端(:2333 dev)
 ```bash
 make setup        # 首次：cp .env.example .env，并填写全部密钥
 # 编辑 .env：DATABASE_PASSWORD / SECRET_KEY / TOTP_ENCRYPTION_KEY / AUTH_SESSION_SECRET
-# 有域名：把 deploy/caddy/Caddyfile 中的 cs.yourdomain.com 改为你的域名
-make up           # docker compose up -d --build（db+backend+frontend+caddy）
+# 前端默认绑定 127.0.0.1:2333；后续由部署者自行配置 HTTPS 反向代理
+make up           # docker compose up -d --build（db+backend+redis+worker+frontend）
 make ps           # 查看状态
 make logs         # 跟踪日志
 make down         # 停止
 ```
 
-- 无域名：去掉 compose 里的 `caddy` 服务，直接访问 `http://<host>:2333`。
+- 前端：由 Compose 绑定到 `127.0.0.1:2333`，后续外部反向代理指向该地址。
+- 临时直连测试可将端口映射改为 `0.0.0.0:2333:2333`，正式环境不建议直接暴露。
 - 后端 Swagger：`http://<host>:9000/docs`。
 
 ### 高频事实速查表（单一事实源）
@@ -74,7 +74,7 @@ make down         # 停止
 | **容器编排内**（Docker 服务间） | 后端 **8000** | `docker-compose.yml` 的 `backend.expose: "8000"`；前端容器 `BACKEND_URL=http://backend:8000` |
 | **本地开发**（宿主机直连） | 后端 **9000** | 根 `Makefile` 的 `BACKEND_PORT := 9000` → `run.py --env 1 --port 9000` |
 | 前端 | 2333 | `Makefile` / `.env` 固定 |
-| Caddy（有域名时） | 80/443 | 反向代理到前端 2333 |
+| 外部反向代理（可选） | 80/443 | 由部署者自行配置，转发到 `127.0.0.1:2333` |
 
 - `run.py` 默认端口为 `8000`；**本地 9000 来自 `Makefile` 的 `--port 9000` 覆盖**，非默认值。
 - 两者指向**同一后端服务，仅场景不同**——不存在"该用哪个"的问题。文档中若看到 8000/9000 混写，均遵循此表。
@@ -132,18 +132,19 @@ A：不能。前端仅 BFF 转发，业务数据全在后端 PG。
 | `AUTH_SESSION_SECRET` | 前端 Session 密钥（≥32B） | ✅ |
 | `ALLOWED_ORIGINS` | 前后端 CORS / Origin 白名单 | 生产 ✅ |
 | `NEXT_PUBLIC_SITE_URL` | 站点 URL | 生产 ✅ |
-| `TRUST_PROXY` | 是否信任反向代理头（Caddy 后须 true） | 生产 ✅ |
+| `TRUST_PROXY` | 是否信任反向代理头（默认 `false`；外部反代配置后设为 `true`） | 按部署方式 |
 
 ## 架构
 
 ```text
-浏览器 ──HTTPS──> Caddy(:80/:443) ──> cs-website(Next.js BFF :2333)
+浏览器 ──> 外部反向代理（可选）──> 127.0.0.1:2333 cs-website(Next.js BFF)
                                           │ BACKEND_URL=http://backend:8000
                                           ▼
                                      backend(FastAPI :8000) ──> db(PostgreSQL:5432)
 ```
 
 - 前端 BFF 通过内部网络 `cs-net` 直连后端，无需暴露后端公网端口。
+- 生产模式使用安全 Cookie，正式访问应由外部反向代理提供 HTTPS；`http://127.0.0.1:2333` 主要用于部署验证。
 - 前端为纯 BFF/展示层，**不持有业务数据**；全部业务数据由后端 PostgreSQL 承载（前端已 100% 移除 SQLite 相关代码、脚本与依赖）。
 - 数据卷：`pgdata`（PG）、根级 `data/`（上传文件）。
 
