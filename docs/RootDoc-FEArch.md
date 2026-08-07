@@ -1,6 +1,6 @@
 # 前端项目 · 通用内容设计规范与目录设计艺术 by 3yearsZ（RootDoc-FEArch）
 
-> **当前进度 / 真实状态（2026-08-06）**：本文档是**通用前端架构准则**（适用于任意前端项目的方法论），**并非本仓库前端的"已实现态"描述**。本仓库前端（`CS-Web-Frontend`）真实态为：Next.js BFF 薄转发层，运行时不再读写数据库，业务/认证/RBAC/迁移全在后端（`CS-Web-Backend`，FastAPI + PostgreSQL）。阅读本文请勿假设本仓库已落地其中每一条；本仓库特定架构以 `CS-Web-Frontend/tools/docs/FrontDoc-Arch.md` 为准。
+> **当前进度 / 真实状态（2026-08-06）**：本文档是**通用前端架构准则**（适用于任意前端项目的方法论），**并非本仓库前端的"已实现态"描述**。本仓库前端（`CS-Web-Frontend`）真实态为：Next.js BFF 薄转发层，运行时不再读写数据库，业务/认证/RBAC/迁移全在后端（`CS-Web-Backend`，FastAPI + PostgreSQL）。阅读本文请勿假设本仓库已落地其中每一条；本仓库特定架构以 `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` 为准。
 
 > 更新人：3yearsZ
 > 最后更新：2026-08-05（统一 RootDoc 命名）

@@ -901,7 +901,7 @@
         "title": "Body_upload_avatar_api_v1_profile_avatar_upload_post",
         "type": "object"
       },
-      "Body_upload_forum_image_api_v1_community_forum_upload_post": {
+      "Body_upload_community_image_api_v1_community_upload_post": {
         "properties": {
           "file": {
             "contentMediaType": "application/octet-stream",
@@ -912,7 +912,7 @@
         "required": [
           "file"
         ],
-        "title": "Body_upload_forum_image_api_v1_community_forum_upload_post",
+        "title": "Body_upload_community_image_api_v1_community_upload_post",
         "type": "object"
       },
       "Body_upload_resource_file_api_v1_tools_resource_upload_post": {
@@ -3162,7 +3162,7 @@
         "type": "object"
       },
       "PublicUserProfileResponse": {
-        "description": "GET /users/{id} 响应：公开资料 + 论坛/考试统计。",
+        "description": "GET /users/{id} 响应：公开资料 + 社区/考试统计。",
         "properties": {
           "stats": {
             "additionalProperties": true,
@@ -4320,16 +4320,16 @@
   },
   "openapi": "3.1.0",
   "paths": {
-    "/api/v1/admin/community/blog": {
+    "/api/v1/admin/community/series": {
       "post": {
-        "description": "博客管理操作：{sub: publish|archive|delete, post_id}。",
-        "operationId": "admin_blog_action_api_v1_admin_community_blog_post",
+        "description": "社区系列管理操作：{sub: publish|archive|delete, post_id}。",
+        "operationId": "admin_community_series_action_api_v1_admin_community_series_post",
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Admin Blog Action Api V1 Admin Community Blog Post"
+                  "title": "Response Admin Community Series Action Api V1 Admin Community Blog Post"
                 }
               }
             },
@@ -4341,15 +4341,15 @@
             "OAuth2PasswordBearer": []
           }
         ],
-        "summary": "Admin Blog Action",
+        "summary": "Admin Community Series Action",
         "tags": [
           "管理员-社区"
         ]
       }
     },
-    "/api/v1/admin/community/forum/categories": {
+    "/api/v1/admin/community/categories": {
       "get": {
-        "operationId": "admin_list_categories_api_v1_admin_community_forum_categories_get",
+        "operationId": "admin_list_categories_api_v1_admin_community_categories_get",
         "responses": {
           "200": {
             "content": {
@@ -4373,7 +4373,7 @@
         ]
       },
       "post": {
-        "operationId": "create_category_api_v1_admin_community_forum_categories_post",
+        "operationId": "create_category_api_v1_admin_community_categories_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -4421,9 +4421,9 @@
         ]
       }
     },
-    "/api/v1/admin/community/forum/categories/{category_id}": {
+    "/api/v1/admin/community/categories/{category_id}": {
       "delete": {
-        "operationId": "delete_category_api_v1_admin_community_forum_categories__category_id__delete",
+        "operationId": "delete_category_api_v1_admin_community_categories__category_id__delete",
         "parameters": [
           {
             "in": "path",
@@ -4468,7 +4468,7 @@
         ]
       },
       "put": {
-        "operationId": "update_category_api_v1_admin_community_forum_categories__category_id__put",
+        "operationId": "update_category_api_v1_admin_community_categories__category_id__put",
         "parameters": [
           {
             "in": "path",
@@ -4527,9 +4527,9 @@
         ]
       }
     },
-    "/api/v1/admin/community/forum/replies/{comment_id}": {
+    "/api/v1/admin/community/replies/{comment_id}": {
       "delete": {
-        "operationId": "admin_hard_delete_comment_api_v1_admin_community_forum_replies__comment_id__delete",
+        "operationId": "admin_hard_delete_comment_api_v1_admin_community_replies__comment_id__delete",
         "parameters": [
           {
             "in": "path",
@@ -4574,7 +4574,7 @@
         ]
       },
       "put": {
-        "operationId": "admin_update_comment_api_v1_admin_community_forum_replies__comment_id__put",
+        "operationId": "admin_update_comment_api_v1_admin_community_replies__comment_id__put",
         "parameters": [
           {
             "in": "path",
@@ -4631,9 +4631,9 @@
         ]
       }
     },
-    "/api/v1/admin/community/forum/replies/{comment_id}/hide": {
+    "/api/v1/admin/community/replies/{comment_id}/hide": {
       "post": {
-        "operationId": "hide_comment_api_v1_admin_community_forum_replies__comment_id__hide_post",
+        "operationId": "hide_comment_api_v1_admin_community_replies__comment_id__hide_post",
         "parameters": [
           {
             "in": "path",
@@ -4696,9 +4696,9 @@
         ]
       }
     },
-    "/api/v1/admin/community/forum/replies/{comment_id}/restore": {
+    "/api/v1/admin/community/replies/{comment_id}/restore": {
       "post": {
-        "operationId": "restore_comment_api_v1_admin_community_forum_replies__comment_id__restore_post",
+        "operationId": "restore_comment_api_v1_admin_community_replies__comment_id__restore_post",
         "parameters": [
           {
             "in": "path",
@@ -4743,10 +4743,10 @@
         ]
       }
     },
-    "/api/v1/admin/community/forum/topics": {
+    "/api/v1/admin/community/topics": {
       "get": {
         "description": "内容列表（管理视图：published + hidden，排除 deleted）。",
-        "operationId": "admin_list_posts_api_v1_admin_community_forum_topics_get",
+        "operationId": "admin_list_posts_api_v1_admin_community_topics_get",
         "parameters": [
           {
             "in": "query",
@@ -4860,9 +4860,9 @@
         ]
       }
     },
-    "/api/v1/admin/community/forum/topics/{post_id}": {
+    "/api/v1/admin/community/topics/{post_id}": {
       "delete": {
-        "operationId": "admin_hard_delete_post_api_v1_admin_community_forum_topics__post_id__delete",
+        "operationId": "admin_hard_delete_post_api_v1_admin_community_topics__post_id__delete",
         "parameters": [
           {
             "in": "path",
@@ -4907,7 +4907,7 @@
         ]
       },
       "put": {
-        "operationId": "admin_update_post_api_v1_admin_community_forum_topics__post_id__put",
+        "operationId": "admin_update_post_api_v1_admin_community_topics__post_id__put",
         "parameters": [
           {
             "in": "path",
@@ -4964,9 +4964,9 @@
         ]
       }
     },
-    "/api/v1/admin/community/forum/topics/{post_id}/feature": {
+    "/api/v1/admin/community/topics/{post_id}/feature": {
       "post": {
-        "operationId": "feature_post_api_v1_admin_community_forum_topics__post_id__feature_post",
+        "operationId": "feature_post_api_v1_admin_community_topics__post_id__feature_post",
         "parameters": [
           {
             "in": "path",
@@ -5011,9 +5011,9 @@
         ]
       }
     },
-    "/api/v1/admin/community/forum/topics/{post_id}/hide": {
+    "/api/v1/admin/community/topics/{post_id}/hide": {
       "post": {
-        "operationId": "hide_post_api_v1_admin_community_forum_topics__post_id__hide_post",
+        "operationId": "hide_post_api_v1_admin_community_topics__post_id__hide_post",
         "parameters": [
           {
             "in": "path",
@@ -5076,9 +5076,9 @@
         ]
       }
     },
-    "/api/v1/admin/community/forum/topics/{post_id}/pin": {
+    "/api/v1/admin/community/topics/{post_id}/pin": {
       "post": {
-        "operationId": "pin_post_api_v1_admin_community_forum_topics__post_id__pin_post",
+        "operationId": "pin_post_api_v1_admin_community_topics__post_id__pin_post",
         "parameters": [
           {
             "in": "path",
@@ -5123,9 +5123,9 @@
         ]
       }
     },
-    "/api/v1/admin/community/forum/topics/{post_id}/restore": {
+    "/api/v1/admin/community/topics/{post_id}/restore": {
       "post": {
-        "operationId": "restore_post_api_v1_admin_community_forum_topics__post_id__restore_post",
+        "operationId": "restore_post_api_v1_admin_community_topics__post_id__restore_post",
         "parameters": [
           {
             "in": "path",
@@ -8443,9 +8443,9 @@
         ]
       }
     },
-    "/api/v1/community/blog/series": {
+    "/api/v1/community/series": {
       "get": {
-        "operationId": "list_series_api_v1_community_blog_series_get",
+        "operationId": "list_series_api_v1_community_series_get",
         "responses": {
           "200": {
             "content": {
@@ -8464,7 +8464,7 @@
         ]
       },
       "post": {
-        "operationId": "create_series_api_v1_community_blog_series_post",
+        "operationId": "create_series_api_v1_community_series_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -8950,9 +8950,9 @@
         ]
       }
     },
-    "/api/v1/community/forum/categories": {
+    "/api/v1/community/categories": {
       "get": {
-        "operationId": "list_categories_api_v1_community_forum_categories_get",
+        "operationId": "list_categories_api_v1_community_categories_get",
         "responses": {
           "200": {
             "content": {
@@ -8971,9 +8971,9 @@
         ]
       }
     },
-    "/api/v1/community/forum/images/{filename}": {
+    "/api/v1/community/images/{filename}": {
       "get": {
-        "operationId": "serve_forum_image_api_v1_community_forum_images__filename__get",
+        "operationId": "serve_community_image_api_v1_community_images__filename__get",
         "parameters": [
           {
             "in": "path",
@@ -8990,7 +8990,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Serve Forum Image Api V1 Community Forum Images  Filename  Get"
+                  "title": "Response Serve Community Image Api V1 Community Community Images  Filename  Get"
                 }
               }
             },
@@ -9007,20 +9007,20 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Serve Forum Image",
+        "summary": "Serve Community Image",
         "tags": [
           "社区"
         ]
       }
     },
-    "/api/v1/community/forum/upload": {
+    "/api/v1/community/upload": {
       "post": {
-        "operationId": "upload_forum_image_api_v1_community_forum_upload_post",
+        "operationId": "upload_community_image_api_v1_community_upload_post",
         "requestBody": {
           "content": {
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/Body_upload_forum_image_api_v1_community_forum_upload_post"
+                "$ref": "#/components/schemas/Body_upload_community_image_api_v1_community_upload_post"
               }
             }
           },
@@ -9031,7 +9031,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Upload Forum Image Api V1 Community Forum Upload Post"
+                  "title": "Response Upload Community Image Api V1 Community Forum Upload Post"
                 }
               }
             },
@@ -9053,15 +9053,15 @@
             "OAuth2PasswordBearer": []
           }
         ],
-        "summary": "Upload Forum Image",
+        "summary": "Upload Community Image",
         "tags": [
           "社区"
         ]
       }
     },
-    "/api/v1/community/forum/users/{user_id}/replies": {
+    "/api/v1/community/users/{user_id}/replies": {
       "get": {
-        "operationId": "list_user_replies_api_v1_community_forum_users__user_id__replies_get",
+        "operationId": "list_user_replies_api_v1_community_users__user_id__replies_get",
         "parameters": [
           {
             "in": "path",
@@ -9128,9 +9128,9 @@
         ]
       }
     },
-    "/api/v1/community/forum/users/{user_id}/topics": {
+    "/api/v1/community/users/{user_id}/topics": {
       "get": {
-        "operationId": "list_user_topics_api_v1_community_forum_users__user_id__topics_get",
+        "operationId": "list_user_topics_api_v1_community_users__user_id__topics_get",
         "parameters": [
           {
             "in": "path",

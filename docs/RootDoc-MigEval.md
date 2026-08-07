@@ -27,7 +27,7 @@
 - **数据库文件**：`app.db` 约 1.4MB（不含 WAL），实际数据量很小。
 - **目录内静态资源**（需一并迁移，数据库只存路径）：
   - `avatars/`：10 个文件（约 0.5MB，jpg/png）
-  - `forum-images/`：1 个文件（23KB）
+  - `community-images/`：1 个文件（23KB）
   - `resource-files/`：6 个文件（每个仅 4 字节，**均为空壳占位**，实际无内容）
 
 ### 2.2 各表行数（43 张表，共 ~1700 行业务数据）
@@ -51,7 +51,7 @@
 
 ### 2.3 静态资源
 
-`resource-files/` 下 6 个文件全部为 **4 字节空文件**（`user-001-*.pdf/.png`），属测试占位，**无可迁移内容**。`avatars/` 与 `forum-images/` 有真实图片，需按路径随 DB 迁移或拷贝。
+`resource-files/` 下 6 个文件全部为 **4 字节空文件**（`user-001-*.pdf/.png`），属测试占位，**无可迁移内容**。`avatars/` 与 `community-images/` 有真实图片，需按路径随 DB 迁移或拷贝。
 
 ---
 
@@ -114,7 +114,7 @@
 2. 按外键依赖顺序导入：`roles` → `users`（派生 username、映射角色、scrypt 哈希搬移）→ `community_categories` → `community_posts` → `community_comments` → `events` → `exams/questions/options` → `resources` → `component_registry*` 等。
 3. 类型转换：布尔、日期 ISO→tz、JSON 文本→jsonb。
 4. 收尾：PG 自增序列 `setval` 对齐；跳过已存在的 seed 角色/管理员；幂等重跑保护。
-5. 静态资源：`avatars/`、`forum-images/` 拷贝到后端静态目录并更新 URL。
+5. 静态资源：`avatars/`、`community-images/` 拷贝到后端静态目录并更新 URL。
 
 ### 4.2 目标库现状影响
 
@@ -165,14 +165,14 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 - **不建议**给后端引入多数据库——项目铁律明确「**SQLite 禁止作生产库**」，后端唯一生产库 = PostgreSQL。多库只会增加维护成本，收益低。
 - **正确姿势**：前端保留双引擎仅用于「迁移过渡期」开发兜底；**生产数据统一走后端 PG**。
 >
-> ℹ️ 变更记录/待办条目已迁移至根目录 `项目演变历史.md` / `项目待办事项.md`。
+> ℹ️ 变更记录/待办条目见本目录 `项目演变历史.md` / `项目待办事项.md`。
 - 若要「本地无 PG 也能跑」，更轻的方案是 **Docker 起 PG**（根级 `docker-compose.yml` 已内置），而非维护 SQLite 方言。
 
 ---
 
 ## 六、行动建议清单
 
-> ℹ️ 变更记录/待办条目已迁移至根目录 `项目演变历史.md` / `项目待办事项.md`。
+> ℹ️ 变更记录/待办条目见本目录 `项目演变历史.md` / `项目待办事项.md`。
 
 ---
 
@@ -180,5 +180,5 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 
 - 源库：`CS-Web-Frontend/data/app.db` 43 张表，~1700 行（含 1458 组件变体种子），users 15 人（UUID 主键）。
 - 目标库：`domefff` 本地 PG 运行中，52 张表（Alembic 建），已有 1 seed 用户。
-- 迁移计划：`CS-Web-Backend/docs/BackDoc-MigV.md` Phase 6 已规划数据迁移脚本，**脚本 `migrate-sqlite-to-pg.mjs` 已于 2026-08-05 实现并跑通（19 张表全部入库，外键完整、类型转换正确）**。
+- 迁移计划：后端 `tools/docs/BackDoc-Infra.md` §六 迁移验证（原 `BackDoc-MigV.md` 已并入）Phase 6 已规划数据迁移脚本，**脚本 `migrate-sqlite-to-pg.mjs` 已于 2026-08-05 实现并跑通（19 张表全部入库，外键完整、类型转换正确）**。
 - 主键差异：后端 `app/models/user.py` 明确 `id: Mapped[int]`；SQLite users 为 TEXT UUID。

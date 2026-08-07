@@ -3,7 +3,7 @@
 > 更新人：3yearsZ
 > 最后更新：2026-08-05（统一 RootDoc 命名）
 > 根级编排层的部署唯一权威。覆盖：本地开发并行启动、容器化全栈部署（db+backend+frontend+caddy）、回滚、数据卷与备份。
-> 深链接（各端专项，勿在此重复）：前端 `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md`（Docker/Caddy/SLO/Runbook）、后端 `CS-Web-Backend/docs/BackDoc-Infra.md`（运维端点 `/health /readyz /metrics/json /status`）。
+> 深链接（各端专项，勿在此重复）：前端 `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md`（Docker/Caddy/SLO/Runbook）、后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md`（运维端点 `/health /readyz /metrics/json /status`）。跨端 SLO 与可观测性基线见本文 **§七**（原 `BackDoc-SLO.md` 已并入）。
 
 ---
 
@@ -17,6 +17,8 @@
 ```
 
 - 前端 BFF 通过内部网络 `cs-net` 直连后端，后端不暴露公网端口（容器 `expose: 8000`，仅内网）。
+
+> 端口约定：容器编排内后端服务端口固定为 **8000**（前端 `BACKEND_URL=http://backend:8000`）；本地开发经 `Makefile` 的 `run.py --port 9000` 暴露 **9000** 供宿主机直连。两者指向同一服务，仅场景不同。
 - 公网只暴露 Caddy（80/443，自动 HTTPS）。
 - 数据卷：`pgdata`（PostgreSQL）、根级 `data/`（上传文件）。前端为纯 BFF 层，无本地数据库备份（业务数据统一由 PostgreSQL 承载，原 Litestream/SQLite 备份体系已移除）。
 
@@ -48,6 +50,7 @@ make dev-up        # 并行起后端(:9000 热重载) + 前端(:2333 dev)
 ```
 
 - 后端：`python run.py --env 1 --port 9000` → Swagger `http://localhost:9000/docs`
+  - 注：`run.py` 默认端口为 8000，`Makefile` 显式传 `--port 9000`；容器编排内则为 8000（见架构图）。
 - 前端：`pnpm dev` → `http://localhost:2333`
 
 ---
@@ -66,7 +69,7 @@ make down         # 停止
 ```
 
 - 无域名：去掉 compose 里的 `caddy` 服务，直接访问 `http://<host>:2333`。
-- 后端 Swagger：`http://<host>:9000/docs`（容器内 `expose: 8000`，仅内网，不映射公网端口）。
+- 后端 Swagger：`http://<host>:9000/docs`（本地 `make dev-up` 暴露；容器编排内后端为 `:8000`，由前端 BFF 经 `backend:8000` 直连，不映射公网）。
 
 **关键行为**：
 - 后端 `DB_AUTO_CREATE_DATABASE=true` + `DB_AUTO_MIGRATE=true` → 空库自动建库并 `alembic upgrade head`。
@@ -89,8 +92,204 @@ make down         # 停止
 
 ## 六、回滚与故障处置
 
-- **后端回滚**：迁移可 `alembic downgrade`（见后端 `docs/BackDoc-MigV.md`）；代码回滚 = 重建该 submodule 镜像。
+- **后端回滚**：迁移可 `alembic downgrade`（见后端 `tools/docs/BackDoc-Infra.md` §六 迁移验证）；代码回滚 = 重建该 submodule 镜像。
 - **前端回滚**：重建 `cs-website` 镜像（前端为纯 BFF，无本地状态库）。
 - **数据卷**：`pgdata` 持久化 PG；`data/` 持久化上传文件；删除容器不删卷（`docker compose down` 不加 `-v`）。
 
 > 专项 Runbook（Docker 部署细节、Caddy 配置、恢复演练）见前端 `FrontDoc-Ops.md`。
+
+---
+
+## 六·A、开发库 → 生产库迁移（PG → PG）
+
+> 本项目唯一数据源是后端 PostgreSQL（前端为纯 BFF，无本地库），因此"环境间迁移"本质是 **PostgreSQL → PostgreSQL 的库迁移**，不是 SQLite→PG（历史 SQLite→PG 映射脚本 `migrate-sqlite-to-pg.mjs` 已删除，不适用）。
+> 备份/恢复统一用 `CS-Web-Backend/tools/scripts/backup_db.sh`；导出到桌面用根级 `scripts/export_db_to_desktop.sh`。
+
+### 1. 导出（开发环境）
+
+```bash
+# 根级脚本：导出开发库到 ~/Desktop（默认）
+./scripts/export_db_to_desktop.sh
+# 或指定目录
+./scripts/export_db_to_desktop.sh /path/to/out
+
+# 也可用后端脚本直接备份（容器内 db 服务名可直连时）
+./CS-Web-Backend/tools/scripts/backup_db.sh /path/to/backup
+```
+
+- 连接参数取自根 `.env` 的 `DATABASE_HOST/PORT/NAME/USER/PASSWORD`。
+- 根 `.env` 中 `DATABASE_HOST=db` 是 docker-compose 容器内服务名，宿主机不可直连。`export_db_to_desktop.sh` 已内置回退：当 `.env` 为 `db` 且未显式指定时自动改用 `localhost`；也可用 `DATABASE_HOST_OVERRIDE=localhost` 强制指定。
+- 输出：`domefff_<时间戳>.sql.gz`（`pg_dump --format=custom` + gzip，已做完整性校验）。
+
+### 2. 传输到生产服务器
+
+```bash
+scp /Users/you/Desktop/domefff_*.sql.gz user@prod-host:/opt/cs-backup/
+```
+
+> 备份含全部业务数据（含用户密码哈希），**禁止提交进仓库、禁止经不安全渠道传输**。
+
+### 3. 恢复（生产环境）
+
+**情形 A：生产是空库（推荐）**
+
+```bash
+# 在生产机：先起 db 服务，再用根脚本的 --restore 模式（读取生产 .env）
+cd /path/to/FztbuCS-Project
+./CS-Web-Backend/tools/scripts/backup_db.sh --restore /opt/cs-backup/domefff_xxx.sql.gz
+# 或直接在 db 容器内 pg_restore
+docker compose exec -T db pg_restore -U postgres --no-owner --no-privileges -d domefff \
+  < /opt/cs-backup/domefff_xxx.sql
+```
+
+**情形 B：生产已有 seed 数据（admin 用户、预置角色）**
+
+直接灌会撞主键/唯一约束。需按 `docs/RootDoc-MigEval.md` 的"按 email/username 去重"策略处理，或先清空 `pgdata` 卷再导入：
+
+```bash
+docker compose down
+docker volume rm fztbucs-project_pgdata   # 卷名以实际为准
+docker compose up -d db
+# 再执行情形 A 的恢复
+```
+
+### 4. 收尾（防后续插入主键冲突）
+
+导入后重建所有自增序列，使其对齐当前最大值：
+
+```bash
+docker compose exec db psql -U postgres -d domefff -c \
+  "SELECT setval(pg_get_serial_sequence(tbl.relname,'id'), COALESCE((SELECT MAX(id) FROM tbl),1)) \
+   FROM pg_class tbl JOIN pg_namespace ns ON ns.oid=table(tbl).relnamespace \
+   WHERE tbl.relkind='r' AND EXISTS (SELECT 1 FROM information_schema.columns c \
+     WHERE c.table_name=tbl.relname AND c.column_name='id' AND c.data_type='integer');"
+```
+
+> 实际逐表 `setval` 更稳妥；上面为示意。启动 `backend` 后其 `DB_AUTO_MIGRATE=true` 会把 schema 补齐到 head（已最新则无操作）。
+
+### 5. 校验
+
+- 行数核对：关键表 `users / community_posts / events / exams / roles` 与源库对账。
+- 外键完整性：抽查 FK 无悬空（参考 `RootDoc-MigEval.md` §4.3 的 P1 风险项）。
+- 静态资源：`data/`（头像 `avatars/`、社区图 `community-images/`）需单独 `rsync` 到生产 `data/` 卷，数据库只存路径。
+
+### 6. 密钥注意
+
+生产 `DATABASE_PASSWORD / SECRET_KEY / TOTP_ENCRYPTION_KEY / AUTH_SESSION_SECRET` 必须与开发**不同**（密钥不可复用，见 `RootDoc-EngConv.md` §四）。若迁移用户密码哈希（scrypt），后端已支持懒升级到 bcrypt，登录时自动升级，可正常登录。
+
+---
+
+> 专项 Runbook（Docker 部署细节、Caddy 配置、恢复演练）见前端 `FrontDoc-Ops.md`。
+
+---
+
+## 七、SLO 与可观测性基线
+
+> **合并说明**：本章原位于 `CS-Web-Backend/tools/docs/BackDoc-SLO.md`（跨前后端的 SLO 与可观测性基线权威），于 2026-08-07 并入本文，作为根级编排层的 SLO 单一事实源。前端 BFF 端点级 SLO / 错误预算消耗规则 / 评审流程见前端 `FrontDoc-Ops.md` Part B（两者为补充关系，非重复）。
+
+# SLO 与可观测性基线（1.0.0）
+
+> 适用范围：CS-Web-Backend + CS-Web-Frontend
+> 版本：1.0.0 起生效，后续版本按实际运行数据迭代
+
+---
+
+### 可用性
+
+| 指标 | 目标 | 测量方式 |
+|------|------|----------|
+| API 可用性 | 99%（每月停机 ≤ 438 分钟） | `/health` + `/readyz` 探针成功率，按月统计 |
+| 前端页面可用性 | 99% | 首页 HTTP 200 成功率 |
+
+### 延迟
+
+| 指标 | 目标 | 测量方式 |
+|------|------|----------|
+| API p95 延迟 | < 500ms | FastAPI 请求日志 `duration_ms` 字段 |
+| API p99 延迟 | < 2000ms | 同上 |
+| 前端首屏加载（LCP） | < 2.5s | 浏览器 Performance API（1.1 接入 RUM） |
+
+### 数据持久性
+
+| 指标 | 目标 | 测量方式 |
+|------|------|----------|
+| 数据库备份 RPO | ≤ 24h | 每日 03:00 cron 全量备份 |
+| 数据库恢复 RTO | ≤ 4h | 从备份恢复到服务可用 |
+| 备份保留 | 14 天 | `backup_db.sh` 自动清理过期文件 |
+
+---
+
+### 错误预算
+
+月度错误预算 = 总分钟数 × (1 - SLO) = 43200 × 1% = **432 分钟/月**
+
+错误预算耗尽时的行动：
+- 冻结非紧急变更，集中精力修复稳定性问题
+- 评估是否需要调整 SLO 目标（而非放松标准）
+
+---
+
+### 可观测性基线
+
+**日志**
+
+| 组件 | 格式 | 关键字段 |
+|------|------|----------|
+| 后端 | loguru JSON（prod profile） | timestamp, level, request_id, user_id, method, path, status, duration_ms |
+| 前端 | pino NDJSON | timestamp, level, request_id, msg |
+
+日志保留：文件轮转 10 MB × 30 天（后端），pino 日志按部署环境配置。
+
+**健康检查端点**
+
+| 端点 | 用途 | 检查内容 |
+|------|------|----------|
+| `GET /health` | liveness | 进程存活（浅检查） |
+| `GET /readyz` | readiness | 数据库连通性，不通返回 503 |
+| `GET /metrics/json` | 指标 | 请求数/延迟分布/错误率（需 system:monitor 权限） |
+| `GET /status` | 详细状态 | 应用配置/连接池/版本（需 system:monitor 权限） |
+
+**告警规则（最小集）**
+
+以下告警通过日志监控或外部探针实现，1.0.0 不依赖 Prometheus：
+
+| 告警 | 条件 | 级别 | 通知方式 |
+|------|------|------|----------|
+| 服务不可用 | `/health` 连续 3 次失败（间隔 10s） | P0 | 日志 + 邮件 |
+| 数据库不可达 | `/readyz` 连续 2 次返回 503 | P0 | 日志 + 邮件 |
+| 错误率飙升 | 5xx 占比 > 5%（5 分钟窗口） | P1 | 日志 |
+| 备份失败 | `backup_db.sh` exit code ≠ 0 | P1 | cron 日志 |
+| 磁盘空间不足 | 磁盘使用率 > 85% | P1 | 系统监控 |
+
+**OpenTelemetry（可选增强）**
+
+1.0.0 默认关闭 OTel。如需启用：
+
+```env
+OTEL_ENABLED=true
+OTEL_EXPORTER_OTLP_ENDPOINT=http://collector:4317
+OTEL_SERVICE_NAME=cs-web-backend
+```
+
+启用后自动埋点 FastAPI / SQLAlchemy / Redis，traces + metrics 经 OTLP 导出。
+
+---
+
+### 运维巡检清单
+
+每日：
+- 确认备份脚本执行成功（检查 `backups/` 目录最新文件）
+- 浏览错误日志中的 ERROR 级别条目
+
+每周：
+- 检查磁盘空间和日志文件大小
+- 验证 `/readyz` 响应正常
+
+每月：
+- 评估 SLO 达成情况
+- 检查错误预算消耗
+- 评估是否需要调整 SLO 目标
+
+每季度：
+- 执行一次数据库恢复演练
+- 审查告警规则有效性

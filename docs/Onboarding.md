@@ -7,7 +7,7 @@
 
 ## 0. 当前真实进度（先读这一段，避免被"目标态"误导）
 
-截至 2026-08-07，项目处于 **0.9.7 → 1.0.0 准备期**。请务必区分"真实态"与"目标态"：
+截至 2026-08-07，项目处于 **0.9.8 → 1.0.0 准备期**。请务必区分"真实态"与"目标态"：
 
 | 维度 | 真实态（当前代码） | 目标态（1.0.0 计划） |
 |---|---|---|
@@ -73,8 +73,10 @@ make dev-up       # 后端 :9000 热重载 + 前端 :2333 dev 同时前台运行
 ```
 
 - 前端：http://localhost:2333
-- 后端 Swagger：http://localhost:9000/docs（容器内 `expose:8000`，不映射公网）
+- 后端 Swagger：http://localhost:9000/docs（本地 `make dev-up` 经 `run.py --port 9000` 暴露）
 - 前端 BFF 经 `BACKEND_URL=http://localhost:9000` 转发（见前端 `.env`）
+
+> 端口约定：本地开发后端经 `run.py --port 9000` 暴露 9000；容器编排内后端服务端口为 8000，前端 BFF 经 `backend:8000` 直连（容器内 `expose: 8000`，不映射公网）。两者指向同一服务，仅场景不同。
 
 ### 2.2 分开起（调试某一端）
 
@@ -173,24 +175,24 @@ make logs          # 跟踪日志
 - 模块间通信矩阵：允许 `import from @/shared/...`、事件总线；禁止直接 import 另一模块 `server/` 或 `api/`。
 - 通信决策树：① 只需类型 → `import type`；② 通用工具 → `@/shared/...`；③ B 是被 admin 管理的模块 → 直接调 `B/server/index.ts`；④ 否则 → 事件总线 `appBus` 发布，B 监听。
 - 事件总线：发布 `<模块>.<动作>`（如 `topic.created`）；订阅方 `try/catch` 吞错不抛出。
-- 依赖矩阵维护：新增/修改模块依赖必须同步 `FrontDoc-Arch.md`「2.3 直接导入依赖矩阵」（架构不变量 FF1）。
+- 依赖矩阵维护：新增/修改模块依赖必须同步 `FrontDoc-01-Arch.md`「2.3 直接导入依赖矩阵」（架构不变量 FF1）。
 
 ## A.4 ADR 引用规则
 
 - 何时创建：影响多模块/引入移除关键技术依赖/改变模块通信/不可逆决策/安全相关 → 记录 ADR。
-- 格式：`### ADR-XXX` + 状态/上下文/决策/替代方案/后果/可逆性/实施记录，统一记录在 `FrontDoc-Evo.md`「架构决策记录」章节。
+- 格式：`### ADR-XXX` + 状态/上下文/决策/替代方案/后果/可逆性/实施记录，统一记录在 `项目演变历史-0.9.1.md`「附录：前端演进路线图与迁移文档」的架构决策记录（ADR）索引章节，完整决策记录见 `项目演变历史.md`。
 - 锚点规则：GitHub 风格（标题转小写 + 空格转连字符 + 去标点，中文保留）。
 - 编号：连续递增（ADR-015…），废弃不回收；状态必须反映实施事实（防再犯 #2）。
 
 ## A.5 文档维护流程
 
-- 每个系统维度有且仅有一个权威位置（Source-of-Truth 无重复规则）：禁止事项→本附录 A.1；ADR→`FrontDoc-Evo.md`；风险→`FrontDoc-Evo.md` R 表；依赖矩阵→`FrontDoc-Arch.md` 2.3；安全发现→`FrontDoc-Sec.md`；API 契约→`FrontDoc-Arch.md` Part B；环境变量→`FrontDoc-Ops.md` Part A。
+- 每个系统维度有且仅有一个权威位置（Source-of-Truth 无重复规则）：禁止事项→本附录 A.1；ADR→`项目演变历史-0.9.1.md`（附录演进文档）/ `项目演变历史.md`；风险→`项目演变历史.md` R 表；依赖矩阵→`FrontDoc-01-Arch.md` 2.3；安全发现→`FrontDoc-02-Sec.md`；API 契约→`FrontDoc-01-Arch.md` Part B；环境变量→`FrontDoc-Ops.md` Part A。
 - 变更同步检查清单（PR 自检模板）：
   - [ ] `pnpm run ts-check` 通过
-  - [ ] 调目录结构 → `FrontDoc-Arch.md` Part A
-  - [ ] 新增/修改 API → `FrontDoc-Arch.md` Part B
-  - [ ] 新增管理员权限 → `FrontDoc-Sec.md` Part 2
-  - [ ] 架构决策 → `FrontDoc-Evo.md` 新增 ADR
+  - [ ] 调目录结构 → `FrontDoc-01-Arch.md` Part A
+  - [ ] 新增/修改 API → `FrontDoc-01-Arch.md` Part B
+  - [ ] 新增管理员权限 → `FrontDoc-02-Sec.md` Part 2
+  - [ ] 架构决策 → `项目演变历史-0.9.1.md` 附录 / `项目演变历史.md` 新增 ADR
   - [ ] 新增禁止事项 → 本附录 A.1
   - [ ] 新增页面/组件 → `FrontDoc-UID.md`
   - [ ] 新增环境变量 → `FrontDoc-Ops.md` Part A + `README.md` 环境变量表
@@ -220,7 +222,7 @@ make logs          # 跟踪日志
 
 # 附录 B：后端工程约定（原 BackDoc-Onboard.md 精要）
 
-> 完整架构 / 编码规范 / 业务模块见 `CS-Web-Backend/docs/` 下的 `BackDoc-Arch.md` / `BackDoc-Conv.md` / `BackDoc-Mods.md`。此处仅保留"必须守住的不变量"与"加一个 API 资源"配方。
+> 完整架构 / 编码规范 / 业务模块见 `CS-Web-Backend/docs/` 下的 `BackDoc-01-Arch.md` / `BackDoc-Conv.md` / `BackDoc-Mods.md`。此处仅保留"必须守住的不变量"与"加一个 API 资源"配方。
 
 ## B.1 必须守住的不变量（速览）
 

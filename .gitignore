@@ -13,6 +13,9 @@
 # 日志
 *.log
 
+# 开发日志目录（含非 .log 文件时整体排除）
+.devlogs/
+
 # IDE / 编辑器 / 工具数据
 .vscode/
 .idea/

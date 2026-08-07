@@ -2,9 +2,11 @@
 
 > 计算机协会官网平台 · 前后端分离 + 根级编排
 
-> **当前真实进度（2026-08-07）**：版本 **0.9.7 → 1.0.0 准备期**。后端 FastAPI + PostgreSQL 已为唯一业务数据源；前端为 BFF 薄转发层。前端 `src/modules/*/server/`（9 模块直连业务层）与 `src/shared/db`（SQLite 双引擎）、`src/shared/security/audit.ts`（本地审计）**已于 2026-08-06 整体删除并验证**（经全仓库引用扫描确认为孤儿死代码，业务早已 `src/app/api/**` 薄转发后端），Blocker **B1 已闭环**；前端审计改走后端 `POST /api/v1/audit/logs`。2026-08-07 进一步清理 SQLite 残留：删除遗留脚本（`create-user`/`seed-exam-data`/`migrate-sqlite-to-pg`）与 `better-sqlite3` 依赖，E2E 改经后端 API 建号。完整待办见 `项目待办事项.md`。
+> **当前真实进度（2026-08-07）**：版本 **0.9.8 → 1.0.0 准备期**。后端 FastAPI + PostgreSQL 已为唯一业务数据源；前端为 BFF 薄转发层。前端 `src/modules/*/server/`（9 模块直连业务层）与 `src/shared/db`（SQLite 双引擎）、`src/shared/security/audit.ts`（本地审计）**已于 2026-08-06 整体删除并验证**（经全仓库引用扫描确认为孤儿死代码，业务早已 `src/app/api/**` 薄转发后端），Blocker **B1 已闭环**；前端审计改走后端 `POST /api/v1/audit/logs`。2026-08-07 进一步清理 SQLite 残留：删除遗留脚本（`create-user`/`seed-exam-data`/`migrate-sqlite-to-pg`）与 `better-sqlite3` 依赖，E2E 改经后端 API 建号。完整待办见 `docs/项目待办事项.md`。
 
 本仓库为**编排/部署仓库（monorepo 外层）**，通过 Git Submodule 收敛前后端两个独立源码仓库，并在根级统一管理全栈容器编排与启动命令。
+
+> **新手先看下方「快速开始」章节**：5 分钟上手 + 端口/版本号/关键 env 等高频事实速查（单一事实源，集中维护，其余文档引用不重复散写）。
 
 ## 目录结构
 
@@ -21,6 +23,8 @@ FztbuCS-Project/
 
 ## 快速开始
 
+> 本仓库高频事实（端口、版本号、关键 env、路径约定）以本「快速开始」章节为**单一事实源**：变动只改此处，其他文档引用即可，不再重复散写。工程原则见 [`docs/RootDoc-EngConv.md`](docs/RootDoc-EngConv.md)；完整部署见 [`docs/RootDoc-Deploy.md`](docs/RootDoc-Deploy.md)。
+
 ### 首次克隆（含 submodule）
 
 ```bash
@@ -35,7 +39,16 @@ git submodule update --init --recursive
 make setup        # 首次：生成 .env（如已用容器，可不做此步）
 make dev-up       # 并行起后端(:9000 热重载) + 前端(:2333 dev)
 # 或分别：make dev-backend / make dev-frontend
+# 停止：make dev-down
 ```
+
+启动后：
+
+| 服务 | 本地访问地址 | 说明 |
+|---|---|---|
+| 前端（Next.js） | http://localhost:2333 | 业务 UI |
+| 后端 Swagger | http://localhost:9000/docs | 仅本地 `make dev-up` 暴露 |
+| 前端 BFF 转发目标 | http://localhost:9000 | 见前端 `.env` 的 `BACKEND_URL` |
 
 ### 容器化部署（全栈一键起）
 
@@ -50,7 +63,62 @@ make down         # 停止
 ```
 
 - 无域名：去掉 compose 里的 `caddy` 服务，直接访问 `http://<host>:2333`。
-- 后端 Swagger：`http://<host>:9000/docs`（容器内 `expose: 8000`，不映射公网端口，仅内网）。
+- 后端 Swagger：`http://<host>:9000/docs`。
+
+### 高频事实速查表（单一事实源）
+
+**端口约定**
+
+| 场景 | 端口 | 依据 |
+|---|---|---|
+| **容器编排内**（Docker 服务间） | 后端 **8000** | `docker-compose.yml` 的 `backend.expose: "8000"`；前端容器 `BACKEND_URL=http://backend:8000` |
+| **本地开发**（宿主机直连） | 后端 **9000** | 根 `Makefile` 的 `BACKEND_PORT := 9000` → `run.py --env 1 --port 9000` |
+| 前端 | 2333 | `Makefile` / `.env` 固定 |
+| Caddy（有域名时） | 80/443 | 反向代理到前端 2333 |
+
+- `run.py` 默认端口为 `8000`；**本地 9000 来自 `Makefile` 的 `--port 9000` 覆盖**，非默认值。
+- 两者指向**同一后端服务，仅场景不同**——不存在"该用哪个"的问题。文档中若看到 8000/9000 混写，均遵循此表。
+
+**版本号单一源**
+
+| 端 | 版本号字段 | 文件位置 |
+|---|---|---|
+| 前端 | `package.json` → `version` | `CS-Web-Frontend/package.json` |
+| 后端 | `__version__` | `CS-Web-Backend/app/__init__.py` |
+| 发布说明锚点 | `CHANGELOG.md` | `CS-Web-Frontend/CHANGELOG.md` |
+
+- 改版本号**三处同步**：前端 `package.json` + 后端 `app/__init__.py.__version__` + 前端 `CHANGELOG.md` 锚点。
+- 当前语义版本线：`0.9.x`（尚未进入 1.0.0）。
+
+**架构一句话**
+
+- 前端是**纯 BFF 薄转发**：`src/app/api/**/route.ts` 仅转发到后端 `/api/v1/**`，无本地业务数据库。
+- 后端是**唯一业务/数据 owner**：FastAPI + PostgreSQL（Alembic 管理 schema），JWT 双 token 认证。
+
+### 常见问答（FAQ）
+
+**Q：后端到底 8000 还是 9000？**
+A：容器内 8000，本地 9000，见上表。两者都对。
+
+**Q：改了端口为什么联调不通？**
+A：本地用 `make dev-up`（9000）；直接 `python run.py` 默认是 8000。确认用的是 Makefile 还是裸跑。
+
+**Q：版本号在哪改？**
+A：三处同步（见上表），缺一不可，否则 CI/CHANGELOG 对不上。
+
+**Q：前端能直连数据库吗？**
+A：不能。前端仅 BFF 转发，业务数据全在后端 PG。
+
+### 详细文档导航
+
+| 我想了解 | 看这里 |
+|---|---|
+| 完整部署 / 回滚 / 备份 | [`docs/RootDoc-Deploy.md`](docs/RootDoc-Deploy.md) |
+| 工程原则 / 命名 / 红线 | [`docs/RootDoc-EngConv.md`](docs/RootDoc-EngConv.md) |
+| 前端架构 / 目录设计 | [`docs/RootDoc-FEArch.md`](docs/RootDoc-FEArch.md) |
+| 入职流程 / 环境搭建 | [`docs/Onboarding.md`](docs/Onboarding.md) |
+| 数据迁移评估 | [`docs/RootDoc-MigEval.md`](docs/RootDoc-MigEval.md) |
+| 历史变更 | [`docs/项目演变历史.md`](docs/项目演变历史.md) |
 
 ## 环境变量
 
@@ -100,5 +168,8 @@ cd CS-Web-Backend && git pull && git push
 | [docs/RootDoc-EngConv.md](docs/RootDoc-EngConv.md) | 通用工程规范（两端共用） |
 | [docs/RootDoc-Deploy.md](docs/RootDoc-Deploy.md) | 全栈部署 / 运维 |
 | [docs/RootDoc-MigEval.md](docs/RootDoc-MigEval.md) | 迁移可行性 + 多数据库支持评估报告（含执行记录；原 `docs/data-migration/` 已并入本文件） |
+| [docs/Onboarding.md](docs/Onboarding.md) | 入职手册 / 环境搭建 |
+| [docs/项目演变历史.md](docs/项目演变历史.md) | 历史变更记录（按版本，索引） |
+| [docs/项目待办事项.md](docs/项目待办事项.md) | 待办清单 |
 
 前后端专项文档保留在各 submodule：后端 `CS-Web-Backend/docs/`、前端 `CS-Web-Frontend/tools/docs/`。
