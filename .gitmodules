@@ -1,0 +1,6 @@
+[submodule "CS-Web-Backend"]
+	path = CS-Web-Backend
+	url = git@github.com:KashiwagiEri233/CS-Web-Backend.git
+[submodule "CS-Web-Frontend"]
+	path = CS-Web-Frontend
+	url = git@github.com:KashiwagiEri233/CS-Web-Frontend.git
