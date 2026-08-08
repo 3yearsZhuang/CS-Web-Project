@@ -232,13 +232,13 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 
 > 本节承接原 `CS-Web-Frontend/tools/docs/FrontDoc-PGMig.md`（2026-08-09 并入，原文件删除）。
 > 状态：✅ **已归档**（2026-08-07）。迁移已于 2026-08-05 执行完成（19 张表全量入库）；迁移脚本 `tools/scripts/migrate-sqlite-to-pg.mjs` 与前端全部 SQLite 依赖（`better-sqlite3`）已于 2026-08-07 随清理删除。如需重跑（不应发生），可从 git 历史恢复脚本并临时安装依赖。
-> 关联：数据库双引擎演进与迁移规划见 [项目演变历史-0.9.1.md 附录（原 FrontDoc-Evo.md）](./项目演变历史-0.9.1.md#附录前端演进路线图与迁移文档原-frontdocevomd) Part B；前端架构见 `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md`。
+> 关联：数据库双引擎演进与迁移规划见本文 §八（迁移执行细节，原 FrontDoc-PGMig 已并入）；前端架构见 `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md`。
 
 ### 8.1 迁移历史概述
 
 旧前端单体库 `data/app.db`（SQLite）的业务数据于 2026-08-05 迁移至后端 PostgreSQL（库 `domefff`）。
 
-**为什么不能直导**：SQLite 主键为 TEXT/UUID，PG 为 Integer 自增；迁移脚本建立了「UUID -> Integer」映射、按外键依赖序逐层导入，并处理认证字段与类型转换。详见 [项目演变历史-0.9.1.md 附录（原 FrontDoc-Evo.md）](./项目演变历史-0.9.1.md#附录前端演进路线图与迁移文档原-frontdocevomd) Part B。
+**为什么不能直导**：SQLite 主键为 TEXT/UUID，PG 为 Integer 自增；迁移脚本建立了「UUID -> Integer」映射、按外键依赖序逐层导入，并处理认证字段与类型转换。详见本文 §八（迁移执行细节）。
 
 **迁移结果**：19 张表全量入库，外键完整、类型转换正确、静态资源已随迁（验证记录见本文「附：验证依据」）。
 
@@ -300,7 +300,7 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 
 ### 8.5 关联文档
 
-- 迁移规划 / 双引擎演进：`./项目演变历史-0.9.1.md` 附录 Part B（原 FrontDoc-Evo.md）
+- 迁移规划 / 双引擎演进：见本文 §八（迁移执行细节，原 FrontDoc-PGMig 已并入）
 - 运维 / 回滚流程：`CS-Web-Frontend/tools/docs/FrontDoc-Ops.md`
 - 后端迁移计划与验证：`CS-Web-Backend/tools/docs/BackDoc-Infra.md` §六 迁移验证（原 `BackDoc-MigV.md` 已并入）
 

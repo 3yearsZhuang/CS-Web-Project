@@ -7,21 +7,23 @@
 
 | 文档 | 说明 |
 |---|---|
-| [RootDoc-FEArch.md](RootDoc-FEArch.md) | 前端通用目录/架构准则（框架无关，唯一权威） |
+| [RootDoc-FEArch.md](RootDoc-FEArch.md) | 前端目录/架构方法论（以 CS-Web-Frontend 真实结构为锚，唯一权威） |
 | [RootDoc-EngConv.md](RootDoc-EngConv.md) | 通用工程规范（命名 / DRY / 圈复杂度 / 错误处理 / 安全 / 配置 / 测试 / Git / 中文排版） |
 | [RootDoc-Deploy.md](RootDoc-Deploy.md) | 全栈部署 / 运维（本地并行启动、容器化部署、健康检查、回滚、数据卷） |
 | [RootDoc-MigEval.md](RootDoc-MigEval.md) | 迁移可行性 + 多数据库支持评估报告 |
+| [RootDoc-ADR.md](RootDoc-ADR.md) | 架构决策（ADR）索引 / 边界上下文 / 数据流 / 韧性 / BFF 交互风格（设计决策 SSOT，L0） |
 | [Onboarding.md](Onboarding.md) | 新开发者/新管理员第一天教程（环境→本地→部署→排障，含「当前真实进度」标注） |
-| [tools-workbench-redesign-plan.md](tools-workbench-redesign-plan.md) | 工具页 → 工作台改造方案（历史方案，已部分落地 0.9.8，保留为对照记录） |
 | [CHANGELOG.md](../CHANGELOG.md) | 发布说明（Keep a Changelog 格式，按版本记录显著变更） |
 | [api-reference.md](api-reference.md) | API 参考（由 `openapi.baseline.json` 0.9.8 冻结契约自动生成，请勿手改） |
+| [项目待办事项.md](项目待办事项.md) | 项目待办 / 进行中事项 + ADR 待评估项存放处（与 `RootDoc-ADR.md` 索引联动） |
+| [DocGovernance.md](DocGovernance.md) | 文档治理规范（三层架构 + 所有权矩阵 + 反模式清单，SSOT 规则） |
 
 ## 子仓库文档索引（原地保留，非迁移）
 
 | 仓库 | 入口 | 内容 |
 |---|---|---|
-| `CS-Web-Backend/tools/docs/` | [README.md](../../CS-Web-Backend/tools/docs/README.md) | 后端 FastAPI 文档索引：`BackDoc-01-Arch.md`（架构 + 业务模块契约 Part B，原 `BackDoc-Mods.md` 并入）、`BackDoc-02-Sec.md`（安全）、`BackDoc-Conv.md`（工程约定）、`BackDoc-Infra.md`（基础设施，原 `BackDoc-MigV` 已并入） |
-| `CS-Web-Frontend/tools/docs/` | [README.md](../../CS-Web-Frontend/tools/docs/README.md) | 前端文档：`FrontDoc-01-Arch.md`（架构 + 业务模块契约 Part B + 前后端联动）、`FrontDoc-02-Sec.md`（安全）、`FrontDoc-UID.md`（UI 设计规范 + Markdown 编辑器 §14，原 FrontDoc-MDE 并入）、`FrontDoc-Ops.md`（运维）、`FrontDoc-i18n.md`（国际化迁移指南）；PG 迁移归档已并入根 [`RootDoc-MigEval.md`](RootDoc-MigEval.md) §八；发布说明 [`CHANGELOG.md`](../../CS-Web-Frontend/CHANGELOG.md) |
+| `CS-Web-Backend/tools/docs/` | [README.md](../CS-Web-Backend/tools/docs/README.md) | 后端 FastAPI 文档索引：`BackDoc-01-Arch.md`（架构 + 业务模块契约 Part B，原 `BackDoc-Mods.md` 并入）、`BackDoc-02-Sec.md`（安全）、`BackDoc-Conv.md`（工程约定）、`BackDoc-Infra.md`（基础设施，原 `BackDoc-MigV` 已并入） |
+| `CS-Web-Frontend/tools/docs/` | [README.md](../CS-Web-Frontend/tools/docs/README.md) | 前端文档：`FrontDoc-01-Arch.md`（架构 + 业务模块契约 Part B + 前后端联动）、`FrontDoc-Conv.md`（编码规范，对标后端 BackDoc-Conv.md）、`FrontDoc-02-Sec.md`（安全）、`FrontDoc-UID.md`（UI 设计规范 + Markdown 编辑器 §14，原 FrontDoc-MDE 并入）、`FrontDoc-Ops.md`（运维）、`FrontDoc-i18n.md`（国际化迁移指南）；PG 迁移归档已并入根 [`RootDoc-MigEval.md`](RootDoc-MigEval.md) §八；发布说明 [`CHANGELOG.md`](../CS-Web-Frontend/CHANGELOG.md) |
 
 ---
 

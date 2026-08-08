@@ -192,17 +192,18 @@ make logs          # 跟踪日志
 
 # 附录 A：前端工程规则
 
-> Source of truth：禁止事项、模块协作契约、ADR 编号规则、文档维护 lifecycle、编码规范、server-only 边界的唯一权威位置。
+> Source of truth（聚合入口）：本附录为新人聚合入口。**禁止事项**权威为前端 `FrontDoc-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 视觉侧）/ 根 `RootDoc-EngConv.md §二`（通用红线）；模块协作契约、ADR 编号规则、文档维护 lifecycle 为本附录专属权威；编码规范细则见 `FrontDoc-Conv.md`。本附录不复述禁止事项列表。
 > 变更触发：新增移除依赖、模块结构调整、ADR 新增、文档结构变更、新增安全/工程发现。
-> **边界说明**：本附录为面向新人的**聚合文档**——对「禁止事项、ADR 编号、文档维护 lifecycle」等本附录专属项，本附录是权威；对**通用/端侧编码细则**（命名、DRY、圈复杂度、分层、迁移等），权威分别为根 `docs/RootDoc-EngConv.md`、后端 `CS-Web-Backend/tools/docs/BackDoc-01-Arch.md`（Part B 模块契约）、前端 `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md`（Part B 模块契约与前后端联动）与 `FrontDoc-UID.md`；**模块协作契约**（模块职责 / 边界 / 前后端联动）权威为前端 `FrontDoc-01-Arch.md` Part B。本附录不重复展开，冲突时以对应权威文件为准。
+> **边界说明**：本附录为面向新人的**聚合文档**——对「ADR 编号、文档维护 lifecycle」等本附录专属项，本附录是权威；**禁止事项**权威为 `FrontDoc-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 视觉侧）/ 根 `RootDoc-EngConv.md §二`（通用红线），本附录 A.1 仅为入口指针；对**通用/端侧编码细则**（命名、DRY、圈复杂度、分层、迁移等），权威分别为根 `docs/RootDoc-EngConv.md`、后端 `CS-Web-Backend/tools/docs/BackDoc-01-Arch.md`（Part B 模块契约）、前端 `CS-Web-Frontend/tools/docs/FrontDoc-Conv.md`（编码规范）、`FrontDoc-01-Arch.md`（Part B 模块契约与前后端联动）与 `FrontDoc-UID.md`（UI 规范）；**模块协作契约**（模块职责 / 边界 / 前后端联动）权威为前端 `FrontDoc-01-Arch.md` Part B。本附录不重复展开，冲突时以对应权威文件为准。
 
-## A.1 禁止事项
+## A.1 禁止事项（入口指针）
 
-1. **禁止引入 react-dev-inspector**：与 Next.js 16 + Turbopack 不兼容，DOM 注入致开发模式渲染 16-24s。移除组件引用 + 从 package.json 删除 `react-dev-inspector` / `@react-dev-inspector/babel-plugin`。
-2. **禁止引入 Vite 相关依赖**：Next.js + Turbopack 不兼容 Vite，引入会污染控制台 404。`vitest` 可保留（仅测试）。
-3. **禁止跨模块直接 import server 代码**：业务模块间（auth ↔ community ↔ events ↔ tools ↔ notification）必须走事件总线。`admin` 聚合层例外，可调用被管理模块 `server/index.ts` 公开 API。跨模块类型引用必须用 `import type`。
-4. **禁止在 types/index.ts 引入运行时依赖**：仅纯类型 + 常量，否则破坏 server-only 边界（见 ADR-010 / M11 `AuditContext` 下沉）。
-5. **禁止模块间循环依赖**：类型引用使用 `import type` 确保编译后无运行时依赖。
+> ⚠️ 本附录**不再复述**禁止事项列表（单一权威见下方）。按类别查对应权威：
+> - **前端编码侧禁止项**（react-dev-inspector / Vite / 跨模块 server import / types 运行时依赖 / 循环依赖 / 组件直连后端等）→ 前端专项规范 [`FrontDoc-Conv.md §12`](../CS-Web-Frontend/tools/docs/FrontDoc-Conv.md#12-禁止事项汇总)。
+> - **UI 视觉侧禁止项**（硬编码颜色、默认阴影、发光、白名单外圆角、ease-in-out、渐变等）→ [`FrontDoc-UID.md §11`](../CS-Web-Frontend/tools/docs/FrontDoc-UID.md#11-ui-专属禁止清单)。
+> - **通用工程红线**（硬编码、魔法值、空 catch、密钥明文等）→ 根 [`RootDoc-EngConv.md §二`](./RootDoc-EngConv.md#二代码质量红线)。
+>
+> 冲突时以对应权威文件为准。
 
 ## A.2 设计规范
 
@@ -219,29 +220,27 @@ make logs          # 跟踪日志
 ## A.4 ADR 引用规则
 
 - 何时创建：影响多模块/引入移除关键技术依赖/改变模块通信/不可逆决策/安全相关 → 记录 ADR。
-- 格式：`### ADR-XXX` + 状态/上下文/决策/替代方案/后果/可逆性/实施记录，统一记录在 `项目演变历史-0.9.1.md`「附录：前端演进路线图与迁移文档」的架构决策记录（ADR）索引章节，完整决策记录见 `项目演变历史.md`。
+- 格式：`### ADR-XXX` + 状态/上下文/决策/替代方案/后果/可逆性/实施记录。ADR 索引与速查的权威位置为 L0 设计决策 SSOT [`RootDoc-ADR.md`](RootDoc-ADR.md)（已实施项）；完整决策记录见 [`项目演变历史.md`](./项目演变历史.md)，待评估项见 [`项目待办事项.md`](./项目待办事项.md)。（注：`项目演变历史-0.9.1.md` 等分卷为只读归档，活文档不引用其已迁出内容。）
 - 锚点规则：GitHub 风格（标题转小写 + 空格转连字符 + 去标点，中文保留）。
 - 编号：连续递增（ADR-015…），废弃不回收；状态必须反映实施事实（防再犯 #2）。
 
 ## A.5 文档维护流程
 
-- 每个系统维度有且仅有一个权威位置（Source-of-Truth 无重复规则）：禁止事项→本附录 A.1；ADR→`项目演变历史-0.9.1.md`（附录演进文档）/ `项目演变历史.md`；风险→`项目演变历史.md` R 表；依赖矩阵→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` 2.3；安全发现→`CS-Web-Frontend/tools/docs/FrontDoc-02-Sec.md`；API 契约→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part B；环境变量→`CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part A。
+- 每个系统维度有且仅有一个权威位置（Source-of-Truth 无重复规则）：禁止事项→前端 `FrontDoc-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 侧）/ 根 `RootDoc-EngConv.md §二`（通用）；ADR→`RootDoc-ADR.md`（索引/速查，L0 SSOT）/ `项目演变历史.md`（完整记录）/ `项目待办事项.md`（待评估）；风险→`项目演变历史.md` R 表；依赖矩阵→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` 2.3；安全发现→`CS-Web-Frontend/tools/docs/FrontDoc-02-Sec.md`；API 契约→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part B（模块组织视图，原始契约以 `docs/api-reference.md` 为准）；环境变量→`CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part A。
 - 变更同步检查清单（PR 自检模板）：
   - [ ] `pnpm run ts-check` 通过
   - [ ] 调目录结构 → `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part A
   - [ ] 新增/修改 API → `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part B
   - [ ] 新增管理员权限 → `CS-Web-Frontend/tools/docs/FrontDoc-02-Sec.md` Part 2
-  - [ ] 架构决策 → `项目演变历史-0.9.1.md` 附录 / `项目演变历史.md` 新增 ADR
-  - [ ] 新增禁止事项 → 本附录 A.1
-  - [ ] 新增页面/组件 → `CS-Web-Frontend/tools/docs/FrontDoc-UID.md`
+  - [ ] 架构决策 → L0 SSOT [`RootDoc-ADR.md`](RootDoc-ADR.md)（索引/速查）；完整记录见 `项目演变历史.md`、待评估项见 `项目待办事项.md`
+  - [ ] 新增禁止事项 → `FrontDoc-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 侧）
+  - [ ] 新增页面/组件 → `CS-Web-Frontend/tools/docs/FrontDoc-UID.md`（视觉）+ `FrontDoc-Conv.md`（编码规范）
   - [ ] 新增环境变量 → `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part A + `README.md` 环境变量表
   - [ ] 修 bug → 立即 grep 同模式跨模块扫描，审计结果写入 ADR「审计确认安全」清单（防再犯 #6）
 
-## A.6 编码规范补充
+## A.6 编码规范补充（入口指针）
 
-- 文件命名：`kebab-case`；组件文件名与默认导出名一致；barrel 统一 `index.ts`。
-- 导入顺序：① React/Next 官方 ② 第三方库 ③ shared 基础设施 ④ 其他模块（仅 `import type`）⑤ 本模块内部。
-- **server-only 边界**（详见 ADR-010）：任何 import `nodemailer`/`crypto`/`fs`/`pino` 的文件首行 `import 'server-only'`，客户端组件禁止 import；barrel 导出 server-only 内容自身也需标记。`src/server.ts` 自定义服务器下 Next.js `server-only` 不生效，已用 `src/shared/server-only.ts` 本地空实现 + `tsconfig.json` paths + `vitest.config.ts` alias 兜底。`shared/logger.ts` 因 pino 同构性显式记录为例外（不加 server-only）。
+> ⚠️ 前端**编码规范细则**（文件命名 `kebab-case`、导入顺序、server-only 边界、React Compiler 红线、样式令牌、widget 注册表、i18n 等）的唯一权威位置为前端专项规范 [`FrontDoc-Conv.md`](../CS-Web-Frontend/tools/docs/FrontDoc-Conv.md)（§2 命名、§10 server-only 边界等）。本附录作为新人入口，不重复展开，冲突以该专项规范为准。
 
 ## A.7 防再犯清单（explanation）
 
