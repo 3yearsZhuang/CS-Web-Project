@@ -4300,6 +4300,928 @@
         ],
         "title": "ValidationError",
         "type": "object"
+      },
+      "GithubDayCount": {
+        "properties": {
+          "date": {
+            "title": "Date",
+            "type": "string"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "count"
+        ],
+        "title": "GithubDayCount",
+        "type": "object"
+      },
+      "GithubContributionsOut": {
+        "description": "GitHub 贡献热力图响应。ok=false 时返回 need_username 与 message，提示需绑定用户名。",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "need_username": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Need Username"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "platform": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Platform"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/GithubDayCount"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          },
+          "streak": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Streak"
+          },
+          "fetched_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fetched At"
+          },
+          "stale": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stale"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "title": "GithubContributionsOut",
+        "type": "object"
+      },
+      "ApiUsageToday": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "errors": {
+            "title": "Errors",
+            "type": "integer"
+          },
+          "avgLatencyMs": {
+            "title": "AvgLatencyMs",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "errors",
+          "avgLatencyMs"
+        ],
+        "title": "ApiUsageToday",
+        "type": "object"
+      },
+      "ApiUsageDay": {
+        "properties": {
+          "date": {
+            "title": "Date",
+            "type": "string"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "count"
+        ],
+        "title": "ApiUsageDay",
+        "type": "object"
+      },
+      "ApiUsageEndpoint": {
+        "properties": {
+          "endpoint": {
+            "title": "Endpoint",
+            "type": "string"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "endpoint",
+          "count"
+        ],
+        "title": "ApiUsageEndpoint",
+        "type": "object"
+      },
+      "ApiUsageStats": {
+        "description": "API 调用统计：今日计数 + 近 N 天趋势 + endpoint 分布。",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "days": {
+            "title": "Days",
+            "type": "integer"
+          },
+          "today": {
+            "$ref": "#/components/schemas/ApiUsageToday"
+          },
+          "daily": {
+            "items": {
+              "$ref": "#/components/schemas/ApiUsageDay"
+            },
+            "title": "Daily",
+            "type": "array"
+          },
+          "endpoints": {
+            "items": {
+              "$ref": "#/components/schemas/ApiUsageEndpoint"
+            },
+            "title": "Endpoints",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ok",
+          "days",
+          "today",
+          "daily",
+          "endpoints"
+        ],
+        "title": "ApiUsageStats",
+        "type": "object"
+      },
+      "FocusSessionIn": {
+        "description": "前端完成一轮专注后的上报。",
+        "properties": {
+          "duration_seconds": {
+            "exclusiveMinimum": 0,
+            "maximum": 14400,
+            "title": "Duration Seconds",
+            "type": "integer"
+          },
+          "phase": {
+            "default": "focus",
+            "pattern": "^(focus|shortBreak|longBreak)$",
+            "title": "Phase",
+            "type": "string"
+          },
+          "sound_source": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Sound Source"
+          }
+        },
+        "required": [
+          "duration_seconds"
+        ],
+        "title": "FocusSessionIn",
+        "type": "object"
+      },
+      "FocusSessionOut": {
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ok",
+          "id"
+        ],
+        "title": "FocusSessionOut",
+        "type": "object"
+      },
+      "PomodoroDay": {
+        "properties": {
+          "date": {
+            "title": "Date",
+            "type": "string"
+          },
+          "minutes": {
+            "title": "Minutes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "minutes"
+        ],
+        "title": "PomodoroDay",
+        "type": "object"
+      },
+      "PomodoroStats": {
+        "description": "番茄钟专注统计：总轮数 / 总时长 / 今日 / 近 N 天分布。",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "totalSessions": {
+            "title": "TotalSessions",
+            "type": "integer"
+          },
+          "totalMinutes": {
+            "title": "TotalMinutes",
+            "type": "integer"
+          },
+          "todayMinutes": {
+            "title": "TodayMinutes",
+            "type": "integer"
+          },
+          "daily": {
+            "items": {
+              "$ref": "#/components/schemas/PomodoroDay"
+            },
+            "title": "Daily",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ok",
+          "totalSessions",
+          "totalMinutes",
+          "todayMinutes",
+          "daily"
+        ],
+        "title": "PomodoroStats",
+        "type": "object"
+      },
+      "ChatTurn": {
+        "description": "单条对话消息（角色 + 内容）。",
+        "properties": {
+          "role": {
+            "pattern": "^(user|assistant)$",
+            "title": "Role",
+            "type": "string"
+          },
+          "content": {
+            "title": "Content",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "ChatTurn",
+        "type": "object"
+      },
+      "ChatRequest": {
+        "description": "SSE 流式对话请求。",
+        "properties": {
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Conversation Id"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatTurn"
+            },
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Messages",
+            "type": "array"
+          }
+        },
+        "required": [
+          "messages"
+        ],
+        "title": "ChatRequest",
+        "type": "object"
+      },
+      "AuxilioChatEvent": {
+        "description": "SSE 事件负载。type 取值：delta（增量文本）/ tool_call（工具调用）/ usage（token 用量）/ done（会话结束，携带 title）/ error（流式异常）。",
+        "properties": {
+          "type": {
+            "enum": [
+              "delta",
+              "tool_call",
+              "usage",
+              "done",
+              "error"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "arguments": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Arguments"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "prompt_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Tokens"
+          },
+          "completion_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completion Tokens"
+          },
+          "total_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Tokens"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "AuxilioChatEvent",
+        "type": "object"
+      },
+      "ConversationOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "createdAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "CreatedAt"
+          },
+          "updatedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "UpdatedAt"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "ConversationOut",
+        "type": "object"
+      },
+      "ConversationListOut": {
+        "properties": {
+          "conversations": {
+            "items": {
+              "$ref": "#/components/schemas/ConversationOut"
+            },
+            "title": "Conversations",
+            "type": "array"
+          }
+        },
+        "required": [
+          "conversations"
+        ],
+        "title": "ConversationListOut",
+        "type": "object"
+      },
+      "LlmConfigIn": {
+        "description": "用户 LLM 配置（api_key 留空表示保留原值）。",
+        "properties": {
+          "provider": {
+            "default": "openai",
+            "pattern": "^(openai|anthropic)$",
+            "title": "Provider",
+            "type": "string"
+          },
+          "api_key": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Api Key"
+          },
+          "base_url": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Base Url"
+          },
+          "model": {
+            "default": "gpt-4o-mini",
+            "maxLength": 120,
+            "title": "Model",
+            "type": "string"
+          }
+        },
+        "title": "LlmConfigIn",
+        "type": "object"
+      },
+      "LlmUsageToday": {
+        "properties": {
+          "calls": {
+            "title": "Calls",
+            "type": "integer"
+          },
+          "tokens": {
+            "title": "Tokens",
+            "type": "integer"
+          },
+          "avgLatencyMs": {
+            "title": "AvgLatencyMs",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "calls",
+          "tokens",
+          "avgLatencyMs"
+        ],
+        "title": "LlmUsageToday",
+        "type": "object"
+      },
+      "LlmUsageDay": {
+        "properties": {
+          "date": {
+            "title": "Date",
+            "type": "string"
+          },
+          "tokens": {
+            "title": "Tokens",
+            "type": "integer"
+          },
+          "calls": {
+            "title": "Calls",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "tokens",
+          "calls"
+        ],
+        "title": "LlmUsageDay",
+        "type": "object"
+      },
+      "LlmUsageModel": {
+        "properties": {
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model",
+          "count"
+        ],
+        "title": "LlmUsageModel",
+        "type": "object"
+      },
+      "LlmUsageStats": {
+        "description": "学习助手 LLM 用量：调用次数 / token 消耗 / 近 N 天趋势 / 模型分布。",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "days": {
+            "title": "Days",
+            "type": "integer"
+          },
+          "today": {
+            "$ref": "#/components/schemas/LlmUsageToday"
+          },
+          "totalCalls": {
+            "title": "TotalCalls",
+            "type": "integer"
+          },
+          "totalTokens": {
+            "title": "TotalTokens",
+            "type": "integer"
+          },
+          "daily": {
+            "items": {
+              "$ref": "#/components/schemas/LlmUsageDay"
+            },
+            "title": "Daily",
+            "type": "array"
+          },
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/LlmUsageModel"
+            },
+            "title": "Models",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ok",
+          "days",
+          "today",
+          "totalCalls",
+          "totalTokens",
+          "daily",
+          "models"
+        ],
+        "title": "LlmUsageStats",
+        "type": "object"
+      },
+      "LlmConfigOut": {
+        "description": "用户 LLM 配置读取响应。configured=false 时仅返回 ok 与 configured；configured=true 时附 provider/baseUrl/model/apiKeyMasked（掩码）。",
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "configured": {
+            "title": "Configured",
+            "type": "boolean"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "baseUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "BaseUrl"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "apiKeyMasked": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "ApiKeyMasked"
+          }
+        },
+        "required": [
+          "ok",
+          "configured"
+        ],
+        "title": "LlmConfigOut",
+        "type": "object"
+      },
+      "LlmConfigUpdateOut": {
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "configured": {
+            "title": "Configured",
+            "type": "boolean"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "configured",
+          "provider",
+          "model"
+        ],
+        "title": "LlmConfigUpdateOut",
+        "type": "object"
+      },
+      "ToolCallOut": {
+        "description": "助手消息触发的单次工具调用记录：{name, arguments}。",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "arguments": {
+            "title": "Arguments",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "arguments"
+        ],
+        "title": "ToolCallOut",
+        "type": "object"
+      },
+      "ChatMessageOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "toolCalls": {
+            "items": {
+              "$ref": "#/components/schemas/ToolCallOut"
+            },
+            "title": "ToolCalls",
+            "type": "array"
+          },
+          "createdAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "CreatedAt"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "content",
+          "toolCalls",
+          "createdAt"
+        ],
+        "title": "ChatMessageOut",
+        "type": "object"
+      },
+      "ChatMessageListOut": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatMessageOut"
+            },
+            "title": "Messages",
+            "type": "array"
+          }
+        },
+        "required": [
+          "messages"
+        ],
+        "title": "ChatMessageListOut",
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -15069,6 +15991,513 @@
         "summary": "Update User",
         "tags": [
           "用户管理"
+        ]
+      }
+    },
+    "/api/v1/workbench/contributions/github": {
+      "get": {
+        "summary": "GitHub 贡献热力图（近一年数据，6h 缓存）。",
+        "description": "GitHub 贡献热力图（近一年数据，6h 缓存）。未绑定用户名时返回 ok=false 与 need_username。",
+        "operationId": "get_github_contributions_api_v1_workbench_contributions_github_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Username"
+            }
+          },
+          {
+            "in": "query",
+            "name": "year",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 2100,
+              "minimum": 2015,
+              "title": "Year",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "refresh",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Refresh",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubContributionsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "tags": [
+          "workbench"
+        ]
+      }
+    },
+    "/api/v1/workbench/stats/api-usage": {
+      "get": {
+        "summary": "API 调用统计：今日计数 + 近 N 天趋势 + endpoint 分布。",
+        "operationId": "get_api_usage_stats_api_v1_workbench_stats_api_usage_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 90,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiUsageStats"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "tags": [
+          "workbench"
+        ]
+      }
+    },
+    "/api/v1/workbench/focus-sessions": {
+      "post": {
+        "summary": "番茄钟完成一轮专注后上报记录（幂等不校验重复，前端只报完成轮）。",
+        "operationId": "record_focus_session_api_v1_workbench_focus_sessions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FocusSessionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FocusSessionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "tags": [
+          "workbench"
+        ]
+      }
+    },
+    "/api/v1/workbench/stats/pomodoro": {
+      "get": {
+        "summary": "番茄钟专注统计：总轮数 / 总时长 / 今日 / 近 N 天分布（喂给学习助手 Skill）。",
+        "operationId": "get_pomodoro_stats_api_v1_workbench_stats_pomodoro_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 90,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PomodoroStats"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "tags": [
+          "workbench"
+        ]
+      }
+    },
+    "/api/v1/auxilio/chat": {
+      "post": {
+        "summary": "SSE 流式对话：支持 OpenAI / Anthropic 双协议与 Skills 工具调用。",
+        "description": "SSE 流式对话：支持 OpenAI / Anthropic 双协议与 Skills 工具调用。响应为 text/event-stream，逐事件推送 delta / tool_call / usage / done / error。",
+        "operationId": "chat_api_v1_auxilio_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuxilioChatEvent"
+                }
+              }
+            },
+            "description": "SSE 流式事件流（text/event-stream）。事件类型：delta / tool_call / usage / done / error。"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "tags": [
+          "学习助手"
+        ]
+      }
+    },
+    "/api/v1/auxilio/conversations": {
+      "get": {
+        "summary": "列出当前用户的学习助手会话（按更新时间倒序）。",
+        "operationId": "list_conversations_api_v1_auxilio_conversations_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationListOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "tags": [
+          "学习助手"
+        ]
+      }
+    },
+    "/api/v1/workbench/stats/llm-usage": {
+      "get": {
+        "summary": "学习助手 LLM 用量：调用次数 / token 消耗 / 近 N 天趋势 / 模型分布。",
+        "operationId": "get_llm_usage_stats_api_v1_workbench_stats_llm_usage_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 90,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LlmUsageStats"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "tags": [
+          "workbench"
+        ]
+      }
+    },
+    "/api/v1/workbench/llm-config": {
+      "get": {
+        "summary": "读取用户 LLM 配置（脱敏：apiKey 只回显掩码，不回传明文）。",
+        "operationId": "get_llm_config_api_v1_workbench_llm_config_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LlmConfigOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "tags": [
+          "workbench"
+        ]
+      },
+      "put": {
+        "summary": "保存用户 LLM 配置（API Key AES-256-GCM 加密存储，绝不落明文/日志）。",
+        "operationId": "update_llm_config_api_v1_workbench_llm_config_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LlmConfigIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LlmConfigUpdateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "tags": [
+          "workbench"
+        ]
+      }
+    },
+    "/api/v1/auxilio/conversations/{conversation_id}/messages": {
+      "get": {
+        "summary": "获取会话内的消息列表（按时间正序）。",
+        "operationId": "list_messages_api_v1_auxilio_conversations_conversation_id_messages_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatMessageListOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "会话不存在（conversation not found）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Not Found"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "tags": [
+          "学习助手"
         ]
       }
     }

@@ -1,12 +1,13 @@
 # 数据迁移与多数据库支持评估报告（RootDoc-MigEval）
 
 > 更新人：3yearsZ
-> 最后更新：2026-08-07（加归档说明；评估内容为 2026-08-05 时点记录）
+> 最后更新：2026-08-09（并入原 `CS-Web-Frontend/tools/docs/FrontDoc-PGMig.md` 前端迁移执行细节为 §八，原文件删除）
+> 评估内容时点：2026-08-05（归档说明见下）
 > 评估对象：`CS-Web-Frontend/data/app.db`（SQLite，旧前端单体数据库）
 > 目标库：`CS-Web-Backend` 后端 PostgreSQL（库名 `domefff`，Alembic 管理）
 > 评估日期：2026-08-05
 >
-> ⚠️ **归档说明（2026-08-07）**：本报告为迁移**执行前**的时点评估记录，文中"前端已原生支持 SQLite/PG 双引擎""`shared/db` 为迁移过渡期保留"等描述反映 2026-08-05 状态。迁移已于 2026-08-05 完成，前端 `src/shared/db/*`、遗留脚本与 `better-sqlite3` 依赖已于 2026-08-06/07 全部删除，当前前端零 SQLite、纯 BFF。本文保留作为迁移决策历史审计证据。
+> ⚠️ **归档说明（2026-08-07，2026-08-09 补充）**：本报告为迁移**执行前**的时点评估记录，文中"前端已原生支持 SQLite/PG 双引擎""`shared/db` 为迁移过渡期保留"等描述反映 2026-08-05 状态。迁移已于 2026-08-05 完成，前端 `src/shared/db/*`、遗留脚本与 `better-sqlite3` 依赖已于 2026-08-06/07 全部删除，当前前端零 SQLite、纯 BFF。本文保留作为迁移决策历史审计证据。2026-08-09 并入原 `CS-Web-Frontend/tools/docs/FrontDoc-PGMig.md`（前端迁移执行细节与踩坑记录，§八）。
 
 ---
 
@@ -138,10 +139,10 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 
 ### 5.1 前端（CS-Web-Frontend）——✅ 评估时点已原生支持双引擎（代码已于 2026-08-07 删除）
 
-`src/shared/db/drivers/`（**已于 2026-08-07 删除**）曾实现 **SQLite 与 PG 双引擎**：
-- `sqlite-driver.ts`（better-sqlite3，已删除）+ `pg-driver.ts`（postgres.js，已删除），统一 `DbEngine` 接口。
-- `DATABASE_PROVIDER=sqlite|pg` 运行时切换，`?` 占位符自动转 PG `$1`（已删除）。
-- `drizzle.config.ts` 同样支持双 dialect（已删除）。
+`src/shared/db/drivers/` 曾实现 **SQLite 与 PG 双引擎**：
+- `sqlite-driver.ts`（better-sqlite3）+ `pg-driver.ts`（postgres.js），统一 `DbEngine` 接口。
+- `DATABASE_PROVIDER=sqlite|pg` 运行时切换，`?` 占位符自动转 PG `$1`。
+- `drizzle.config.ts` 同样支持双 dialect。
 
 > 注：当前前端已降级为纯 BFF（薄转发到后端），`shared/db` 双引擎代码已于 2026-08-07 删除，业务数据统一走后端 PG。
 
@@ -163,7 +164,7 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 ### 5.3 建议
 
 - **不建议**给后端引入多数据库——项目铁律明确「**SQLite 禁止作生产库**」，后端唯一生产库 = PostgreSQL。多库只会增加维护成本，收益低。
-- **正确姿势**：前端**曾**保留双引擎用于「迁移过渡期」开发兜底（代码已于 2026-08-07 删除）；**生产数据统一走后端 PG**。
+- **正确姿势**：前端**曾**保留双引擎用于「迁移过渡期」开发兜底；**生产数据统一走后端 PG**。
 >
 > ℹ️ 变更记录/待办条目见本目录 `项目演变历史.md` / `项目待办事项.md`。
 - 若要「本地无 PG 也能跑」，更轻的方案是 **Docker 起 PG**（根级 `docker-compose.yml` 已内置），而非维护 SQLite 方言。
@@ -176,9 +177,138 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 
 ---
 
+## 七、现行 PostgreSQL 迁移链现状（0.9.8 补录，2026-08-08）
+
+> 本章为 2026-08-08 补录，反映当前（0.9.8）代码实际迁移状态，与上文 2026-08-05 评估时点记录互补。
+
+### 7.1 当前数据源
+
+- 唯一数据源：后端 **PostgreSQL**（库名 `domefff`），由 **Alembic** 管理迁移。
+- 前端为纯 BFF，**零 SQLite**、无本地库；历史 SQLite→PG 脚本 `CS-Web-Frontend/tools/scripts/migrate-sqlite-to-pg.mjs` 已于 2026-08-07 随 SQLite 清理一并删除（见文首归档说明），现行不存在 SQLite 双引擎。
+
+### 7.2 现行 Alembic 迁移链（截至 2026-08-08）
+
+当前迁移链为单一线性链，现行 head（最新迁移）为 **`d3e4f5a6b7c8`**（add `llm_usage_logs` + `llm_configs`，2026-08-08）：
+
+```text
+… → a3b4c5d6e7f8(chinese_fts_zhparser)
+  → b0b1c2d3e4f5(add_workbench_tables)
+  → c2d3e4f5a6b7(add_focus_sessions)
+  → d3e4f5a6b7c8(add_llm_usage_logs+llm_configs)  ← HEAD
+```
+
+| 迁移 ID | 内容 | 创建日期 |
+|---------|------|----------|
+| `a3b4c5d6e7f8` | 中文全文检索 zhparser 条件安装（不可用时静默回退 `simple`） | 2026-08-07 |
+| `b0b1c2d3e4f5` | 工作台表（workbench） | 2026-08-08 |
+| `c2d3e4f5a6b7` | `focus_sessions`（番茄钟追踪） | 2026-08-08 |
+| `d3e4f5a6b7c8` | `llm_usage_logs` + `llm_configs`（LLM 用量与配置）← **HEAD** | 2026-08-08 |
+
+> 注：`a3b4c5d6e7f8` 是中文检索可靠性化的关键里程碑，属现行链上的中间节点，并非 head。
+
+### 7.3 部署自动迁移
+
+- 容器编排内后端 `DB_AUTO_MIGRATE=true` → 空库自动 `alembic upgrade head`（head = `d3e4f5a6b7c8`）；库已最新则无操作。详见 `docs/RootDoc-Deploy.md` §四。
+- 回滚：`alembic downgrade` 可逐级回退；生产建议先独立迁移 job 再起多 worker（见 `CS-Web-Backend/tools/docs/BackDoc-Infra.md` §六）。
+
+### 7.4 与本文评估时点记录的关系
+
+- 上文第一~六章为 2026-08-05「迁移执行前」评估，文中"前端已原生支持 SQLite/PG 双引擎"等描述均已在 2026-08-07 清理后失效（见文首归档说明）。
+- 本章（§七）为现行 PostgreSQL 单一事实源补充，确认**无 SQLite 双引擎、无 `migrate-sqlite-to-pg.mjs`**，迁移链以 Alembic 线性管理。
+
+---
+
 ## 附：验证依据
 
 - 源库：`CS-Web-Frontend/data/app.db` 43 张表，~1700 行（含 1458 组件变体种子），users 15 人（UUID 主键）。
 - 目标库：`domefff` 本地 PG 运行中，52 张表（Alembic 建），已有 1 seed 用户。
-- 迁移计划：后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md` §六 迁移验证（原 `BackDoc-MigV.md` 已并入）Phase 6 已规划数据迁移脚本，**脚本 `migrate-sqlite-to-pg.mjs` 已于 2026-08-05 实现并跑通（19 张表全部入库，外键完整、类型转换正确）**。
+- 迁移计划：后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md` §六 迁移验证（原 `BackDoc-MigV.md` 已并入）Phase 6 已规划数据迁移脚本，**脚本 `migrate-sqlite-to-pg.mjs` 已于 2026-08-05 实现并跑通（19 张表全部入库，外键完整、类型转换正确），该脚本已于 2026-08-07 删除**。
 - 主键差异：后端 `app/models/user.py` 明确 `id: Mapped[int]`；SQLite users 为 TEXT UUID。
+- 现行 Alembic head（2026-08-08）：**`d3e4f5a6b7c8`**（详见本文 §七）；`focus_sessions` 迁移 `c2d3e4f5a6b7`。
+
+---
+
+## 八、前端迁移执行细节（原 FrontDoc-PGMig.md 并入，已归档）
+
+> 本节承接原 `CS-Web-Frontend/tools/docs/FrontDoc-PGMig.md`（2026-08-09 并入，原文件删除）。
+> 状态：✅ **已归档**（2026-08-07）。迁移已于 2026-08-05 执行完成（19 张表全量入库）；迁移脚本 `tools/scripts/migrate-sqlite-to-pg.mjs` 与前端全部 SQLite 依赖（`better-sqlite3`）已于 2026-08-07 随清理删除。如需重跑（不应发生），可从 git 历史恢复脚本并临时安装依赖。
+> 关联：数据库双引擎演进与迁移规划见 [项目演变历史-0.9.1.md 附录（原 FrontDoc-Evo.md）](./项目演变历史-0.9.1.md#附录前端演进路线图与迁移文档原-frontdocevomd) Part B；前端架构见 `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md`。
+
+### 8.1 迁移历史概述
+
+旧前端单体库 `data/app.db`（SQLite）的业务数据于 2026-08-05 迁移至后端 PostgreSQL（库 `domefff`）。
+
+**为什么不能直导**：SQLite 主键为 TEXT/UUID，PG 为 Integer 自增；迁移脚本建立了「UUID -> Integer」映射、按外键依赖序逐层导入，并处理认证字段与类型转换。详见 [项目演变历史-0.9.1.md 附录（原 FrontDoc-Evo.md）](./项目演变历史-0.9.1.md#附录前端演进路线图与迁移文档原-frontdocevomd) Part B。
+
+**迁移结果**：19 张表全量入库，外键完整、类型转换正确、静态资源已随迁（验证记录见本文「附：验证依据」）。
+
+### 8.2 迁移范围与取舍
+
+**会迁移的表（业务数据，行数与 SQLite 一致）**
+
+| 模块 | 表 |
+|------|----|
+| 用户/认证 | users、user_roles、two_factor_auth |
+| 社区 | community_categories、community_posts、community_comments |
+| 活动 | events、event_registrations |
+| 考试 | exams、exam_questions、exam_question_options |
+| 资源/组件 | resources、component_registry_items / _variants / _guides |
+| 其他 | notifications、join_applications、announcements、tasks、task_claims、points_transactions、settings |
+
+**明确舍弃（PG 无对应表或低价值）**
+
+- `sessions` / `login_history`：PG 用 JWT，无此表，**旧登录态作废，用户需重新登录**
+- `admin_actions`：审计操作痕迹，低价值，并入 PG `audit_logs`（不做逐条映射）
+- FTS 虚拟表（`community_posts_fts*`）：SQLite 专属，PG 用 ILIKE/GIN，数据在主表已保留
+- `resource-files/` 下的 6 个 4 字节空壳文件：无可迁移内容
+
+### 8.3 关键实现与注意事项（踩坑记录）
+
+**8.3.1 主键重映射（最高风险）**
+- 全部 UUID/TEXT 主键 -> PG Integer 自增序列，脚本在内存维护 `UUID->Integer` 映射。
+- **19 张表**含 `user_id`/`author_id` 外键，须按映射回填；否则外键悬空。
+- 导入顺序严格按外键依赖：roles -> users -> categories -> posts -> comments -> events -> exams -> resources -> component -> 其余。
+
+**8.3.2 认证字段差异**
+- SQLite `users.role` 单列 -> PG `user_roles` 多对多（`admin`->admin、`user`->user）。
+- `root` 角色：PG 无此角色 -> 映射为 `is_superuser=true` + 挂 `admin` 角色。
+- `username`：SQLite 无此字段，由 email 前缀/display_name 派生，冲突自动加 `_1` 后缀。
+- 密码：scrypt 哈希**原样搬移**，登录时后端 `password_compat` 懒升级为 bcrypt（零停机）。
+
+**8.3.3 类型转换**
+- Integer 布尔 0/1 -> PG `boolean`
+- ISO / `YYYY-MM-DD HH:MM:SS` 日期 -> PG `timestamptz`
+- JSON 文本（`'[]'`）-> PG `jsonb`
+- 组件注册表：SQLite `item.id` 是 `cmp-button` 形式（**≠ slug**，slug 是 `button`），variants/guides 的 `item_id` 引用的是 **id** 而非 slug —— 脚本按 `item.id` 回填，勿误用 slug。
+
+**8.3.4 社区图片 URL 重写**
+- 旧前端社区图 URL 为 `/api/community/images/`，后端为 `/api/community/community/images/`。
+- 脚本会自动将 `content_markdown` 中的 `/api/community/images/` 重写为 `/api/community/community/images/`。
+
+**8.3.5 幂等与 RESET**
+- users 按 email 去重；component 按 slug/唯一约束去重。
+- `RESET=1` 会 `TRUNCATE` 业务表（**仅 PG 中确实存在的表**；`sessions`/`login_history` 不在 RESET 列表，因为它们未迁移到 PG）`RESTART IDENTITY CASCADE`，保留 `roles`/`users` 种子后重导。
+- RESET 后必须为「已存在用户」补登记 PG id 映射，否则后续外键悬空（脚本已处理）。
+
+**8.3.6 events 列表字段必须为 `[]` 而非 `null`**
+- PG `events.tags/topics/registration_fields` 为 jsonb 可存 `null`，但后端 `EventOut` 定义为 `List[str] = []`（非 Optional），`null` 会导致活动列表/详情接口响应校验 422。
+- 脚本已用 `toJson(e.x, [])` 兜底为空数组；勿改用 `null` 兜底。
+
+### 8.4 静态资源迁移与迁移后验证
+
+> ℹ️ 待办条目（静态资源手动复制、迁移后验证清单）见 [项目待办事项.md](./项目待办事项.md)。
+
+### 8.5 关联文档
+
+- 迁移规划 / 双引擎演进：`./项目演变历史-0.9.1.md` 附录 Part B（原 FrontDoc-Evo.md）
+- 运维 / 回滚流程：`CS-Web-Frontend/tools/docs/FrontDoc-Ops.md`
+- 后端迁移计划与验证：`CS-Web-Backend/tools/docs/BackDoc-Infra.md` §六 迁移验证（原 `BackDoc-MigV.md` 已并入）
+
+---
+
+## 九、信息缺口声明（0.9.8）
+
+- **迁移 head 与任务参数卡不一致**：本文任务参数卡标注"迁移 head = `a3b4c5d6e7f8`"，但当前代码（2026-08-08）实际 Alembic head 为 **`d3e4f5a6b7c8`**（`a3b4c5d6e7f8` 为链上中间里程碑，提供中文检索 zhparser 能力）。本文以代码实际状态为准写入 §七；参数卡口径需由主理人校正。
+- **`focus_sessions` 迁移 ID 已确认**：`c2d3e4f5a6b7`，与参数卡一致。
+- **SQLite 双引擎 / `migrate-sqlite-to-pg.mjs`**：已删除并归档（见文首），现行无此能力，无待补数据。
+- **外部链接核查**：本文引用的 `BackDoc-Infra.md` / `项目演变历史.md` / `项目待办事项.md` 均存在，无坏链；原 `FrontDoc-PGMig.md` 已于 2026-08-09 并入本文 §八（原文件删除）；已删除文件（`migrate-sqlite-to-pg.mjs`、`BackDoc-MigV.md`）均在正文显式标注"已删除/已并入"，非失效引用。

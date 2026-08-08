@@ -30,7 +30,7 @@
 |---|---|---|
 | Git | 任意新版本 | 拉取含子仓库(submodule) 的仓库 |
 | Python | **3.13+**（与后端 `pyproject.toml` 一致；3.9 会因 `X \| None` 语法失败） | 后端运行 / 测试 |
-| Node.js | 22 | 前端运行 / 构建 |
+| Node.js | 22（>=22，对齐 `CS-Web-Frontend/package.json` engines） | 前端运行 / 构建 |
 | pnpm | 9.0.0 | 前端包管理（CI 锁定此版本） |
 | Docker + Compose | 新版 | 容器化全栈部署 |
 | PostgreSQL | 16（容器自动起） | 生产/测试数据库 |
@@ -47,9 +47,10 @@ git submodule update --init --recursive
 
 ```bash
 cd CS-Web-Backend
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[test]"        # 安装运行时 + pytest 全家桶（G2 已固化版本）
-cp .env.example .env            # 填写 DATABASE_PASSWORD / SECRET_KEY / TOTP_ENCRYPTION_KEY / AUTH_SESSION_SECRET
+uv sync                          # 推荐：uv 安装全部依赖（锁于 uv.lock；等同 pip install -e ".[test]"）
+# 或传统方式：python -m venv .venv && source .venv/bin/activate && pip install -e ".[test]"
+cp .env.development .env         # 本地开发模板（生产用 .env.example）；填写 DATABASE_PASSWORD / SECRET_KEY / TOTP_ENCRYPTION_KEY / AUTH_SESSION_SECRET
+alembic upgrade head             # 初始化 / 同步 schema（开发环境 DB_AUTO_MIGRATE=True 亦会自动升级；CI 与测试建议显式执行）
 ```
 
 ### 1.4 前端环境
@@ -77,6 +78,8 @@ make dev-up       # 后端 :9000 热重载 + 前端 :2333 dev 同时前台运行
 - 前端 BFF 经 `BACKEND_URL=http://localhost:9000` 转发（见前端 `.env`）
 
 > 端口约定：本地开发后端经 `run.py --port 9000` 暴露 9000；容器编排内后端服务端口为 8000，前端 BFF 经 `backend:8000` 直连（容器内 `expose: 8000`，不映射公网）。两者指向同一服务，仅场景不同。
+
+> 直接起（不依赖 `make`）：前端 `pnpm dev`（等价于 `pnpm tsx watch src/server.ts`，默认端口 **2333**，见 `CS-Web-Frontend/tools/scripts/dev-server.mjs`）；后端 `uvicorn app.main:app --port 9000`（或 `python run.py --env 1`，见 `CS-Web-Backend/README.md`）。本地数据库为 PostgreSQL **5432** 端口、库名 **domefff**（见 `CS-Web-Backend/.env.example` 的 `DATABASE_NAME` / `DATABASE_PORT`）；首次需 `alembic upgrade head` 建表。
 
 ### 2.2 分开起（调试某一端）
 
@@ -154,10 +157,44 @@ make logs          # 跟踪日志
 
 ---
 
-# 附录 A：前端工程规则（原 FrontDoc-Onboard.md 第 8 节）
+## 6. 新特性体验路径（/tools 工作台）
+
+本地跑通并登录后，可体验工作台（workbench）子模块聚合的新特性。工作台挂载于 `/tools` 页顶部，由 `CS-Web-Frontend/src/modules/workbench/widget-registry.ts` 配置驱动渲染，顶部用 `InlineTabs` 在「工作台」与「学习助手」两个视图间切换。
+
+### 6.1 进入工作台
+
+- 打开 http://localhost:2333/tools → 默认进入「工作台」视图（问候条 + 各 widget 卡片）。
+- 切到「学习助手」Tab 进入 Auxilio 对话（见 6.3）。
+
+### 6.2 GitHub 贡献热力图（github-heatmap widget）
+
+- 在卡片内绑定 **GitHub 用户名** → 展示 53×7 贡献方格 + 总贡献数 / 连续天数（streak）徽章。
+- 数据由**后端抓取公开贡献页并缓存（约 6h）**，**无需 token**；仅做展示，不写库。
+- **需登录后查看**：未登录时接口返回 401，卡片提示「请先登录后使用」。
+
+### 6.3 Auxilio 学习助手对话（学习助手 Tab / assistant-chat widget）
+
+- 进入 `/tools` 切到「学习助手」Tab，或直达 `/tools/auxilio`，即可与 Auxilio 对话。
+- 能力：SSE 流式打字机 + **工具调用状态卡**（如查考试倒计时、薄弱点、资源、API 统计）；后端未配置模型时自动降级为规则模式。
+- 会话持久化：左侧会话列表（新建 / 历史），数据来自 `/api/tools/auxilio/conversations`。
+
+### 6.4 LLM 用量统计（llm-usage widget）
+
+- 展示近 30 天大模型调用次数、Token 消耗、平均延迟与模型分布（来自 `llm_usage_logs` 埋点）。
+- 「LLM 设置」可自助接入 OpenAI 兼容 / Anthropic 的 API Key（后端 **AES-256-GCM** 加密存储）。
+
+### 6.5 API 调用统计（api-usage）— 部分就绪
+
+- 后端 `/api/workbench/stats/api-usage` 与前端 BFF `/api/workbench/stats/api-usage` 路由、以及 i18n 词条（`apiUsage*`）均已就绪。
+- **截至 0.9.8，该卡片尚未在 `widget-registry.ts` 的 `WIDGETS` 中注册**，工作台暂不可见；如需开放需先在 registry 登记对应 widget（见 `CS-Web-Frontend/src/modules/workbench/README.md`）。[待填写：确认 api-usage-stats widget 是否计划随 1.0.0 一并注册]
+
+---
+
+# 附录 A：前端工程规则
 
 > Source of truth：禁止事项、模块协作契约、ADR 编号规则、文档维护 lifecycle、编码规范、server-only 边界的唯一权威位置。
 > 变更触发：新增移除依赖、模块结构调整、ADR 新增、文档结构变更、新增安全/工程发现。
+> **边界说明**：本附录为面向新人的**聚合文档**——对「禁止事项、ADR 编号、文档维护 lifecycle」等本附录专属项，本附录是权威；对**通用/端侧编码细则**（命名、DRY、圈复杂度、分层、迁移等），权威分别为根 `docs/RootDoc-EngConv.md`、后端 `CS-Web-Backend/tools/docs/BackDoc-01-Arch.md`（Part B 模块契约）、前端 `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md`（Part B 模块契约与前后端联动）与 `FrontDoc-UID.md`；**模块协作契约**（模块职责 / 边界 / 前后端联动）权威为前端 `FrontDoc-01-Arch.md` Part B。本附录不重复展开，冲突时以对应权威文件为准。
 
 ## A.1 禁止事项
 
@@ -222,9 +259,9 @@ make logs          # 跟踪日志
 
 ---
 
-# 附录 B：后端工程约定（原 BackDoc-Onboard.md 精要）
+# 附录 B：后端工程约定
 
-> 完整架构 / 编码规范 / 业务模块见 `CS-Web-Backend/tools/docs/` 下的 `BackDoc-01-Arch.md` / `BackDoc-Conv.md` / `BackDoc-Mods.md`。此处仅保留"必须守住的不变量"与"加一个 API 资源"配方。
+> 完整架构 / 编码规范 / 业务模块见 `CS-Web-Backend/tools/docs/` 下的 `BackDoc-01-Arch.md`（Part A 架构 + Part B 业务模块）/ `BackDoc-Conv.md`。此处仅保留"必须守住的不变量"与"加一个 API 资源"配方。
 
 ## B.1 必须守住的不变量（速览）
 
@@ -252,7 +289,7 @@ make logs          # 跟踪日志
 5. `api/v1/<x>.py` → 注册到 `api/v1/__init__.py`
 6. Alembic 建表/迁移
 7. `tools/tests/` 镜像补测试
-8. 业务模块在 `CS-Web-Backend/tools/docs/BackDoc-Mods.md` 对应节登记（或新建 `CS-Web-Backend/tools/docs/modules/<name>.md` 并登记到 `CS-Web-Backend/tools/docs/README.md`）
+8. 业务模块在 `CS-Web-Backend/tools/docs/BackDoc-01-Arch.md` Part B 对应节登记（或新建 `CS-Web-Backend/tools/docs/modules/<name>.md` 并登记到 `CS-Web-Backend/tools/docs/README.md`）
 
 > **中心注册点**（必须登记，否则不生效）：ORM 模型、业务异常、中间件、配置项、API router、启动/关闭任务（`@register_startup`/`@register_shutdown`）、测试子包 `__init__.py`。
 

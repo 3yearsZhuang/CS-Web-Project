@@ -5,6 +5,8 @@
 > 从后端 `CS-Web-Backend/tools/docs/BackDoc-Conv.md` 与前端 `CS-Web-Frontend/tools/docs/FrontDoc-UID.md` 提炼的**框架无关**通用原则。
 > 本项目（FztbuCS-Project）内的 Python/FastAPI 与 TypeScript/Next.js 代码均适用。
 > 端侧强相关的完整规范仍以各子仓库为权威（见文末深链接），此处只收通用原则，避免重复漂移。
+>
+> **约定类文档边界**：通用（两端共用）规范以本文件为权威；**后端专项**约定见 `CS-Web-Backend/tools/docs/BackDoc-Conv.md`；**前端专项**约定见 `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md`（架构与约定）与 `FrontDoc-UID.md`（UI 规范）；`docs/Onboarding.md` 附录 A 为面向新人的**聚合摘要（非权威）**，细则一律指回上述权威文件。三份约定文件与聚合摘要出现冲突时，以各自的权威文件为准。
 
 ---
 
@@ -106,7 +108,44 @@
 
 ---
 
-## 十、深链接（端侧完整规范）
+## 十、前端工程约定（React Compiler / 语义色板 / widget registry / i18n）
+
+> 本条为**前端专属**工程约定，完整规范以 `CS-Web-Frontend/tools/docs/`（`FrontDoc-UID.md` / `FrontDoc-01-Arch.md`）为准；此处收通用原则，避免重复漂移。
+> 适用代码：`CS-Web-Frontend/src/**`（Next.js 16 + React 19 + Tailwind v4）。
+
+### 10.1 React Compiler 红线
+
+前端按 React Compiler 语义编写（自动记忆组件与 Hook 返回值），以下为不可违反的红线：
+
+- **Hook 返回值不得混入 ref 对象**：`useMemo` / 自定义 Hook 的返回值若包含 `useRef` 产物，React Compiler 会误将其当作可记忆值缓存，导致引用错乱；需记忆的状态与 ref 必须分开返回。
+- **`useCallback` 闭包用到 ref 时，ref 必须列入依赖数组**：`ref.current` 变化不被自动追踪，漏写依赖会读到过期值。
+
+> 现状：当前 `CS-Web-Frontend/next.config.ts` 尚未显式开启 `compiler.reactCompiler`，上述红线作为**防御性约定**先行落实；编译器启用后即为硬性约束。[待填写：确认 React Compiler 是否已在 0.9.8 启用]
+
+### 10.2 颜色：项目令牌 + Tailwind 语义色板，禁止硬编码 hex
+
+- 颜色必须走**项目令牌**（`var(--primary)` / `var(--foreground)` / `var(--muted-foreground)` / `var(--destructive)` / `var(--border)` / `var(--chart-1..n)`）或 **Tailwind 语义色板**（emerald / amber / red / blue / green 等），**禁止散落硬编码十六进制**（如 `#1a2b3c`）。
+- 例外：SVG `stroke` / `fill` 无法用类名时，集中收口到常量文件（如 `CS-Web-Frontend/src/modules/workbench/widgets/pomodoro/constants.ts`）并注释色板来源，不得就地写 hex。
+- 依据：工作台模块约定（`CS-Web-Frontend/src/modules/workbench/README.md` §6.3.2）。
+
+### 10.3 工作台 widget：必须在 registry 注册
+
+- 新增工作台（workbench）widget 必须三步：① 在 `CS-Web-Frontend/src/modules/workbench/widget-registry.ts` 的 `WIDGETS` 数组声明（`id` / `slot` / `titleKey`）；② 组装组件（建议放 `src/modules/workbench/widgets/`）；③ 工作台按 `slot`（`full` / `main` / `side`）自动渲染。
+- `widget-registry` 是渲染的**唯一事实源**：未注册的组件不出现在工作台；布局显隐由用户偏好 `wb_widget_prefs`（localStorage）驱动，无需改骨架。
+- 新增 widget 通常还需配套 i18n 词条（见 10.4）与（如涉及）后端 `/api/workbench/**` 路由（经前端 BFF 薄转发）。
+
+### 10.4 i18n：workbench namespace 三处词条
+
+- 工作台文案统一走 `useTranslations('workbench')`，词条定义在 `CS-Web-Frontend/src/i18n/messages/tools.ts`。
+- 新增 / 修改一条 workbench 文案，必须同步**三处**，否则 `AppMessages` 类型编译失败或运行时缺译：
+  1. **类型（interface）**：`interface ToolsMessages` 内 `workbench: { ... }` 块新增 key；
+  2. **中文（zhCN）**：`zhCN: ToolsMessages` 对象内 `workbench: { ... }` 给出中文串；
+  3. **英文（en）**：`en: ToolsMessages` 对象内 `workbench: { ... }` 给出英文串。
+- 聚合入口 `CS-Web-Frontend/src/i18n/languages/{zh-CN,en}.ts` 与类型 `CS-Web-Frontend/src/i18n/types.ts` 自动展开，无需手动登记。
+
+---
+
+## 十一、深链接（端侧完整规范）
 
 | 端 | 权威文档 |
 |---|---|

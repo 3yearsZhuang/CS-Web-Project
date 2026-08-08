@@ -1,6 +1,6 @@
 # 工具页 → 工作台 改造方案评估与规划
 
-> ⚠️ 草稿：工具页 → 工作台改造方案（规划，未实施）。
+> ⚠️ **历史方案**：工具页 → 工作台改造方案（2026-08-08 规划）。**已部分落地（0.9.8）**：工作台模块（`src/modules/workbench`，registry 配置驱动、视图切换、数据备份）与各 widget（greeting / today-tasks / pomodoro-player / exam-countdown / quick-notes / github-heatmap / llm-usage / assistant-chat）已实现，后端 workbench / auxilio 路由与数据表已上线。本文件保留为**方案对照记录**，其中规划细节可能滞后于实际实现，与代码冲突处以代码与 `openapi.baseline.json` 为准。
 
 > 基于代码库实地调研（2026-08-08）。前端：Next.js 16 App Router + Tailwind 4 + SWR + next-intl，无图表库；后端：FastAPI + SQLAlchemy 2.0 async，JWT + GitHub OAuth，asyncio 后台任务。
 

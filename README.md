@@ -2,7 +2,7 @@
 
 > 计算机协会官网平台 · 前后端分离 + 根级编排
 
-> **当前真实进度（2026-08-07）**：版本 **0.9.8 → 1.0.0 准备期**。后端 FastAPI + PostgreSQL 已为唯一业务数据源；前端为 BFF 薄转发层。前端 `src/modules/*/server/`（9 模块直连业务层）与 `src/shared/db`（SQLite 双引擎）、`src/shared/security/audit.ts`（本地审计）**已于 2026-08-06 整体删除并验证**（经全仓库引用扫描确认为孤儿死代码，业务早已 `src/app/api/**` 薄转发后端），Blocker **B1 已闭环**；前端审计改走后端 `POST /api/v1/audit/logs`。2026-08-07 进一步清理 SQLite 残留：删除遗留脚本（`create-user`/`seed-exam-data`/`migrate-sqlite-to-pg`）与 `better-sqlite3` 依赖，E2E 改经后端 API 建号。完整待办见 `docs/项目待办事项.md`。
+> **当前真实进度（2026-08-08）**：版本 **0.9.8 → 1.0.0 准备期**。后端 FastAPI + PostgreSQL 为唯一业务数据源；前端为纯 BFF 薄转发层（`src/modules/*/server/`、`src/shared/db`、本地审计等直连层已整体删除，B1 闭环；审计走后端 `POST /api/v1/audit/logs`，E2E 经后端 API 建号）。完整待办见 `docs/项目待办事项.md`。
 
 本仓库为**编排/部署仓库（monorepo 外层）**，通过 Git 子仓库(submodule) 收敛前后端两个独立源码仓库，并在根级统一管理全栈容器编排与启动命令。
 
@@ -19,6 +19,18 @@ FztbuCS-Project/
 ├── Makefile               # 统一命令入口
 └── docs/                  # 根级文档（编排/部署/通用规范，入口见 docs/README.md）
 ```
+
+## 核心特性
+
+> 以下能力在 **0.9.8** 中已具备；认证相关接口统一前缀 `/api/v1`，完整契约见后端 Swagger 与仓库根 `openapi.baseline.json`。
+
+- **统一工作台（Workbench）**：个人数据聚合视图，集中呈现 GitHub 贡献热力图、API 调用统计、番茄钟专注记录、LLM 用量等（端点见「使用示例 · 工作台」）。
+- **Auxilio 学习助手**：SSE 流式对话，支持会话管理与 Skills 工具调用；前端「助手对话」入口即对应其接口。
+- **GitHub 贡献热力图**：同步并渲染用户 GitHub 贡献日历（`GET /api/v1/workbench/contributions/github`）。
+- **API 调用统计**：按用户/端点聚合接口调用量与趋势（`GET /api/v1/workbench/stats/api-usage`）。
+- **番茄钟专注记录**：记录专注时段并统计分布（`POST /api/v1/workbench/focus-sessions`、`GET /api/v1/workbench/stats/pomodoro`）。
+- **双 Token 认证与 2FA**：邮箱验证码注册/登录、JWT 双 token、可选 TOTP 二次验证（见「使用示例 · 认证流程」）。
+- **业务域**：`/users`、`/rbac`、`/events`、`/community`、`/announcements`、`/notifications`、`/join`、`/tools`、`/audit` 等，详见后端 Swagger。
 
 ## 快速开始
 
@@ -84,11 +96,12 @@ make down         # 停止
 | 端 | 版本号字段 | 文件位置 |
 |---|---|---|
 | 前端 | `package.json` → `version` | `CS-Web-Frontend/package.json` |
-| 后端 | `__version__` | `CS-Web-Backend/app/__init__.py` |
-| 发布说明锚点 | `CHANGELOG.md` | `CS-Web-Frontend/CHANGELOG.md` |
 | 后端 | `pyproject.toml` → `version` | `CS-Web-Backend/pyproject.toml` |
+| 后端 | `__version__` | `CS-Web-Backend/app/__init__.py` |
+| 后端 | `uv.lock` 依赖锁定版本 | `CS-Web-Backend/uv.lock` |
 
-- 改版本号**四处同步**：前端 `package.json` + 后端 `pyproject.toml` + 后端 `app/__init__.py.__version__` + 前端 `CHANGELOG.md` 锚点。
+- 改版本号**四处同步**：前端 `package.json` + 后端 `pyproject.toml` + 后端 `app/__init__.py.__version__` + 后端 `uv.lock`（依赖锁定随版本一起更新）。
+- 发布说明（版本锚点）：[`CHANGELOG.md`](CHANGELOG.md)，按 Keep a Changelog 维护，记录各版本显著变更（0.9.8 含工作台 / Auxilio 等新增能力）。
 - 当前语义版本线：`0.9.x`（尚未进入 1.0.0）。
 
 **架构一句话**
@@ -120,10 +133,11 @@ A：不能。前端仅 BFF 转发，业务数据全在后端 PG。
 | 入职流程 / 环境搭建 | [`docs/Onboarding.md`](docs/Onboarding.md) |
 | 数据迁移评估 | [`docs/RootDoc-MigEval.md`](docs/RootDoc-MigEval.md) |
 | 历史变更 | [`docs/项目演变历史.md`](docs/项目演变历史.md) |
+| 发布说明（版本锚点） | [`CHANGELOG.md`](CHANGELOG.md) |
 
 ## 安装
 
-> 最小可运行前置：Git、Python 3.13+、Node 22 + pnpm 9；生产 / 容器部署另需 Docker + Compose（PostgreSQL 16 由容器自动拉起）。
+> 最小可运行前置：Git、Python 3.13+、Node 22+ + pnpm 9；生产 / 容器部署另需 Docker + Compose（PostgreSQL 16 由容器自动拉起）。
 > 推荐先按上方「快速开始」用 `make` 一键起；本节给出**分步手动安装**与 env 填写细节，便于排错与精细化控制。
 
 ### 环境要求
@@ -132,7 +146,7 @@ A：不能。前端仅 BFF 转发，业务数据全在后端 PG。
 |---|---|---|
 | Git | 较新版本 | 拉取含子仓库(submodule) 的仓库 |
 | Python | **3.13+**（与 `CS-Web-Backend/pyproject.toml` 一致；3.9 会因 `X \| None` 语法失败） | 后端运行 / 测试 |
-| Node.js | 22 | 前端运行 / 构建 |
+| Node.js | **22+**（与 `CS-Web-Frontend/package.json` 的 `engines.node: ">=22"` 一致） | 前端运行 / 构建 |
 | pnpm | 9.0.0 | 前端包管理（CI 锁定此版本，`package.json` 已禁 npm/yarn） |
 | Docker + Compose | 新版 | 容器化全栈部署（PG 16 自动起） |
 
@@ -252,6 +266,74 @@ curl http://localhost:9000/api/v1/auth/me \
 > token 轮换：`POST /api/v1/auth/refresh` 传 `{"refreshToken":"..."}` 换取新双 token；登出 `POST /api/v1/auth/logout`（带 `Authorization` 头，可选 body 带 `refreshToken`）。
 > 其他业务域均挂在 `/api/v1` 下：`/users`、`/rbac`、`/events`、`/community`、`/announcements`、`/notifications`、`/join`、`/tools`、`/audit` 等，详见 Swagger。
 
+### 工作台（Workbench）示例
+
+工作台聚合个人数据，接口均挂在 `/api/v1/workbench` 下，需携带 `Authorization: Bearer <ACCESS_TOKEN>`（认证流程见上）。
+
+**API 调用统计**：
+
+```bash
+curl http://localhost:9000/api/v1/workbench/stats/api-usage \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+# => {"userId":1,"totalCalls":1280,"byEndpoint":[{"path":"/api/v1/...","count":42}],"periodDays":30}
+```
+
+**GitHub 贡献热力图**：
+
+```bash
+curl http://localhost:9000/api/v1/workbench/contributions/github \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+# => {"userId":1,"username":"alice","contributions":[{"date":"2026-08-01","count":5}, ...]}
+```
+
+**番茄钟专注记录**（写入一条专注时段）：
+
+```bash
+curl -X POST http://localhost:9000/api/v1/workbench/focus-sessions \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"startedAt":"2026-08-08T09:00:00Z","endedAt":"2026-08-08T09:25:00Z","task":"阅读文档"}'
+# => {"id":42,"durationMin":25,"createdAt":"2026-08-08T09:25:00Z"}
+```
+
+> 其余工作台端点：`GET /api/v1/workbench/stats/pomodoro`（专注统计）、`GET /api/v1/workbench/stats/llm-usage`（LLM 用量）、`GET /api/v1/workbench/llm-config` 与 `PUT /api/v1/workbench/llm-config`（LLM 配置）。响应统一 camelCase。
+
+### Auxilio 学习助手（SSE 流式对话）
+
+Auxilio 提供流式对话能力，接口挂在 `/api/v1/auxilio` 下。`POST /api/v1/auxilio/chat` 以 SSE（`text/event-stream`）返回增量 `delta` 事件，支持 OpenAI / Anthropic 双协议与 Skills 工具调用。
+
+**后端直连（curl，SSE）**：
+
+```bash
+curl -N -X POST http://localhost:9000/api/v1/auxilio/chat \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"解释一下 RBAC 的最小权限原则"}]}'
+# => event: delta   {"type":"delta","text":"RBAC..."}
+#    event: usage   {"type":"usage","promptTokens":..,"completionTokens":..}
+#    event: done    {"type":"done","title":"RBAC 最小权限原则"}
+```
+
+**前端（经 BFF 转发）**：
+
+```ts
+const res = await fetch('/api/auxilio/chat', {
+  method: 'POST',
+  credentials: 'include',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ messages: [{ role: 'user', content: '解释 RBAC' }] }),
+});
+const reader = res.body!.getReader();
+const decoder = new TextDecoder();
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  console.log(decoder.decode(value)); // SSE 增量事件
+}
+```
+
+> 会话管理：`GET /api/v1/auxilio/conversations`（会话列表）、`GET /api/v1/auxilio/conversations/{conversationId}/messages`（消息历史）。前端「助手对话」入口即对应上述接口。
+
 ### 前端（BFF 薄转发）
 
 前端不持有业务数据，所有读写都经 `src/app/api/**/route.ts` 转发到后端。新增一个 BFF 路由的标准写法（出自 `src/app/api/tools/component-registry/route.ts`）：
@@ -348,17 +430,7 @@ docs: 补充 README 使用示例
 
 ## 文档地图
 
-跨项目/编排层文档统一在根 `docs/`（单一权威、零漂移）：
+**唯一文档地图：**[`docs/README.md`](docs/README.md)（根级文档索引 + 各子仓库文档入口，新增/合并/删除文档须先登记于此）。
 
-| 文档 | 说明 |
-|---|---|
-| [docs/README.md](docs/README.md) | 根级文档索引 + 子仓库文档入口 |
-| [docs/RootDoc-FEArch.md](docs/RootDoc-FEArch.md) | 前端通用目录/架构准则（框架无关） |
-| [docs/RootDoc-EngConv.md](docs/RootDoc-EngConv.md) | 通用工程规范（两端共用） |
-| [docs/RootDoc-Deploy.md](docs/RootDoc-Deploy.md) | 全栈部署 / 运维 |
-| [docs/RootDoc-MigEval.md](docs/RootDoc-MigEval.md) | 迁移可行性 + 多数据库支持评估报告（含执行记录；原 `docs/data-migration/` 已并入本文件） |
-| [docs/Onboarding.md](docs/Onboarding.md) | 入职手册 / 环境搭建 |
-| [docs/项目演变历史.md](docs/项目演变历史.md) | 历史变更记录（按版本，索引） |
-| [docs/项目待办事项.md](docs/项目待办事项.md) | 待办清单 |
-
-前后端专项文档保留在各子仓库(submodule)：后端 `CS-Web-Backend/tools/docs/`、前端 `CS-Web-Frontend/tools/docs/`。
+- 跨项目/编排层文档统一在根 `docs/`（单一权威、零漂移）：`RootDoc-FEArch`（前端通用准则）、`RootDoc-EngConv`（通用工程规范）、`RootDoc-Deploy`（全栈部署/运维）、`RootDoc-MigEval`（迁移评估）、`Onboarding`（新开发者/管理员上手）、`api-reference`（API 参考，由 openapi 契约自动生成）、`CHANGELOG`（发布说明）、`项目演变历史`（历史变更）、`项目待办事项`——完整清单与说明见文档地图。
+- 前后端专项文档保留在各子仓库(submodule)：后端 `CS-Web-Backend/tools/docs/`（入口 `README.md`）、前端 `CS-Web-Frontend/tools/docs/`（入口 `README.md`）。

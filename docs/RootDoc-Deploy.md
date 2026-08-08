@@ -1,7 +1,8 @@
 # 全栈部署 / 运维（RootDoc-Deploy）
 
 > 更新人：3yearsZ
-> 最后更新：2026-08-05（统一 RootDoc 命名）
+> 最后更新：2026-08-08（补充 0.9.8 部署要点：可选 LLM_* 环境变量与 Auxilio 降级、/health 健康检查端点、Node>=22 / Python>=3.13 运行环境、docker-compose 子仓库(submodule) 构建上下文）
+> 对应版本：0.9.8（后端 `CS-Web-Backend/app/__init__.py` `__version__ = "0.9.8"`）。部署文档权威基线，端侧细节见深链接。
 > 根级编排层的部署唯一权威。覆盖：本地开发并行启动、容器化全栈部署（db+backend+redis+worker+frontend）、回滚、数据卷与备份。
 > 深链接（各端专项，勿在此重复）：前端 `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md`（Docker/外部反向代理/SLO/Runbook）、后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md`（运维端点 `/health /readyz /metrics/json /status`）。跨端 SLO 与可观测性基线见本文 **§七**（原 `BackDoc-SLO.md` 已并入）。
 
@@ -39,6 +40,32 @@
 | `TRUST_PROXY` | 是否信任反向代理头（默认 `false`；外部反代配置后设为 `true`） | 按部署方式 |
 
 > 本地覆盖用不跟踪的 `.env.local`；后端开发模板 `.env.development`（最全参考样板），见后端 `CS-Web-Backend/tools/docs/BackDoc-Conv.md` §7。
+
+### 2.1 运行环境要求（0.9.8）
+
+| 组件 | 最低版本 | 依据 |
+|------|----------|------|
+| Node.js（前端 BFF 构建/运行） | `>=22` | 前端 `CS-Web-Frontend/package.json` `engines.node` |
+| Python（后端运行时） | `>=3.13` | 后端 `CS-Web-Backend/pyproject.toml` `requires-python`；镜像 `python:3.13-slim` |
+
+> 低于上述版本会导致前端依赖解析失败或后端镜像构建失败，部署前须确认本地与 CI 环境达标。
+
+### 2.2 可选环境变量：LLM 学习助手（Auxilio，0.9.8 新增）
+
+Auxilio 为内置学习助手 Agent；其 LLM 能力通过以下可选变量开启，**未配置时 `LLM_PROVIDER` 默认 `none`，Auxilio 自动降级为纯规则推荐模式（不调用任何外部模型，不影响其他功能）**：
+
+| 变量 | 用途 | 必填 | 默认值 |
+|------|------|------|--------|
+| `LLM_PROVIDER` | LLM 供应商：`openai`（OpenAI 兼容协议）/ `anthropic` / `none`（禁用→规则模式） | 否 | `none` |
+| `LLM_API_KEY` | 供应商 API Key（仅存 `.env`，不落库/日志/前端） | 否（开启 LLM 时必填） | 空 |
+| `LLM_BASE_URL` | OpenAI 兼容自定义网关（DeepSeek / 通义 / Kimi / 本地 vLLM） | 否 | 空 |
+| `LLM_MODEL` | 模型名（如 `gpt-4o-mini`） | 否 | `gpt-4o-mini` |
+| `LLM_TIMEOUT` | 单次调用超时（秒） | 否 | `60` |
+| `LLM_MAX_TOKENS` | 单次回复最大 token | 否 | `1024` |
+| `LLM_DAILY_BUDGET` | 单用户每日调用预算（0=不限制，防成本失控） | 否 | `200` |
+
+> 仅当 `LLM_PROVIDER` 设为 `openai` / `anthropic` 时才需配套 `LLM_API_KEY`（及可选 `LLM_BASE_URL` / `LLM_MODEL`）。`none` 模式下全部 LLM 变量可留空。
+> 注意：根 `.env.example` 当前未列出上述 `LLM_*` 项（代码默认值已可运行），如需显式示例可补充；详见文末「信息缺口声明」。
 
 ---
 
@@ -85,9 +112,13 @@ make down         # 停止
 | 端点 | 鉴权 | 说明 |
 |---|---|---|
 | `GET /health` | 公开 | liveness 浅检查（进程存活） |
+| `GET /health/events` | 公开 | 事件总线各事件监听器数量（运维快速定位事件链路） |
+| `GET /health/security` | 公开 | 限流/会话黑名单/迁移/多实例安全组件状态 |
 | `GET /readyz` | 公开 | readiness，不通返回 **503** |
 | `GET /metrics/json` | 超级用户 | 单实例内存指标 JSON |
 | `GET /status` | 超级用户 | 各组件状态明细 |
+
+> 健康检查根路径为 `/health`（**非** `/api/v1/health`）：运维/探针端点挂在根 `root_router` 上，不受 `API_V1_STR=/api/v1` 前缀影响。
 
 > 标准 OTel 指标经 OTLP **推送**到 collector（Jaeger/Tempo/otel-collector），再由 Grafana 消费；默认 `OTEL_ENABLED=False` 完全 no-op。详见后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md`。
 
@@ -248,6 +279,8 @@ docker compose exec db psql -U postgres -d domefff -c \
 | 端点 | 用途 | 检查内容 |
 |------|------|----------|
 | `GET /health` | liveness | 进程存活（浅检查） |
+| `GET /health/events` | 事件 | 事件总线各事件监听器数量 |
+| `GET /health/security` | 安全 | 限流/会话黑名单/迁移/多实例安全组件状态 |
 | `GET /readyz` | readiness | 数据库连通性，不通返回 503 |
 | `GET /metrics/json` | 指标 | 请求数/延迟分布/错误率（需 system:monitor 权限） |
 | `GET /status` | 详细状态 | 应用配置/连接池/版本（需 system:monitor 权限） |
@@ -296,3 +329,11 @@ OTEL_SERVICE_NAME=cs-web-backend
 每季度：
 - 执行一次数据库恢复演练
 - 审查告警规则有效性
+
+---
+
+## 八、信息缺口声明（0.9.8）
+
+- **`.env.example` 未列出 `LLM_*` 变量**：后端 `CS-Web-Backend/app/core/config.py` 已定义 `LLM_PROVIDER/LLM_API_KEY/LLM_BASE_URL/LLM_MODEL/LLM_TIMEOUT/LLM_MAX_TOKENS/LLM_DAILY_BUDGET`，默认 `LLM_PROVIDER=none` 即可运行；如要求示例值显式化，需补 `.env.example`（超出本文档范围，标记待办）。
+- **运行环境版本以代码为准**：Node>=22 / Python>=3.13 取自 `package.json` 与 `pyproject.toml`，后续升级须同步本文 §2.1。
+- **迁移 head 以 `CS-Web-Backend/alembic` 实际链为准**：现行 Alembic head 为 `d3e4f5a6b7c8`（详见 `docs/RootDoc-MigEval.md` §七），本文不重复迁移细节。
