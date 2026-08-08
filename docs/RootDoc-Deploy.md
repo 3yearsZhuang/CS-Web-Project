@@ -38,7 +38,7 @@
 | `NEXT_PUBLIC_SITE_URL` | 站点 URL | 生产 ✅ |
 | `TRUST_PROXY` | 是否信任反向代理头（默认 `false`；外部反代配置后设为 `true`） | 按部署方式 |
 
-> 本地覆盖用不跟踪的 `.env.local`；后端开发模板 `.env.development`（最全参考样板），见后端 `docs/BackDoc-Conv.md` §7。
+> 本地覆盖用不跟踪的 `.env.local`；后端开发模板 `.env.development`（最全参考样板），见后端 `CS-Web-Backend/tools/docs/BackDoc-Conv.md` §7。
 
 ---
 
@@ -76,7 +76,7 @@ make down         # 停止
 
 **关键行为**：
 - 后端 `DB_AUTO_CREATE_DATABASE=true` + `DB_AUTO_MIGRATE=true` → 空库自动建库并 `alembic upgrade head`。
-- `build.context` 指向各自 submodule 目录（`./CS-Web-Backend`、`./CS-Web-Frontend`），Dockerfile 内路径相对自身，无需改动。
+- `build.context` 指向各自子仓库(submodule) 目录（`./CS-Web-Backend`、`./CS-Web-Frontend`），Dockerfile 内路径相对自身，无需改动。
 
 ---
 
@@ -89,17 +89,17 @@ make down         # 停止
 | `GET /metrics/json` | 超级用户 | 单实例内存指标 JSON |
 | `GET /status` | 超级用户 | 各组件状态明细 |
 
-> 标准 OTel 指标经 OTLP **推送**到 collector（Jaeger/Tempo/otel-collector），再由 Grafana 消费；默认 `OTEL_ENABLED=False` 完全 no-op。详见后端 `docs/BackDoc-Infra.md`。
+> 标准 OTel 指标经 OTLP **推送**到 collector（Jaeger/Tempo/otel-collector），再由 Grafana 消费；默认 `OTEL_ENABLED=False` 完全 no-op。详见后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md`。
 
 ---
 
 ## 六、回滚与故障处置
 
-- **后端回滚**：迁移可 `alembic downgrade`（见后端 `tools/docs/BackDoc-Infra.md` §六 迁移验证）；代码回滚 = 重建该 submodule 镜像。
+- **后端回滚**：迁移可 `alembic downgrade`（见后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md` §六 迁移验证）；代码回滚 = 重建该子仓库(submodule) 镜像。
 - **前端回滚**：重建 `cs-website` 镜像（前端为纯 BFF，无本地状态库）。
 - **数据卷**：`pgdata` 持久化 PG；`data/` 持久化上传文件；删除容器不删卷（`docker compose down` 不加 `-v`）。
 
-> 专项 Runbook（Docker 部署细节、外部反向代理接入、恢复演练）见前端 `FrontDoc-Ops.md`。
+> 专项 Runbook（Docker 部署细节、外部反向代理接入、恢复演练）见前端 `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md`。
 
 ---
 
@@ -182,18 +182,18 @@ docker compose exec db psql -U postgres -d domefff -c \
 
 ---
 
-> 专项 Runbook（Docker 部署细节、外部反向代理接入、恢复演练）见前端 `FrontDoc-Ops.md`。
+> 专项 Runbook（Docker 部署细节、外部反向代理接入、恢复演练）见前端 `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md`。
 
 ---
 
 ## 七、SLO 与可观测性基线
 
-> **合并说明**：本章原位于 `CS-Web-Backend/tools/docs/BackDoc-SLO.md`（跨前后端的 SLO 与可观测性基线权威），于 2026-08-07 并入本文，作为根级编排层的 SLO 单一事实源。前端 BFF 端点级 SLO / 错误预算消耗规则 / 评审流程见前端 `FrontDoc-Ops.md` Part B（两者为补充关系，非重复）。
+> **合并说明**：本章原位于 `CS-Web-Backend/tools/docs/BackDoc-SLO.md`（跨前后端的 SLO 与可观测性基线权威），于 2026-08-07 并入本文，作为根级编排层的 SLO 单一事实源。前端 BFF 端点级 SLO / 错误预算消耗规则 / 评审流程见前端 `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part B（两者为补充关系，非重复）。
 
 # SLO 与可观测性基线（1.0.0）
 
 > 适用范围：CS-Web-Backend + CS-Web-Frontend
-> 版本：1.0.0 起生效，后续版本按实际运行数据迭代
+> 版本：1.0.0 起计划生效，后续版本按实际运行数据迭代
 
 ---
 

@@ -28,14 +28,14 @@
 
 | 工具 | 版本 | 用途 |
 |---|---|---|
-| Git | 任意新版本 | 拉取含 submodule 的仓库 |
+| Git | 任意新版本 | 拉取含子仓库(submodule) 的仓库 |
 | Python | **3.13+**（与后端 `pyproject.toml` 一致；3.9 会因 `X \| None` 语法失败） | 后端运行 / 测试 |
 | Node.js | 22 | 前端运行 / 构建 |
 | pnpm | 9.0.0 | 前端包管理（CI 锁定此版本） |
 | Docker + Compose | 新版 | 容器化全栈部署 |
 | PostgreSQL | 16（容器自动起） | 生产/测试数据库 |
 
-### 1.2 克隆仓库（含 submodule）
+### 1.2 克隆仓库（含子仓库(submodule)）
 
 ```bash
 git clone <root-repo-url> FztbuCS-Project
@@ -177,7 +177,7 @@ make logs          # 跟踪日志
 - 模块间通信矩阵：允许 `import from @/shared/...`、事件总线；禁止直接 import 另一模块 `server/` 或 `api/`。
 - 通信决策树：① 只需类型 → `import type`；② 通用工具 → `@/shared/...`；③ B 是被 admin 管理的模块 → 直接调 `B/server/index.ts`；④ 否则 → 事件总线 `appBus` 发布，B 监听。
 - 事件总线：发布 `<模块>.<动作>`（如 `topic.created`）；订阅方 `try/catch` 吞错不抛出。
-- 依赖矩阵维护：新增/修改模块依赖必须同步 `FrontDoc-01-Arch.md`「2.3 直接导入依赖矩阵」（架构不变量 FF1）。
+- 依赖矩阵维护：新增/修改模块依赖必须同步 `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md`「2.3 直接导入依赖矩阵」（架构不变量 FF1）。
 
 ## A.4 ADR 引用规则
 
@@ -188,16 +188,16 @@ make logs          # 跟踪日志
 
 ## A.5 文档维护流程
 
-- 每个系统维度有且仅有一个权威位置（Source-of-Truth 无重复规则）：禁止事项→本附录 A.1；ADR→`项目演变历史-0.9.1.md`（附录演进文档）/ `项目演变历史.md`；风险→`项目演变历史.md` R 表；依赖矩阵→`FrontDoc-01-Arch.md` 2.3；安全发现→`FrontDoc-02-Sec.md`；API 契约→`FrontDoc-01-Arch.md` Part B；环境变量→`FrontDoc-Ops.md` Part A。
+- 每个系统维度有且仅有一个权威位置（Source-of-Truth 无重复规则）：禁止事项→本附录 A.1；ADR→`项目演变历史-0.9.1.md`（附录演进文档）/ `项目演变历史.md`；风险→`项目演变历史.md` R 表；依赖矩阵→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` 2.3；安全发现→`CS-Web-Frontend/tools/docs/FrontDoc-02-Sec.md`；API 契约→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part B；环境变量→`CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part A。
 - 变更同步检查清单（PR 自检模板）：
   - [ ] `pnpm run ts-check` 通过
-  - [ ] 调目录结构 → `FrontDoc-01-Arch.md` Part A
-  - [ ] 新增/修改 API → `FrontDoc-01-Arch.md` Part B
-  - [ ] 新增管理员权限 → `FrontDoc-02-Sec.md` Part 2
+  - [ ] 调目录结构 → `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part A
+  - [ ] 新增/修改 API → `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part B
+  - [ ] 新增管理员权限 → `CS-Web-Frontend/tools/docs/FrontDoc-02-Sec.md` Part 2
   - [ ] 架构决策 → `项目演变历史-0.9.1.md` 附录 / `项目演变历史.md` 新增 ADR
   - [ ] 新增禁止事项 → 本附录 A.1
-  - [ ] 新增页面/组件 → `FrontDoc-UID.md`
-  - [ ] 新增环境变量 → `FrontDoc-Ops.md` Part A + `README.md` 环境变量表
+  - [ ] 新增页面/组件 → `CS-Web-Frontend/tools/docs/FrontDoc-UID.md`
+  - [ ] 新增环境变量 → `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part A + `README.md` 环境变量表
   - [ ] 修 bug → 立即 grep 同模式跨模块扫描，审计结果写入 ADR「审计确认安全」清单（防再犯 #6）
 
 ## A.6 编码规范补充
@@ -224,7 +224,7 @@ make logs          # 跟踪日志
 
 # 附录 B：后端工程约定（原 BackDoc-Onboard.md 精要）
 
-> 完整架构 / 编码规范 / 业务模块见 `CS-Web-Backend/docs/` 下的 `BackDoc-01-Arch.md` / `BackDoc-Conv.md` / `BackDoc-Mods.md`。此处仅保留"必须守住的不变量"与"加一个 API 资源"配方。
+> 完整架构 / 编码规范 / 业务模块见 `CS-Web-Backend/tools/docs/` 下的 `BackDoc-01-Arch.md` / `BackDoc-Conv.md` / `BackDoc-Mods.md`。此处仅保留"必须守住的不变量"与"加一个 API 资源"配方。
 
 ## B.1 必须守住的不变量（速览）
 
@@ -252,7 +252,7 @@ make logs          # 跟踪日志
 5. `api/v1/<x>.py` → 注册到 `api/v1/__init__.py`
 6. Alembic 建表/迁移
 7. `tools/tests/` 镜像补测试
-8. 业务模块在 `BackDoc-Mods.md` 对应节登记（或新建 `tools/docs/modules/<name>.md` 并登记到 `tools/docs/README.md`）
+8. 业务模块在 `CS-Web-Backend/tools/docs/BackDoc-Mods.md` 对应节登记（或新建 `CS-Web-Backend/tools/docs/modules/<name>.md` 并登记到 `CS-Web-Backend/tools/docs/README.md`）
 
 > **中心注册点**（必须登记，否则不生效）：ORM 模型、业务异常、中间件、配置项、API router、启动/关闭任务（`@register_startup`/`@register_shutdown`）、测试子包 `__init__.py`。
 

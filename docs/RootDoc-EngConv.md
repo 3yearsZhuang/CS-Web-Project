@@ -2,7 +2,7 @@
 
 > 更新人：3yearsZ
 > 最后更新：2026-08-05（统一 RootDoc 命名）
-> 从后端 `CS-Web-Backend/docs/BackDoc-Conv.md` 与前端 `CS-Web-Frontend/tools/docs/FrontDoc-UID.md` 提炼的**框架无关**通用原则。
+> 从后端 `CS-Web-Backend/tools/docs/BackDoc-Conv.md` 与前端 `CS-Web-Frontend/tools/docs/FrontDoc-UID.md` 提炼的**框架无关**通用原则。
 > 本项目（FztbuCS-Project）内的 Python/FastAPI 与 TypeScript/Next.js 代码均适用。
 > 端侧强相关的完整规范仍以各子仓库为权威（见文末深链接），此处只收通用原则，避免重复漂移。
 
@@ -110,6 +110,6 @@
 
 | 端 | 权威文档 |
 |---|---|
-| 后端 | `CS-Web-Backend/docs/BackDoc-Conv.md`（编码规范、命名、质量红线、安全/错误处理约定） |
+| 后端 | `CS-Web-Backend/tools/docs/BackDoc-Conv.md`（编码规范、命名、质量红线、安全/错误处理约定） |
 | 前端 | `CS-Web-Frontend/tools/docs/FrontDoc-UID.md`（视觉与交互设计规范）、根级 `docs/Onboarding.md` 附录 A.6（编码规范补充、server-only 边界） |
 | 前端通用 | `../docs/RootDoc-FEArch.md`（目录设计艺术，跨项目） |

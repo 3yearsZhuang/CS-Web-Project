@@ -109,7 +109,7 @@
 
 ### 4.1 迁移脚本（必须新建）
 
-`CS-Web-Frontend/tools/scripts/migrate-sqlite-to-pg.mjs`（迁移计划 Phase 6 已规划，**已于 2026-08-05 实现并完成数据迁移**，详见 `CS-Web-Frontend/tools/docs/FrontDoc-PGMig.md` 的用法说明，实际执行结果见 `项目演变历史.md` 的"数据迁移"节）：
+`CS-Web-Frontend/tools/scripts/migrate-sqlite-to-pg.mjs`（迁移计划 Phase 6 已规划并实现、于 2026-08-05 完成数据迁移；**该脚本已于 2026-08-07 随 SQLite 清理一并删除，见文首归档说明**），详见 `CS-Web-Frontend/tools/docs/FrontDoc-PGMig.md` 的用法说明，实际执行结果见 `项目演变历史.md` 的"数据迁移"节）：
 1. 读 SQLite → 建 `UUID → Integer` 全局映射（含 users、events、community_posts 等所有主表）。
 2. 按外键依赖顺序导入：`roles` → `users`（派生 username、映射角色、scrypt 哈希搬移）→ `community_categories` → `community_posts` → `community_comments` → `events` → `exams/questions/options` → `resources` → `component_registry*` 等。
 3. 类型转换：布尔、日期 ISO→tz、JSON 文本→jsonb。
@@ -136,14 +136,14 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 
 ## 五、多数据库支持评估
 
-### 5.1 前端（CS-Web-Frontend）——✅ 已原生支持，且做得很完整
+### 5.1 前端（CS-Web-Frontend）——✅ 评估时点已原生支持双引擎（代码已于 2026-08-07 删除）
 
-`src/shared/db/drivers/` 已实现 **SQLite 与 PG 双引擎**：
-- `sqlite-driver.ts`（better-sqlite3）+ `pg-driver.ts`（postgres.js），统一 `DbEngine` 接口。
-- `DATABASE_PROVIDER=sqlite|pg` 运行时切换，`?` 占位符自动转 PG `$1`。
-- `drizzle.config.ts` 同样支持双 dialect。
+`src/shared/db/drivers/`（**已于 2026-08-07 删除**）曾实现 **SQLite 与 PG 双引擎**：
+- `sqlite-driver.ts`（better-sqlite3，已删除）+ `pg-driver.ts`（postgres.js，已删除），统一 `DbEngine` 接口。
+- `DATABASE_PROVIDER=sqlite|pg` 运行时切换，`?` 占位符自动转 PG `$1`（已删除）。
+- `drizzle.config.ts` 同样支持双 dialect（已删除）。
 
-> 注：当前前端已降级为 BFF（薄转发到后端），`shared/db` 为**迁移过渡期保留**，最终业务数据统一走后端 PG。
+> 注：当前前端已降级为纯 BFF（薄转发到后端），`shared/db` 双引擎代码已于 2026-08-07 删除，业务数据统一走后端 PG。
 
 ### 5.2 后端（CS-Web-Backend）——⚠️ 当前仅 PostgreSQL，但引入成本可控
 
@@ -163,7 +163,7 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 ### 5.3 建议
 
 - **不建议**给后端引入多数据库——项目铁律明确「**SQLite 禁止作生产库**」，后端唯一生产库 = PostgreSQL。多库只会增加维护成本，收益低。
-- **正确姿势**：前端保留双引擎仅用于「迁移过渡期」开发兜底；**生产数据统一走后端 PG**。
+- **正确姿势**：前端**曾**保留双引擎用于「迁移过渡期」开发兜底（代码已于 2026-08-07 删除）；**生产数据统一走后端 PG**。
 >
 > ℹ️ 变更记录/待办条目见本目录 `项目演变历史.md` / `项目待办事项.md`。
 - 若要「本地无 PG 也能跑」，更轻的方案是 **Docker 起 PG**（根级 `docker-compose.yml` 已内置），而非维护 SQLite 方言。
@@ -180,5 +180,5 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 
 - 源库：`CS-Web-Frontend/data/app.db` 43 张表，~1700 行（含 1458 组件变体种子），users 15 人（UUID 主键）。
 - 目标库：`domefff` 本地 PG 运行中，52 张表（Alembic 建），已有 1 seed 用户。
-- 迁移计划：后端 `tools/docs/BackDoc-Infra.md` §六 迁移验证（原 `BackDoc-MigV.md` 已并入）Phase 6 已规划数据迁移脚本，**脚本 `migrate-sqlite-to-pg.mjs` 已于 2026-08-05 实现并跑通（19 张表全部入库，外键完整、类型转换正确）**。
+- 迁移计划：后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md` §六 迁移验证（原 `BackDoc-MigV.md` 已并入）Phase 6 已规划数据迁移脚本，**脚本 `migrate-sqlite-to-pg.mjs` 已于 2026-08-05 实现并跑通（19 张表全部入库，外键完整、类型转换正确）**。
 - 主键差异：后端 `app/models/user.py` 明确 `id: Mapped[int]`；SQLite users 为 TEXT UUID。

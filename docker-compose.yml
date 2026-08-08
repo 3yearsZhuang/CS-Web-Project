@@ -11,7 +11,7 @@
 #   - 前端(BFF) 通过内部网络 cs-net 把 /api 转发到 backend:8000
 #   - PostgreSQL 数据持久化在 pgdata 卷
 #   - 仅前端绑定宿主机回环地址 127.0.0.1:2333，后端不暴露宿主机端口
-#   - 后端/前端 build.context 指向各自 submodule 目录，Dockerfile 内路径相对自身，无需改动
+#   - 后端/前端 build.context 指向各自子仓库(submodule) 目录，Dockerfile 内路径相对自身，无需改动
 
 services:
   # ============ 后端 FastAPI（BFF 转发目标）============

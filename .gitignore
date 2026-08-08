@@ -24,6 +24,7 @@
 *.swo
 *~
 .codebuddy/
+.workbuddy/
 
 # OS
 .DS_Store
