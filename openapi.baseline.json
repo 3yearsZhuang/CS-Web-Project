@@ -5238,7 +5238,8 @@
   },
   "info": {
     "description": "企业级FastAPI框架，包含RBAC权限管理系统",
-    "title": "FastAPI RBAC Framework"
+    "title": "FastAPI RBAC Framework",
+    "version": "0.9.8"
   },
   "openapi": "3.1.0",
   "paths": {

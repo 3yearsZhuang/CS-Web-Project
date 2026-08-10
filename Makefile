@@ -112,3 +112,16 @@ contract-baseline:
 # 比对当前契约与基线（CI 门禁，差异即失败）：
 contract-check:
 	cd CS-Web-Backend && (.venv/bin/python tools/scripts/export_openapi.py --check ../openapi.baseline.json || python tools/scripts/export_openapi.py --check ../openapi.baseline.json)
+
+# ---- 文档死链审计（ER-09）----
+# 可复现的 PR 门禁：扫描 docs/ 与根级 *.md，断文件链接即失败。
+# 锚点默认仅警告；--strict-anchors 时缺失锚点也计为错误。
+check-docs-links:
+	python3 scripts/check_dead_links.py --base . --docs docs
+
+# ---- BFF 安全边界（AL-1）----
+# 前端边界门禁：'use client' 文件禁止从 @/shared/security（非 schemas 子树）导入权威安全模块
+# （密码哈希/权限判定/JWT 签发等），后端为认证/授权唯一权威。
+check-bff-boundary:
+	cd CS-Web-Frontend && pnpm run check:bff-boundary
+

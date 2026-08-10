@@ -1,0 +1,12 @@
+# ============ E2E/CI 专用 docker-compose override ============
+# 仅用于 CI/E2E：把后端端口暴露到宿主机，使 runner 上的前端 dev server (BFF)
+# 与 Playwright globalSetup 能经 http://127.0.0.1:8000 访问后端。
+#
+# 用法：docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d backend
+# 不启动 cs-website（前端由 runner 上的 `pnpm run dev` 经 Playwright webServer 拉起）。
+# 不影响生产编排（生产仍只 expose 后端、不暴露宿主机端口）。
+
+services:
+  backend:
+    ports:
+      - "127.0.0.1:8000:8000"

@@ -1,0 +1,105 @@
+name: E2E (full stack)
+
+# ER-14（方案C）：E2E 需完整环境（前端 BFF + 后端 + DB），成本较高，
+# 不进常规 PR。改为 nightly 全量跑 + 保留 workflow_dispatch 手动触发。
+# CI 经根仓 docker-compose 起后端栈（db/redis/backend），前端 dev server
+# 由 Playwright webServer 在 runner 上拉起，BFF 转发到 127.0.0.1:8000。
+
+on:
+  schedule:
+    # 每日 02:00 北京时间（UTC 18:00 前一日）跑全量 E2E
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: '检查的 ref（留空则用默认分支）'
+        required: false
+
+jobs:
+  e2e:
+    name: Playwright E2E (full stack)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout root repo with submodules
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          ref: ${{ github.event.inputs.ref || '' }}
+
+      - name: Generate .env for docker-compose
+        # CI 一次性环境，全部用占位值；ADMIN_PASSWORD 供后端 rbac_init seed 建管理员
+        run: |
+          cat > .env <<'EOF'
+          DATABASE_NAME=domefff
+          DATABASE_USER=postgres
+          DATABASE_PASSWORD=e2e-db-password
+          SECRET_KEY=e2e-secret-key-32bytes-minimum-placeholder
+          TOTP_ENCRYPTION_KEY=e2e-totp-encryption-key-32bytes-min
+          AUTH_SESSION_SECRET=e2e-auth-session-secret-32bytes-min
+          ALLOWED_ORIGINS=http://localhost:2333
+          NEXT_PUBLIC_SITE_URL=http://localhost:2333
+          ADMIN_USERNAME=admin
+          ADMIN_PASSWORD=E2e-Admin-2026!
+          TRUST_PROXY=false
+          EOF
+
+      - name: Start backend stack (db/redis/backend)
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build backend
+          # 等待后端就绪（/health 端点）
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:8000/health >/dev/null 2>&1; then
+              echo "::notice::backend ready"; exit 0
+            fi
+            sleep 3
+          done
+          echo "::error::backend 未就绪"
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml logs backend || true
+          exit 1
+
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 9.0.0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: CS-Web-Frontend/pnpm-lock.yaml
+
+      - name: Install frontend deps
+        working-directory: CS-Web-Frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        working-directory: CS-Web-Frontend
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run E2E
+        working-directory: CS-Web-Frontend
+        env:
+          # BFF 转发目标：runner 访问 docker 后端
+          BACKEND_URL: http://127.0.0.1:8000
+          # globalSetup 直接访问后端建测试账号 + 管理员登录
+          E2E_BACKEND_URL: http://127.0.0.1:8000
+          E2E_ADMIN_USERNAME: admin
+          E2E_ADMIN_PASSWORD: E2e-Admin-2026!
+          AUTH_SESSION_SECRET: e2e-auth-session-secret-32bytes-min
+          NEXT_PUBLIC_SITE_URL: http://localhost:2333
+          ALLOWED_ORIGINS: http://localhost:2333
+          PASSWORD_RESET_DEFAULT: E2E_PLACEHOLDER
+        run: pnpm test:e2e --project=chromium
+
+      - name: Upload E2E report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-report
+          path: CS-Web-Frontend/playwright-report/
+          retention-days: 7
+
+      - name: Dump backend logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml logs backend || true

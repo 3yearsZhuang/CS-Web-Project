@@ -54,6 +54,8 @@ services:
       PASSWORD_RESET_DEFAULT: ${PASSWORD_RESET_DEFAULT:-}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
       REQUIRE_REDIS_FOR_SECURITY: "false"
+      # 生产日志形态：JSON 结构化 + 文件轮转（ER-05，对齐 RootDoc-Deploy.md 的 prod JSON 描述）
+      LOG_PROFILE: "prod"
       # 跨实例事件广播（ADR-014）：MULTI_INSTANCE=true 经 arq/redis 广播事件。
       # 单实例部署保持 false（零开销，行为与改造前一致）。
       MULTI_INSTANCE: ${MULTI_INSTANCE:-false}
@@ -102,6 +104,8 @@ services:
       MULTI_INSTANCE: ${MULTI_INSTANCE:-false}
       QUEUE_ENABLED: ${QUEUE_ENABLED:-true}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      # 生产日志形态（同 backend，ER-05）
+      LOG_PROFILE: "prod"
     depends_on:
       db:
         condition: service_healthy

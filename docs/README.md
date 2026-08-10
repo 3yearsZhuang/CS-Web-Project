@@ -12,6 +12,7 @@
 | [RootDoc-Deploy.md](RootDoc-Deploy.md) | 全栈部署 / 运维（本地并行启动、容器化部署、健康检查、回滚、数据卷） |
 | [RootDoc-MigEval.md](RootDoc-MigEval.md) | 迁移可行性 + 多数据库支持评估报告 |
 | [RootDoc-ADR.md](RootDoc-ADR.md) | 架构决策（ADR）索引 / 边界上下文 / 数据流 / 韧性 / BFF 交互风格（设计决策 SSOT，L0） |
+| [项目演变历史.md](项目演变历史.md) | 演变历史主索引 / ADR 完整记录（活文档唯一可引用的历史入口，见 DocGovernance §3 反模式 #1；分卷 `项目演变历史-0.9.x.md` 为只读归档，禁止活文档直引） |
 | [Onboarding.md](Onboarding.md) | 新开发者/新管理员第一天教程（环境→本地→部署→排障，含「当前真实进度」标注） |
 | [CHANGELOG.md](../CHANGELOG.md) | 发布说明（Keep a Changelog 格式，按版本记录显著变更） |
 | [api-reference.md](api-reference.md) | API 参考（由 `openapi.baseline.json` 0.9.8 冻结契约自动生成，请勿手改） |
@@ -44,3 +45,5 @@
 - ~~**api-reference 文档尚未生成**~~ → **已解决（2026-08-08）**：已生成 `docs/api-reference.md`（由 `openapi.baseline.json` 0.9.8 冻结契约自动生成）并登记至上方「根级文档」表。
 - ~~**前端子仓库内部死链（FrontDoc-PGMig 引用 FrontDoc-Evo）**~~ → **已核正（2026-08-08）**：链接 href 实际指向 `docs/项目演变历史-0.9.1.md#附录前端演进路线图与迁移文档原-frontdocevomd`（锚点存在、非死链）；已将显示文本从易误导的「FrontDoc-Evo.md」改为「项目演变历史-0.9.1.md 附录（原 FrontDoc-Evo.md）」。
 - **CHANGELOG.md 归属（跨项目版本锚点）**：跨项目的发布说明（版本锚点）统一落在**根仓 `CHANGELOG.md`**（Keep a Changelog 格式，含 0.9.8 工作台 / Auxilio 等跨端变更），由根仓维护；根 README「详细文档导航 / 版本号单一源」与本文档地图「根级文档」表均指向它。前端子仓库另有其本地 `CS-Web-Frontend/CHANGELOG.md`（前端侧变更、可选维护），已在「子仓库文档索引」登记，**不**作为跨项目锚点；后端无独立 CHANGELOG 文件，版本同步以 `pyproject.toml` / `app/__init__.py.__version__` / `uv.lock` 为准（详见根 README「版本号单一源」）。
+- **设计文档（Design-v1.0.0 / Design-DB-v1.0.0）删除说明（2026-08-09）**：按用户决策删除两份独立设计文档，`deliverables/FztbuCS-Project-analysis-2026-08-09.md` 一并删除；逆向调研素材与综合评估已 consolidated 进 `项目待办事项.md`「逆向调研 / 设计文档素材与综合评估」区，待统一决策是否正式成稿（见该区 D1~D7）。
+- **路线图文档（Roadmap-1.0-to-3.0.md）删除说明（2026-08-09）**：按用户决策删除本会话生成的战略层功能路线图文档，其功能版本演进发现（1.0.0 收口 → 1.x 参与度 → 2.0.0 平台化 → 3.0.0 生态化）与 ADR-ROADMAP-001（微服务拆分时机）已 consolidated 进 `项目待办事项.md`「产品功能路线图发现（2026-08-09，待统一决策）」区，待统一决策。
