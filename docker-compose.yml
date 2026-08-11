@@ -19,6 +19,9 @@ services:
     image: postgres:16-alpine
     container_name: cs-backend-db
     restart: unless-stopped
+    # 资源约束（ER-35）
+    mem_limit: 512m
+    cpus: "1.0"
     environment:
       POSTGRES_DB: ${DATABASE_NAME:-domefff}
       POSTGRES_USER: ${DATABASE_USER:-postgres}
@@ -46,14 +49,22 @@ services:
       DATABASE_NAME: ${DATABASE_NAME:-domefff}
       DATABASE_USER: ${DATABASE_USER:-postgres}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      # 空库自动建库 + 自动迁移到 head
-      DB_AUTO_CREATE_DATABASE: "true"
-      DB_AUTO_MIGRATE: "true"
-      SECRET_KEY: ${SECRET_KEY}
-      TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY}
+      # 生产不再自动建库（ER-39）：目标库须预创建，避免掩盖库名配置失误。
+      DB_AUTO_CREATE_DATABASE: "false"
+      # 迁移与发布分离（ER-30）：应用启动只校验 schema 版本，不再自动迁移；
+      # 升级由独立的 migrate 服务（alembic upgrade head）在 backend/worker 之前完成。
+      DB_AUTO_MIGRATE: "false"
+      # 密钥必填守卫（ER-38）：缺失即启动失败，避免误用空密钥
+      SECRET_KEY: ${SECRET_KEY:?请在 .env 中设置 SECRET_KEY}
+      TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY:?请在 .env 中设置 TOTP_ENCRYPTION_KEY}
       PASSWORD_RESET_DEFAULT: ${PASSWORD_RESET_DEFAULT:-}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
-      REQUIRE_REDIS_FOR_SECURITY: "false"
+      # 多 worker 下安全默认收紧（ER-29，与 ER-37 多 worker 绑定）：
+      # 限流/令牌黑名单走 Redis，禁止内存回退导致各实例撤销状态不一致。
+      REQUIRE_REDIS_FOR_SECURITY: "true"
+      # 多 worker 进程数 / 优雅停机超时（ER-37/ER-36，可被 .env 覆盖）
+      UVICORN_WORKERS: ${UVICORN_WORKERS:-4}
+      UVICORN_GRACEFUL_SHUTDOWN: ${UVICORN_GRACEFUL_SHUTDOWN:-30}
       # 生产日志形态：JSON 结构化 + 文件轮转（ER-05，对齐 RootDoc-Deploy.md 的 prod JSON 描述）
       LOG_PROFILE: "prod"
       # 跨实例事件广播（ADR-014）：MULTI_INSTANCE=true 经 arq/redis 广播事件。
@@ -68,6 +79,41 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    # 优雅停机（ER-36）：留余量给 uvicorn --timeout-graceful-shutdown（30s）
+    stop_grace_period: 40s
+    # 资源约束（ER-35）
+    mem_limit: 1g
+    cpus: "1.0"
+    # prod 日志持久化（ER-40）
+    volumes:
+      - logs:/app/logs
+    networks:
+      - cs-net
+
+  # ============ 数据库迁移（ER-30：独立 migrate job）============
+  # 一次性任务：等 db 健康后执行 alembic upgrade head，完成后退出；
+  # backend/worker 经 depends_on 等待其成功，避免版本不一致导致启动失败。
+  migrate:
+    build:
+      context: ./CS-Web-Backend
+    container_name: cs-migrate
+    restart: "no"
+    env_file: .env
+    environment:
+      # 容器内连 db 服务，覆盖 .env 中的 localhost
+      DATABASE_HOST: db
+      DATABASE_PORT: "5432"
+      DATABASE_NAME: ${DATABASE_NAME:-domefff}
+      DATABASE_USER: ${DATABASE_USER:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      SECRET_KEY: ${SECRET_KEY:?请在 .env 中设置 SECRET_KEY}
+      TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY:?请在 .env 中设置 TOTP_ENCRYPTION_KEY}
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - cs-net
 
@@ -76,6 +122,9 @@ services:
     image: redis:7-alpine
     container_name: cs-redis
     restart: unless-stopped
+    # 资源约束（ER-35）
+    mem_limit: 256m
+    cpus: "0.5"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -91,6 +140,13 @@ services:
     container_name: cs-worker
     restart: unless-stopped
     command: arq app.core.queue.worker.WorkerSettings
+    # worker 无 HTTP 端口，以关键依赖 Redis 连通性作存活代理（ER-34）
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import os,redis,sys; sys.exit(0 if redis.Redis.from_url(os.environ['REDIS_URL']).ping() else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
     env_file: .env
     environment:
       DATABASE_HOST: db
@@ -98,8 +154,8 @@ services:
       DATABASE_NAME: ${DATABASE_NAME:-domefff}
       DATABASE_USER: ${DATABASE_USER:-postgres}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      SECRET_KEY: ${SECRET_KEY}
-      TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY}
+      SECRET_KEY: ${SECRET_KEY:?请在 .env 中设置 SECRET_KEY}
+      TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY:?请在 .env 中设置 TOTP_ENCRYPTION_KEY}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
       MULTI_INSTANCE: ${MULTI_INSTANCE:-false}
       QUEUE_ENABLED: ${QUEUE_ENABLED:-true}
@@ -111,6 +167,13 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    stop_grace_period: 40s
+    mem_limit: 512m
+    cpus: "0.5"
+    volumes:
+      - logs:/app/logs
     networks:
       - cs-net
 
@@ -126,12 +189,19 @@ services:
       - PORT=2333
       # BFF 转发目标：容器内直连后端，无需暴露公网
       - BACKEND_URL=http://backend:8000
-      - AUTH_SESSION_SECRET=${AUTH_SESSION_SECRET}
+      - AUTH_SESSION_SECRET=${AUTH_SESSION_SECRET:?请在 .env 中设置 AUTH_SESSION_SECRET}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
       - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
       # 纯 BFF：前端不持有任何数据库，移除 SQLite 挂载（原 SQLITE_DB_PATH 仅历史残留）
       # 默认不信任代理头；部署者配置外部反向代理后再显式设置为 true
       - TRUST_PROXY=${TRUST_PROXY:-false}
+    # Next.js BFF 无内置 /health，探首页 HTTP 状态作 liveness（ER-34）
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:2333/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
     volumes:
       # 持久化：用户上传文件等本地数据
       - ./data:/app/data
@@ -139,13 +209,20 @@ services:
     networks:
       - cs-net
     depends_on:
-      - backend
-
+      backend:
+        condition: service_healthy
+    # 优雅停机（ER-36）：Next 自定义 server 需时间排空在途请求
+    stop_grace_period: 40s
+    # 资源约束（ER-35）
+    mem_limit: 512m
+    cpus: "1.0"
     ports:
       - "127.0.0.1:2333:2333"
 
 volumes:
   pgdata:
+  # prod 日志持久化（ER-40）：backend/worker 的 /app/logs 挂载此卷
+  logs:
 
 networks:
   cs-net:

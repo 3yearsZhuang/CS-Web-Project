@@ -987,6 +987,54 @@
         "title": "ChangePasswordRequest",
         "type": "object"
       },
+      "ChatRequest": {
+        "properties": {
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatTurn"
+            },
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Messages",
+            "type": "array"
+          }
+        },
+        "required": [
+          "messages"
+        ],
+        "title": "ChatRequest",
+        "type": "object"
+      },
+      "ChatTurn": {
+        "properties": {
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "role": {
+            "pattern": "^(user|assistant)$",
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "ChatTurn",
+        "type": "object"
+      },
       "ComponentGuideInput": {
         "properties": {
           "antiPatterns": {
@@ -2157,6 +2205,57 @@
         "title": "ExceptionLogResolveResponse",
         "type": "object"
       },
+      "FeatureVisibilityConfig": {
+        "description": "全部受管模块的可见性配置聚合。",
+        "properties": {
+          "modules": {
+            "items": {
+              "$ref": "#/components/schemas/ModuleVisibility"
+            },
+            "title": "Modules",
+            "type": "array"
+          }
+        },
+        "required": [
+          "modules"
+        ],
+        "title": "FeatureVisibilityConfig",
+        "type": "object"
+      },
+      "FocusSessionIn": {
+        "description": "前端完成一轮专注后的上报。",
+        "properties": {
+          "duration_seconds": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 14400.0,
+            "title": "Duration Seconds",
+            "type": "integer"
+          },
+          "phase": {
+            "default": "focus",
+            "pattern": "^(focus|shortBreak|longBreak)$",
+            "title": "Phase",
+            "type": "string"
+          },
+          "sound_source": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sound Source"
+          }
+        },
+        "required": [
+          "duration_seconds"
+        ],
+        "title": "FocusSessionIn",
+        "type": "object"
+      },
       "ForgotPasswordRequest": {
         "description": "忘记密码：提交密码重置申请。",
         "properties": {
@@ -2389,6 +2488,49 @@
         "title": "JoinReviewRequest",
         "type": "object"
       },
+      "LlmConfigIn": {
+        "description": "用户 LLM 配置（api_key 留空表示保留原值）。",
+        "properties": {
+          "api_key": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Api Key"
+          },
+          "base_url": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Url"
+          },
+          "model": {
+            "default": "gpt-4o-mini",
+            "maxLength": 120,
+            "title": "Model",
+            "type": "string"
+          },
+          "provider": {
+            "default": "openai",
+            "pattern": "^(openai|anthropic)$",
+            "title": "Provider",
+            "type": "string"
+          }
+        },
+        "title": "LlmConfigIn",
+        "type": "object"
+      },
       "LoginRequest": {
         "properties": {
           "password": {
@@ -2500,6 +2642,38 @@
         "title": "MeResponse",
         "type": "object"
       },
+      "ModuleVisibility": {
+        "description": "单个模块的可见性配置（列表项 / 更新返回）。",
+        "properties": {
+          "admin": {
+            "title": "Admin",
+            "type": "boolean"
+          },
+          "guest": {
+            "title": "Guest",
+            "type": "boolean"
+          },
+          "member": {
+            "title": "Member",
+            "type": "boolean"
+          },
+          "moduleKey": {
+            "description": "模块标识",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Modulekey",
+            "type": "string"
+          }
+        },
+        "required": [
+          "moduleKey",
+          "guest",
+          "member",
+          "admin"
+        ],
+        "title": "ModuleVisibility",
+        "type": "object"
+      },
       "NotificationOut": {
         "description": "通知出参。",
         "properties": {
@@ -2582,6 +2756,11 @@
           "total": {
             "title": "Total",
             "type": "integer"
+          },
+          "total_pages": {
+            "default": 0,
+            "title": "Total Pages",
+            "type": "integer"
           }
         },
         "required": [
@@ -2612,6 +2791,11 @@
           },
           "total": {
             "title": "Total",
+            "type": "integer"
+          },
+          "total_pages": {
+            "default": 0,
+            "title": "Total Pages",
             "type": "integer"
           }
         },
@@ -2644,6 +2828,11 @@
           "total": {
             "title": "Total",
             "type": "integer"
+          },
+          "total_pages": {
+            "default": 0,
+            "title": "Total Pages",
+            "type": "integer"
           }
         },
         "required": [
@@ -2674,6 +2863,11 @@
           },
           "total": {
             "title": "Total",
+            "type": "integer"
+          },
+          "total_pages": {
+            "default": 0,
+            "title": "Total Pages",
             "type": "integer"
           }
         },
@@ -2706,6 +2900,11 @@
           "total": {
             "title": "Total",
             "type": "integer"
+          },
+          "total_pages": {
+            "default": 0,
+            "title": "Total Pages",
+            "type": "integer"
           }
         },
         "required": [
@@ -2736,6 +2935,11 @@
           },
           "total": {
             "title": "Total",
+            "type": "integer"
+          },
+          "total_pages": {
+            "default": 0,
+            "title": "Total Pages",
             "type": "integer"
           }
         },
@@ -2768,6 +2972,11 @@
           "total": {
             "title": "Total",
             "type": "integer"
+          },
+          "total_pages": {
+            "default": 0,
+            "title": "Total Pages",
+            "type": "integer"
           }
         },
         "required": [
@@ -2799,6 +3008,11 @@
           },
           "total": {
             "title": "Total",
+            "type": "integer"
+          },
+          "total_pages": {
+            "default": 0,
+            "title": "Total Pages",
             "type": "integer"
           }
         },
@@ -3931,6 +4145,38 @@
         "title": "TwoFactorVerifyRequest",
         "type": "object"
       },
+      "UpdateVisibilityRequest": {
+        "description": "更新单模块可见性请求体（module_key 在 URL 路径中）。\n\n强制 2FA（决策 B）：root 必须已启用 2FA 且携带有效 TOTP 码。",
+        "properties": {
+          "admin": {
+            "title": "Admin",
+            "type": "boolean"
+          },
+          "guest": {
+            "title": "Guest",
+            "type": "boolean"
+          },
+          "member": {
+            "title": "Member",
+            "type": "boolean"
+          },
+          "totpCode": {
+            "description": "两步验证码",
+            "maxLength": 6,
+            "minLength": 6,
+            "title": "Totpcode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "guest",
+          "member",
+          "admin",
+          "totpCode"
+        ],
+        "title": "UpdateVisibilityRequest",
+        "type": "object"
+      },
       "User": {
         "properties": {
           "email": {
@@ -4300,928 +4546,6 @@
         ],
         "title": "ValidationError",
         "type": "object"
-      },
-      "GithubDayCount": {
-        "properties": {
-          "date": {
-            "title": "Date",
-            "type": "string"
-          },
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "date",
-          "count"
-        ],
-        "title": "GithubDayCount",
-        "type": "object"
-      },
-      "GithubContributionsOut": {
-        "description": "GitHub 贡献热力图响应。ok=false 时返回 need_username 与 message，提示需绑定用户名。",
-        "properties": {
-          "ok": {
-            "title": "Ok",
-            "type": "boolean"
-          },
-          "need_username": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Need Username"
-          },
-          "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Message"
-          },
-          "platform": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Platform"
-          },
-          "username": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Username"
-          },
-          "year": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Year"
-          },
-          "data": {
-            "items": {
-              "$ref": "#/components/schemas/GithubDayCount"
-            },
-            "title": "Data",
-            "type": "array"
-          },
-          "total": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Total"
-          },
-          "streak": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Streak"
-          },
-          "fetched_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fetched At"
-          },
-          "stale": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Stale"
-          }
-        },
-        "required": [
-          "ok"
-        ],
-        "title": "GithubContributionsOut",
-        "type": "object"
-      },
-      "ApiUsageToday": {
-        "properties": {
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          },
-          "errors": {
-            "title": "Errors",
-            "type": "integer"
-          },
-          "avgLatencyMs": {
-            "title": "AvgLatencyMs",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "count",
-          "errors",
-          "avgLatencyMs"
-        ],
-        "title": "ApiUsageToday",
-        "type": "object"
-      },
-      "ApiUsageDay": {
-        "properties": {
-          "date": {
-            "title": "Date",
-            "type": "string"
-          },
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "date",
-          "count"
-        ],
-        "title": "ApiUsageDay",
-        "type": "object"
-      },
-      "ApiUsageEndpoint": {
-        "properties": {
-          "endpoint": {
-            "title": "Endpoint",
-            "type": "string"
-          },
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "endpoint",
-          "count"
-        ],
-        "title": "ApiUsageEndpoint",
-        "type": "object"
-      },
-      "ApiUsageStats": {
-        "description": "API 调用统计：今日计数 + 近 N 天趋势 + endpoint 分布。",
-        "properties": {
-          "ok": {
-            "title": "Ok",
-            "type": "boolean"
-          },
-          "days": {
-            "title": "Days",
-            "type": "integer"
-          },
-          "today": {
-            "$ref": "#/components/schemas/ApiUsageToday"
-          },
-          "daily": {
-            "items": {
-              "$ref": "#/components/schemas/ApiUsageDay"
-            },
-            "title": "Daily",
-            "type": "array"
-          },
-          "endpoints": {
-            "items": {
-              "$ref": "#/components/schemas/ApiUsageEndpoint"
-            },
-            "title": "Endpoints",
-            "type": "array"
-          }
-        },
-        "required": [
-          "ok",
-          "days",
-          "today",
-          "daily",
-          "endpoints"
-        ],
-        "title": "ApiUsageStats",
-        "type": "object"
-      },
-      "FocusSessionIn": {
-        "description": "前端完成一轮专注后的上报。",
-        "properties": {
-          "duration_seconds": {
-            "exclusiveMinimum": 0,
-            "maximum": 14400,
-            "title": "Duration Seconds",
-            "type": "integer"
-          },
-          "phase": {
-            "default": "focus",
-            "pattern": "^(focus|shortBreak|longBreak)$",
-            "title": "Phase",
-            "type": "string"
-          },
-          "sound_source": {
-            "anyOf": [
-              {
-                "maxLength": 40,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Sound Source"
-          }
-        },
-        "required": [
-          "duration_seconds"
-        ],
-        "title": "FocusSessionIn",
-        "type": "object"
-      },
-      "FocusSessionOut": {
-        "properties": {
-          "ok": {
-            "title": "Ok",
-            "type": "boolean"
-          },
-          "id": {
-            "title": "Id",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "ok",
-          "id"
-        ],
-        "title": "FocusSessionOut",
-        "type": "object"
-      },
-      "PomodoroDay": {
-        "properties": {
-          "date": {
-            "title": "Date",
-            "type": "string"
-          },
-          "minutes": {
-            "title": "Minutes",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "date",
-          "minutes"
-        ],
-        "title": "PomodoroDay",
-        "type": "object"
-      },
-      "PomodoroStats": {
-        "description": "番茄钟专注统计：总轮数 / 总时长 / 今日 / 近 N 天分布。",
-        "properties": {
-          "ok": {
-            "title": "Ok",
-            "type": "boolean"
-          },
-          "totalSessions": {
-            "title": "TotalSessions",
-            "type": "integer"
-          },
-          "totalMinutes": {
-            "title": "TotalMinutes",
-            "type": "integer"
-          },
-          "todayMinutes": {
-            "title": "TodayMinutes",
-            "type": "integer"
-          },
-          "daily": {
-            "items": {
-              "$ref": "#/components/schemas/PomodoroDay"
-            },
-            "title": "Daily",
-            "type": "array"
-          }
-        },
-        "required": [
-          "ok",
-          "totalSessions",
-          "totalMinutes",
-          "todayMinutes",
-          "daily"
-        ],
-        "title": "PomodoroStats",
-        "type": "object"
-      },
-      "ChatTurn": {
-        "description": "单条对话消息（角色 + 内容）。",
-        "properties": {
-          "role": {
-            "pattern": "^(user|assistant)$",
-            "title": "Role",
-            "type": "string"
-          },
-          "content": {
-            "title": "Content",
-            "type": "string"
-          }
-        },
-        "required": [
-          "role",
-          "content"
-        ],
-        "title": "ChatTurn",
-        "type": "object"
-      },
-      "ChatRequest": {
-        "description": "SSE 流式对话请求。",
-        "properties": {
-          "conversation_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Conversation Id"
-          },
-          "messages": {
-            "items": {
-              "$ref": "#/components/schemas/ChatTurn"
-            },
-            "maxItems": 40,
-            "minItems": 1,
-            "title": "Messages",
-            "type": "array"
-          }
-        },
-        "required": [
-          "messages"
-        ],
-        "title": "ChatRequest",
-        "type": "object"
-      },
-      "AuxilioChatEvent": {
-        "description": "SSE 事件负载。type 取值：delta（增量文本）/ tool_call（工具调用）/ usage（token 用量）/ done（会话结束，携带 title）/ error（流式异常）。",
-        "properties": {
-          "type": {
-            "enum": [
-              "delta",
-              "tool_call",
-              "usage",
-              "done",
-              "error"
-            ],
-            "title": "Type",
-            "type": "string"
-          },
-          "text": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Text"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "arguments": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Arguments"
-          },
-          "title": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Title"
-          },
-          "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Message"
-          },
-          "provider": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Provider"
-          },
-          "model": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Model"
-          },
-          "prompt_tokens": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Prompt Tokens"
-          },
-          "completion_tokens": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Completion Tokens"
-          },
-          "total_tokens": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Total Tokens"
-          }
-        },
-        "required": [
-          "type"
-        ],
-        "title": "AuxilioChatEvent",
-        "type": "object"
-      },
-      "ConversationOut": {
-        "properties": {
-          "id": {
-            "title": "Id",
-            "type": "integer"
-          },
-          "title": {
-            "title": "Title",
-            "type": "string"
-          },
-          "createdAt": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "CreatedAt"
-          },
-          "updatedAt": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "UpdatedAt"
-          }
-        },
-        "required": [
-          "id",
-          "title",
-          "createdAt",
-          "updatedAt"
-        ],
-        "title": "ConversationOut",
-        "type": "object"
-      },
-      "ConversationListOut": {
-        "properties": {
-          "conversations": {
-            "items": {
-              "$ref": "#/components/schemas/ConversationOut"
-            },
-            "title": "Conversations",
-            "type": "array"
-          }
-        },
-        "required": [
-          "conversations"
-        ],
-        "title": "ConversationListOut",
-        "type": "object"
-      },
-      "LlmConfigIn": {
-        "description": "用户 LLM 配置（api_key 留空表示保留原值）。",
-        "properties": {
-          "provider": {
-            "default": "openai",
-            "pattern": "^(openai|anthropic)$",
-            "title": "Provider",
-            "type": "string"
-          },
-          "api_key": {
-            "anyOf": [
-              {
-                "maxLength": 300,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Api Key"
-          },
-          "base_url": {
-            "anyOf": [
-              {
-                "maxLength": 300,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Base Url"
-          },
-          "model": {
-            "default": "gpt-4o-mini",
-            "maxLength": 120,
-            "title": "Model",
-            "type": "string"
-          }
-        },
-        "title": "LlmConfigIn",
-        "type": "object"
-      },
-      "LlmUsageToday": {
-        "properties": {
-          "calls": {
-            "title": "Calls",
-            "type": "integer"
-          },
-          "tokens": {
-            "title": "Tokens",
-            "type": "integer"
-          },
-          "avgLatencyMs": {
-            "title": "AvgLatencyMs",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "calls",
-          "tokens",
-          "avgLatencyMs"
-        ],
-        "title": "LlmUsageToday",
-        "type": "object"
-      },
-      "LlmUsageDay": {
-        "properties": {
-          "date": {
-            "title": "Date",
-            "type": "string"
-          },
-          "tokens": {
-            "title": "Tokens",
-            "type": "integer"
-          },
-          "calls": {
-            "title": "Calls",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "date",
-          "tokens",
-          "calls"
-        ],
-        "title": "LlmUsageDay",
-        "type": "object"
-      },
-      "LlmUsageModel": {
-        "properties": {
-          "model": {
-            "title": "Model",
-            "type": "string"
-          },
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "model",
-          "count"
-        ],
-        "title": "LlmUsageModel",
-        "type": "object"
-      },
-      "LlmUsageStats": {
-        "description": "学习助手 LLM 用量：调用次数 / token 消耗 / 近 N 天趋势 / 模型分布。",
-        "properties": {
-          "ok": {
-            "title": "Ok",
-            "type": "boolean"
-          },
-          "days": {
-            "title": "Days",
-            "type": "integer"
-          },
-          "today": {
-            "$ref": "#/components/schemas/LlmUsageToday"
-          },
-          "totalCalls": {
-            "title": "TotalCalls",
-            "type": "integer"
-          },
-          "totalTokens": {
-            "title": "TotalTokens",
-            "type": "integer"
-          },
-          "daily": {
-            "items": {
-              "$ref": "#/components/schemas/LlmUsageDay"
-            },
-            "title": "Daily",
-            "type": "array"
-          },
-          "models": {
-            "items": {
-              "$ref": "#/components/schemas/LlmUsageModel"
-            },
-            "title": "Models",
-            "type": "array"
-          }
-        },
-        "required": [
-          "ok",
-          "days",
-          "today",
-          "totalCalls",
-          "totalTokens",
-          "daily",
-          "models"
-        ],
-        "title": "LlmUsageStats",
-        "type": "object"
-      },
-      "LlmConfigOut": {
-        "description": "用户 LLM 配置读取响应。configured=false 时仅返回 ok 与 configured；configured=true 时附 provider/baseUrl/model/apiKeyMasked（掩码）。",
-        "properties": {
-          "ok": {
-            "title": "Ok",
-            "type": "boolean"
-          },
-          "configured": {
-            "title": "Configured",
-            "type": "boolean"
-          },
-          "provider": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Provider"
-          },
-          "baseUrl": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "BaseUrl"
-          },
-          "model": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Model"
-          },
-          "apiKeyMasked": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "ApiKeyMasked"
-          }
-        },
-        "required": [
-          "ok",
-          "configured"
-        ],
-        "title": "LlmConfigOut",
-        "type": "object"
-      },
-      "LlmConfigUpdateOut": {
-        "properties": {
-          "ok": {
-            "title": "Ok",
-            "type": "boolean"
-          },
-          "configured": {
-            "title": "Configured",
-            "type": "boolean"
-          },
-          "provider": {
-            "title": "Provider",
-            "type": "string"
-          },
-          "model": {
-            "title": "Model",
-            "type": "string"
-          }
-        },
-        "required": [
-          "ok",
-          "configured",
-          "provider",
-          "model"
-        ],
-        "title": "LlmConfigUpdateOut",
-        "type": "object"
-      },
-      "ToolCallOut": {
-        "description": "助手消息触发的单次工具调用记录：{name, arguments}。",
-        "properties": {
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "arguments": {
-            "title": "Arguments",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "arguments"
-        ],
-        "title": "ToolCallOut",
-        "type": "object"
-      },
-      "ChatMessageOut": {
-        "properties": {
-          "id": {
-            "title": "Id",
-            "type": "integer"
-          },
-          "role": {
-            "title": "Role",
-            "type": "string"
-          },
-          "content": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content"
-          },
-          "toolCalls": {
-            "items": {
-              "$ref": "#/components/schemas/ToolCallOut"
-            },
-            "title": "ToolCalls",
-            "type": "array"
-          },
-          "createdAt": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "CreatedAt"
-          }
-        },
-        "required": [
-          "id",
-          "role",
-          "content",
-          "toolCalls",
-          "createdAt"
-        ],
-        "title": "ChatMessageOut",
-        "type": "object"
-      },
-      "ChatMessageListOut": {
-        "properties": {
-          "messages": {
-            "items": {
-              "$ref": "#/components/schemas/ChatMessageOut"
-            },
-            "title": "Messages",
-            "type": "array"
-          }
-        },
-        "required": [
-          "messages"
-        ],
-        "title": "ChatMessageListOut",
-        "type": "object"
       }
     },
     "securitySchemes": {
@@ -5239,37 +4563,10 @@
   "info": {
     "description": "企业级FastAPI框架，包含RBAC权限管理系统",
     "title": "FastAPI RBAC Framework",
-    "version": "0.9.8"
+    "version": "0.9.9"
   },
   "openapi": "3.1.0",
   "paths": {
-    "/api/v1/admin/community/series": {
-      "post": {
-        "description": "社区系列管理操作：{sub: publish|archive|delete, post_id}。",
-        "operationId": "admin_community_series_action_api_v1_admin_community_series_post",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Admin Community Series Action Api V1 Admin Community Blog Post"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Admin Community Series Action",
-        "tags": [
-          "管理员-社区"
-        ]
-      }
-    },
     "/api/v1/admin/community/categories": {
       "get": {
         "operationId": "admin_list_categories_api_v1_admin_community_categories_get",
@@ -5278,7 +4575,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Admin List Categories Api V1 Admin Community Forum Categories Get"
+                  "title": "Response Admin List Categories Api V1 Admin Community Categories Get"
                 }
               }
             },
@@ -5315,7 +4612,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Create Category Api V1 Admin Community Forum Categories Post",
+                  "title": "Response Create Category Api V1 Admin Community Categories Post",
                   "type": "object"
                 }
               }
@@ -5363,7 +4660,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Delete Category Api V1 Admin Community Forum Categories  Category Id  Delete"
+                  "title": "Response Delete Category Api V1 Admin Community Categories  Category Id  Delete"
                 }
               }
             },
@@ -5421,7 +4718,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Update Category Api V1 Admin Community Forum Categories  Category Id  Put",
+                  "title": "Response Update Category Api V1 Admin Community Categories  Category Id  Put",
                   "type": "object"
                 }
               }
@@ -5450,6 +4747,33 @@
         ]
       }
     },
+    "/api/v1/admin/community/community": {
+      "post": {
+        "description": "社区管理操作：{sub: publish|archive|delete, post_id}。",
+        "operationId": "admin_community_action_api_v1_admin_community_community_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Admin Community Action Api V1 Admin Community Community Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Admin Community Action",
+        "tags": [
+          "管理员-社区"
+        ]
+      }
+    },
     "/api/v1/admin/community/replies/{comment_id}": {
       "delete": {
         "operationId": "admin_hard_delete_comment_api_v1_admin_community_replies__comment_id__delete",
@@ -5469,7 +4793,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Admin Hard Delete Comment Api V1 Admin Community Forum Replies  Comment Id  Delete"
+                  "title": "Response Admin Hard Delete Comment Api V1 Admin Community Replies  Comment Id  Delete"
                 }
               }
             },
@@ -5526,7 +4850,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Admin Update Comment Api V1 Admin Community Forum Replies  Comment Id  Put"
+                  "title": "Response Admin Update Comment Api V1 Admin Community Replies  Comment Id  Put"
                 }
               }
             },
@@ -5591,7 +4915,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Hide Comment Api V1 Admin Community Forum Replies  Comment Id  Hide Post"
+                  "title": "Response Hide Comment Api V1 Admin Community Replies  Comment Id  Hide Post"
                 }
               }
             },
@@ -5638,7 +4962,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Restore Comment Api V1 Admin Community Forum Replies  Comment Id  Restore Post"
+                  "title": "Response Restore Comment Api V1 Admin Community Replies  Comment Id  Restore Post"
                 }
               }
             },
@@ -5661,433 +4985,6 @@
           }
         ],
         "summary": "Restore Comment",
-        "tags": [
-          "管理员-社区"
-        ]
-      }
-    },
-    "/api/v1/admin/community/topics": {
-      "get": {
-        "description": "内容列表（管理视图：published + hidden，排除 deleted）。",
-        "operationId": "admin_list_posts_api_v1_admin_community_topics_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "kind",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Kind"
-            }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
-            }
-          },
-          {
-            "in": "query",
-            "name": "search",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Search"
-            }
-          },
-          {
-            "in": "query",
-            "name": "sort",
-            "required": false,
-            "schema": {
-              "default": "latest",
-              "title": "Sort",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "skip",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "title": "Skip",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Admin List Posts Api V1 Admin Community Forum Topics Get"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Admin List Posts",
-        "tags": [
-          "管理员-社区"
-        ]
-      }
-    },
-    "/api/v1/admin/community/topics/{post_id}": {
-      "delete": {
-        "operationId": "admin_hard_delete_post_api_v1_admin_community_topics__post_id__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "post_id",
-            "required": true,
-            "schema": {
-              "title": "Post Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Admin Hard Delete Post Api V1 Admin Community Forum Topics  Post Id  Delete"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Admin Hard Delete Post",
-        "tags": [
-          "管理员-社区"
-        ]
-      },
-      "put": {
-        "operationId": "admin_update_post_api_v1_admin_community_topics__post_id__put",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "post_id",
-            "required": true,
-            "schema": {
-              "title": "Post Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Admin Update Post Api V1 Admin Community Forum Topics  Post Id  Put"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Admin Update Post",
-        "tags": [
-          "管理员-社区"
-        ]
-      }
-    },
-    "/api/v1/admin/community/topics/{post_id}/feature": {
-      "post": {
-        "operationId": "feature_post_api_v1_admin_community_topics__post_id__feature_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "post_id",
-            "required": true,
-            "schema": {
-              "title": "Post Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Feature Post Api V1 Admin Community Forum Topics  Post Id  Feature Post"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Feature Post",
-        "tags": [
-          "管理员-社区"
-        ]
-      }
-    },
-    "/api/v1/admin/community/topics/{post_id}/hide": {
-      "post": {
-        "operationId": "hide_post_api_v1_admin_community_topics__post_id__hide_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "post_id",
-            "required": true,
-            "schema": {
-              "title": "Post Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "additionalProperties": true,
-                    "type": "object"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Body"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Hide Post Api V1 Admin Community Forum Topics  Post Id  Hide Post"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Hide Post",
-        "tags": [
-          "管理员-社区"
-        ]
-      }
-    },
-    "/api/v1/admin/community/topics/{post_id}/pin": {
-      "post": {
-        "operationId": "pin_post_api_v1_admin_community_topics__post_id__pin_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "post_id",
-            "required": true,
-            "schema": {
-              "title": "Post Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Pin Post Api V1 Admin Community Forum Topics  Post Id  Pin Post"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Pin Post",
-        "tags": [
-          "管理员-社区"
-        ]
-      }
-    },
-    "/api/v1/admin/community/topics/{post_id}/restore": {
-      "post": {
-        "operationId": "restore_post_api_v1_admin_community_topics__post_id__restore_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "post_id",
-            "required": true,
-            "schema": {
-              "title": "Post Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Restore Post Api V1 Admin Community Forum Topics  Post Id  Restore Post"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Restore Post",
         "tags": [
           "管理员-社区"
         ]
@@ -6256,6 +5153,433 @@
           }
         ],
         "summary": "Resolve Report",
+        "tags": [
+          "管理员-社区"
+        ]
+      }
+    },
+    "/api/v1/admin/community/topics": {
+      "get": {
+        "description": "内容列表（管理视图：published + hidden，排除 deleted）。",
+        "operationId": "admin_list_posts_api_v1_admin_community_topics_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "latest",
+              "title": "Sort",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Admin List Posts Api V1 Admin Community Topics Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Admin List Posts",
+        "tags": [
+          "管理员-社区"
+        ]
+      }
+    },
+    "/api/v1/admin/community/topics/{post_id}": {
+      "delete": {
+        "operationId": "admin_hard_delete_post_api_v1_admin_community_topics__post_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "post_id",
+            "required": true,
+            "schema": {
+              "title": "Post Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Admin Hard Delete Post Api V1 Admin Community Topics  Post Id  Delete"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Admin Hard Delete Post",
+        "tags": [
+          "管理员-社区"
+        ]
+      },
+      "put": {
+        "operationId": "admin_update_post_api_v1_admin_community_topics__post_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "post_id",
+            "required": true,
+            "schema": {
+              "title": "Post Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Admin Update Post Api V1 Admin Community Topics  Post Id  Put"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Admin Update Post",
+        "tags": [
+          "管理员-社区"
+        ]
+      }
+    },
+    "/api/v1/admin/community/topics/{post_id}/feature": {
+      "post": {
+        "operationId": "feature_post_api_v1_admin_community_topics__post_id__feature_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "post_id",
+            "required": true,
+            "schema": {
+              "title": "Post Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Feature Post Api V1 Admin Community Topics  Post Id  Feature Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Feature Post",
+        "tags": [
+          "管理员-社区"
+        ]
+      }
+    },
+    "/api/v1/admin/community/topics/{post_id}/hide": {
+      "post": {
+        "operationId": "hide_post_api_v1_admin_community_topics__post_id__hide_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "post_id",
+            "required": true,
+            "schema": {
+              "title": "Post Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Hide Post Api V1 Admin Community Topics  Post Id  Hide Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Hide Post",
+        "tags": [
+          "管理员-社区"
+        ]
+      }
+    },
+    "/api/v1/admin/community/topics/{post_id}/pin": {
+      "post": {
+        "operationId": "pin_post_api_v1_admin_community_topics__post_id__pin_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "post_id",
+            "required": true,
+            "schema": {
+              "title": "Post Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Pin Post Api V1 Admin Community Topics  Post Id  Pin Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Pin Post",
+        "tags": [
+          "管理员-社区"
+        ]
+      }
+    },
+    "/api/v1/admin/community/topics/{post_id}/restore": {
+      "post": {
+        "operationId": "restore_post_api_v1_admin_community_topics__post_id__restore_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "post_id",
+            "required": true,
+            "schema": {
+              "title": "Post Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Restore Post Api V1 Admin Community Topics  Post Id  Restore Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Restore Post",
         "tags": [
           "管理员-社区"
         ]
@@ -7040,6 +6364,66 @@
         "summary": "Registration Stats",
         "tags": [
           "管理员-活动"
+        ]
+      }
+    },
+    "/api/v1/admin/feature-visibility/{module_key}": {
+      "put": {
+        "description": "更新单模块可见性。\n\n- root 专属（is_superuser）\n- 强制 2FA（决策 B）：root 必须已启用 2FA，否则拒绝；并校验 TOTP 码\n- 审计留痕：服务端推导 actor，记录新旧规则",
+        "operationId": "update_feature_visibility_api_v1_admin_feature_visibility__module_key__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "module_key",
+            "required": true,
+            "schema": {
+              "maxLength": 50,
+              "minLength": 1,
+              "title": "Module Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVisibilityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModuleVisibility"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "更新单模块可见性（root + 2FA）",
+        "tags": [
+          "功能模块可见性"
         ]
       }
     },
@@ -8391,13 +7775,13 @@
             }
           },
           {
-            "description": "跳过的记录数",
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
-              "description": "跳过的记录数",
+              "description": "跳过的记录数（与 page 互斥）",
               "minimum": 0,
               "title": "Skip",
               "type": "integer"
@@ -8415,6 +7799,45 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -9275,6 +8698,33 @@
         ]
       }
     },
+    "/api/v1/auth/sessions/all": {
+      "delete": {
+        "description": "一键登出全部设备：撤销当前用户所有 refresh token（含当前设备）。",
+        "operationId": "revoke_all_sessions_api_v1_auth_sessions_all_delete",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Revoke All Sessions Api V1 Auth Sessions All Delete"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Revoke All Sessions",
+        "tags": [
+          "认证"
+        ]
+      }
+    },
     "/api/v1/auth/sessions/{token_id}": {
       "delete": {
         "description": "远程登出：撤销指定 refresh token（须属于当前用户）。",
@@ -9323,6 +8773,145 @@
         ]
       }
     },
+    "/api/v1/auxilio/chat": {
+      "post": {
+        "description": "SSE 流式对话：支持 OpenAI / Anthropic 双协议与 Skills 工具调用。",
+        "operationId": "chat_api_v1_auxilio_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Chat",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      }
+    },
+    "/api/v1/auxilio/conversations": {
+      "get": {
+        "operationId": "list_conversations_api_v1_auxilio_conversations_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "List Conversations",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      }
+    },
+    "/api/v1/auxilio/conversations/{conversation_id}/messages": {
+      "get": {
+        "operationId": "list_messages_api_v1_auxilio_conversations__conversation_id__messages_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "List Messages",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      }
+    },
     "/api/v1/avatars/{filename}": {
       "get": {
         "description": "头像静态服务（公开）。文件名严格校验防路径遍历。",
@@ -9366,70 +8955,22 @@
         ]
       }
     },
-    "/api/v1/community/series": {
+    "/api/v1/community/categories": {
       "get": {
-        "operationId": "list_series_api_v1_community_series_get",
+        "operationId": "list_categories_api_v1_community_categories_get",
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response List Series Api V1 Community Blog Series Get"
+                  "title": "Response List Categories Api V1 Community Categories Get"
                 }
               }
             },
             "description": "Successful Response"
           }
         },
-        "summary": "List Series",
-        "tags": [
-          "社区"
-        ]
-      },
-      "post": {
-        "operationId": "create_series_api_v1_community_series_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Series Api V1 Community Blog Series Post",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Create Series",
+        "summary": "List Categories",
         "tags": [
           "社区"
         ]
@@ -9588,13 +9129,13 @@
         "operationId": "list_drafts_api_v1_community_drafts_get",
         "parameters": [
           {
-            "description": "跳过的记录数",
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
-              "description": "跳过的记录数",
+              "description": "跳过的记录数（与 page 互斥）",
               "minimum": 0,
               "title": "Skip",
               "type": "integer"
@@ -9612,6 +9153,45 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -9653,13 +9233,13 @@
         "operationId": "list_favorites_api_v1_community_favorites_get",
         "parameters": [
           {
-            "description": "跳过的记录数",
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
-              "description": "跳过的记录数",
+              "description": "跳过的记录数（与 page 互斥）",
               "minimum": 0,
               "title": "Skip",
               "type": "integer"
@@ -9677,6 +9257,45 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -9873,27 +9492,6 @@
         ]
       }
     },
-    "/api/v1/community/categories": {
-      "get": {
-        "operationId": "list_categories_api_v1_community_categories_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response List Categories Api V1 Community Forum Categories Get"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "List Categories",
-        "tags": [
-          "社区"
-        ]
-      }
-    },
     "/api/v1/community/images/{filename}": {
       "get": {
         "operationId": "serve_community_image_api_v1_community_images__filename__get",
@@ -9913,7 +9511,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Serve Community Image Api V1 Community Community Images  Filename  Get"
+                  "title": "Response Serve Community Image Api V1 Community Images  Filename  Get"
                 }
               }
             },
@@ -9931,190 +9529,6 @@
           }
         },
         "summary": "Serve Community Image",
-        "tags": [
-          "社区"
-        ]
-      }
-    },
-    "/api/v1/community/upload": {
-      "post": {
-        "operationId": "upload_community_image_api_v1_community_upload_post",
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_upload_community_image_api_v1_community_upload_post"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Upload Community Image Api V1 Community Forum Upload Post"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Upload Community Image",
-        "tags": [
-          "社区"
-        ]
-      }
-    },
-    "/api/v1/community/users/{user_id}/replies": {
-      "get": {
-        "operationId": "list_user_replies_api_v1_community_users__user_id__replies_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "user_id",
-            "required": true,
-            "schema": {
-              "title": "User Id",
-              "type": "integer"
-            }
-          },
-          {
-            "description": "跳过的记录数",
-            "in": "query",
-            "name": "skip",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "description": "跳过的记录数",
-              "minimum": 0,
-              "title": "Skip",
-              "type": "integer"
-            }
-          },
-          {
-            "description": "每页返回的最大记录数",
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 100,
-              "description": "每页返回的最大记录数",
-              "maximum": 500,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_dict_"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List User Replies",
-        "tags": [
-          "社区"
-        ]
-      }
-    },
-    "/api/v1/community/users/{user_id}/topics": {
-      "get": {
-        "operationId": "list_user_topics_api_v1_community_users__user_id__topics_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "user_id",
-            "required": true,
-            "schema": {
-              "title": "User Id",
-              "type": "integer"
-            }
-          },
-          {
-            "description": "跳过的记录数",
-            "in": "query",
-            "name": "skip",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "description": "跳过的记录数",
-              "minimum": 0,
-              "title": "Skip",
-              "type": "integer"
-            }
-          },
-          {
-            "description": "每页返回的最大记录数",
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 100,
-              "description": "每页返回的最大记录数",
-              "maximum": 500,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_dict_"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List User Topics",
         "tags": [
           "社区"
         ]
@@ -10362,13 +9776,13 @@
             }
           },
           {
-            "description": "跳过的记录数",
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
-              "description": "跳过的记录数",
+              "description": "跳过的记录数（与 page 互斥）",
               "minimum": 0,
               "title": "Skip",
               "type": "integer"
@@ -10386,6 +9800,45 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -10686,13 +10139,13 @@
             }
           },
           {
-            "description": "跳过的记录数",
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
-              "description": "跳过的记录数",
+              "description": "跳过的记录数（与 page 互斥）",
               "minimum": 0,
               "title": "Skip",
               "type": "integer"
@@ -10710,6 +10163,45 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -10898,6 +10390,145 @@
         ]
       }
     },
+    "/api/v1/community/series": {
+      "get": {
+        "operationId": "list_series_api_v1_community_series_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response List Series Api V1 Community Series Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Series",
+        "tags": [
+          "社区"
+        ]
+      },
+      "post": {
+        "operationId": "create_series_api_v1_community_series_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Series Api V1 Community Series Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Create Series",
+        "tags": [
+          "社区"
+        ]
+      }
+    },
+    "/api/v1/community/tags": {
+      "get": {
+        "description": "聚合公开文章（published）中出现过的全部标签，去重排序后返回。\n\n供前端 Feed 页标签云使用；标签云为空时不视为错误。",
+        "operationId": "list_tags_api_v1_community_tags_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Tags Api V1 Community Tags Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Tags",
+        "tags": [
+          "社区"
+        ]
+      }
+    },
+    "/api/v1/community/upload": {
+      "post": {
+        "operationId": "upload_community_image_api_v1_community_upload_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_community_image_api_v1_community_upload_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Upload Community Image Api V1 Community Upload Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Upload Community Image",
+        "tags": [
+          "社区"
+        ]
+      }
+    },
     "/api/v1/community/users/{user_id}/follow-counts": {
       "get": {
         "operationId": "follow_counts_api_v1_community_users__user_id__follow_counts_get",
@@ -10987,6 +10618,222 @@
         ]
       }
     },
+    "/api/v1/community/users/{user_id}/replies": {
+      "get": {
+        "operationId": "list_user_replies_api_v1_community_users__user_id__replies_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "跳过的记录数（与 page 互斥）",
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "description": "跳过的记录数（与 page 互斥）",
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "每页返回的最大记录数",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "description": "每页返回的最大记录数",
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_dict_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List User Replies",
+        "tags": [
+          "社区"
+        ]
+      }
+    },
+    "/api/v1/community/users/{user_id}/topics": {
+      "get": {
+        "operationId": "list_user_topics_api_v1_community_users__user_id__topics_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "跳过的记录数（与 page 互斥）",
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "description": "跳过的记录数（与 page 互斥）",
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "每页返回的最大记录数",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "description": "每页返回的最大记录数",
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_dict_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List User Topics",
+        "tags": [
+          "社区"
+        ]
+      }
+    },
     "/api/v1/events": {
       "get": {
         "description": "活动列表（status/search/tag 筛选 + 分页，含报名人数）。",
@@ -11041,13 +10888,13 @@
             }
           },
           {
-            "description": "跳过的记录数",
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
-              "description": "跳过的记录数",
+              "description": "跳过的记录数（与 page 互斥）",
               "minimum": 0,
               "title": "Skip",
               "type": "integer"
@@ -11065,6 +10912,45 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -11462,13 +11348,13 @@
             }
           },
           {
-            "description": "跳过的记录数",
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
-              "description": "跳过的记录数",
+              "description": "跳过的记录数（与 page 互斥）",
               "minimum": 0,
               "title": "Skip",
               "type": "integer"
@@ -11486,6 +11372,45 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -11632,6 +11557,28 @@
         "summary": "Resolve Exception Log",
         "tags": [
           "异常管理"
+        ]
+      }
+    },
+    "/api/v1/feature-visibility": {
+      "get": {
+        "description": "公开读取全部受管模块的可见性规则（缺失项回退默认值）。",
+        "operationId": "get_feature_visibility_api_v1_feature_visibility_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureVisibilityConfig"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "获取功能模块可见性配置",
+        "tags": [
+          "功能模块可见性"
         ]
       }
     },
@@ -11863,13 +11810,13 @@
             }
           },
           {
-            "description": "跳过的记录数",
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
-              "description": "跳过的记录数",
+              "description": "跳过的记录数（与 page 互斥）",
               "minimum": 0,
               "title": "Skip",
               "type": "integer"
@@ -11887,6 +11834,45 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -12398,13 +12384,13 @@
         "operationId": "get_permissions_api_v1_rbac_permissions_get",
         "parameters": [
           {
-            "description": "跳过的记录数",
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
-              "description": "跳过的记录数",
+              "description": "跳过的记录数（与 page 互斥）",
               "minimum": 0,
               "title": "Skip",
               "type": "integer"
@@ -12422,6 +12408,45 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -12659,13 +12684,13 @@
         "operationId": "get_roles_api_v1_rbac_roles_get",
         "parameters": [
           {
-            "description": "跳过的记录数",
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
-              "description": "跳过的记录数",
+              "description": "跳过的记录数（与 page 互斥）",
               "minimum": 0,
               "title": "Skip",
               "type": "integer"
@@ -12683,6 +12708,45 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -13293,6 +13357,108 @@
         "summary": "Assign Role To User",
         "tags": [
           "RBAC权限管理"
+        ]
+      }
+    },
+    "/api/v1/test/test-exception": {
+      "get": {
+        "description": "测试异常日志记录",
+        "operationId": "test_exception_api_v1_test_test_exception_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Test Exception",
+        "tags": [
+          "异常测试"
+        ]
+      }
+    },
+    "/api/v1/test/test-http-exception": {
+      "get": {
+        "description": "测试HTTP异常日志记录",
+        "operationId": "test_http_exception_api_v1_test_test_http_exception_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Test Http Exception",
+        "tags": [
+          "异常测试"
+        ]
+      }
+    },
+    "/api/v1/test/test-validation-exception": {
+      "post": {
+        "description": "测试验证异常日志记录（body 无 schema 约束，用于触发自定义验证流程）",
+        "operationId": "test_validation_exception_api_v1_test_test_validation_exception_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Data",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Test Validation Exception",
+        "tags": [
+          "异常测试"
+        ]
+      }
+    },
+    "/api/v1/test/test-zero-division": {
+      "get": {
+        "description": "测试除零异常日志记录",
+        "operationId": "test_zero_division_api_v1_test_test_zero_division_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Test Zero Division",
+        "tags": [
+          "异常测试"
         ]
       }
     },
@@ -14723,13 +14889,13 @@
             }
           },
           {
-            "description": "跳过的记录数",
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
-              "description": "跳过的记录数",
+              "description": "跳过的记录数（与 page 互斥）",
               "minimum": 0,
               "title": "Skip",
               "type": "integer"
@@ -14747,6 +14913,45 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -15668,13 +15873,13 @@
         "operationId": "read_users_api_v1_users__get",
         "parameters": [
           {
-            "description": "跳过的记录数",
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
-              "description": "跳过的记录数",
+              "description": "跳过的记录数（与 page 互斥）",
               "minimum": 0,
               "title": "Skip",
               "type": "integer"
@@ -15692,6 +15897,45 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -15997,11 +16241,11 @@
     },
     "/api/v1/workbench/contributions/github": {
       "get": {
-        "summary": "GitHub 贡献热力图（近一年数据，6h 缓存）。",
-        "description": "GitHub 贡献热力图（近一年数据，6h 缓存）。未绑定用户名时返回 ok=false 与 need_username。",
+        "description": "GitHub 贡献热力图（近一年数据，6h 缓存）。",
         "operationId": "get_github_contributions_api_v1_workbench_contributions_github_get",
         "parameters": [
           {
+            "description": "GitHub 用户名；缺省用绑定资料",
             "in": "query",
             "name": "username",
             "required": false,
@@ -16014,7 +16258,7 @@
                   "type": "null"
                 }
               ],
-              "default": null,
+              "description": "GitHub 用户名；缺省用绑定资料",
               "title": "Username"
             }
           },
@@ -16031,11 +16275,13 @@
             }
           },
           {
+            "description": "强制刷新",
             "in": "query",
             "name": "refresh",
             "required": false,
             "schema": {
               "default": false,
+              "description": "强制刷新",
               "title": "Refresh",
               "type": "boolean"
             }
@@ -16045,9 +16291,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GithubContributionsOut"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -16068,14 +16312,132 @@
             "OAuth2PasswordBearer": []
           }
         ],
+        "summary": "Get Github Contributions",
         "tags": [
+          "工作台",
+          "workbench"
+        ]
+      }
+    },
+    "/api/v1/workbench/focus-sessions": {
+      "post": {
+        "description": "番茄钟完成一轮专注后上报记录（幂等不校验重复，前端只报完成轮）。",
+        "operationId": "record_focus_session_api_v1_workbench_focus_sessions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FocusSessionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Record Focus Session",
+        "tags": [
+          "工作台",
+          "workbench"
+        ]
+      }
+    },
+    "/api/v1/workbench/llm-config": {
+      "get": {
+        "description": "读取用户 LLM 配置（脱敏：apiKey 只回显掩码，不回传明文）。",
+        "operationId": "get_llm_config_api_v1_workbench_llm_config_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Get Llm Config",
+        "tags": [
+          "工作台",
+          "workbench"
+        ]
+      },
+      "put": {
+        "description": "保存用户 LLM 配置（API Key AES-256-GCM 加密存储，绝不落明文/日志）。",
+        "operationId": "update_llm_config_api_v1_workbench_llm_config_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LlmConfigIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Update Llm Config",
+        "tags": [
+          "工作台",
           "workbench"
         ]
       }
     },
     "/api/v1/workbench/stats/api-usage": {
       "get": {
-        "summary": "API 调用统计：今日计数 + 近 N 天趋势 + endpoint 分布。",
+        "description": "API 调用统计：今日计数 + 近 N 天趋势 + endpoint 分布。",
         "operationId": "get_api_usage_stats_api_v1_workbench_stats_api_usage_get",
         "parameters": [
           {
@@ -16095,9 +16457,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiUsageStats"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -16113,211 +16473,16 @@
             "description": "Validation Error"
           }
         },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
+        "summary": "Get Api Usage Stats",
         "tags": [
+          "工作台",
           "workbench"
-        ]
-      }
-    },
-    "/api/v1/workbench/focus-sessions": {
-      "post": {
-        "summary": "番茄钟完成一轮专注后上报记录（幂等不校验重复，前端只报完成轮）。",
-        "operationId": "record_focus_session_api_v1_workbench_focus_sessions_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FocusSessionIn"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FocusSessionOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "tags": [
-          "workbench"
-        ]
-      }
-    },
-    "/api/v1/workbench/stats/pomodoro": {
-      "get": {
-        "summary": "番茄钟专注统计：总轮数 / 总时长 / 今日 / 近 N 天分布（喂给学习助手 Skill）。",
-        "operationId": "get_pomodoro_stats_api_v1_workbench_stats_pomodoro_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "days",
-            "required": false,
-            "schema": {
-              "default": 30,
-              "maximum": 90,
-              "minimum": 1,
-              "title": "Days",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PomodoroStats"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "tags": [
-          "workbench"
-        ]
-      }
-    },
-    "/api/v1/auxilio/chat": {
-      "post": {
-        "summary": "SSE 流式对话：支持 OpenAI / Anthropic 双协议与 Skills 工具调用。",
-        "description": "SSE 流式对话：支持 OpenAI / Anthropic 双协议与 Skills 工具调用。响应为 text/event-stream，逐事件推送 delta / tool_call / usage / done / error。",
-        "operationId": "chat_api_v1_auxilio_chat_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ChatRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "text/event-stream": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuxilioChatEvent"
-                }
-              }
-            },
-            "description": "SSE 流式事件流（text/event-stream）。事件类型：delta / tool_call / usage / done / error。"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "tags": [
-          "学习助手"
-        ]
-      }
-    },
-    "/api/v1/auxilio/conversations": {
-      "get": {
-        "summary": "列出当前用户的学习助手会话（按更新时间倒序）。",
-        "operationId": "list_conversations_api_v1_auxilio_conversations_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 20,
-              "maximum": 50,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConversationListOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "tags": [
-          "学习助手"
         ]
       }
     },
     "/api/v1/workbench/stats/llm-usage": {
       "get": {
-        "summary": "学习助手 LLM 用量：调用次数 / token 消耗 / 近 N 天趋势 / 模型分布。",
+        "description": "学习助手 LLM 用量：调用次数 / token 消耗 / 近 N 天趋势 / 模型分布。",
         "operationId": "get_llm_usage_stats_api_v1_workbench_stats_llm_usage_get",
         "parameters": [
           {
@@ -16337,9 +16502,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LlmUsageStats"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -16360,102 +16523,27 @@
             "OAuth2PasswordBearer": []
           }
         ],
+        "summary": "Get Llm Usage Stats",
         "tags": [
+          "工作台",
           "workbench"
         ]
       }
     },
-    "/api/v1/workbench/llm-config": {
+    "/api/v1/workbench/stats/pomodoro": {
       "get": {
-        "summary": "读取用户 LLM 配置（脱敏：apiKey 只回显掩码，不回传明文）。",
-        "operationId": "get_llm_config_api_v1_workbench_llm_config_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LlmConfigOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "tags": [
-          "workbench"
-        ]
-      },
-      "put": {
-        "summary": "保存用户 LLM 配置（API Key AES-256-GCM 加密存储，绝不落明文/日志）。",
-        "operationId": "update_llm_config_api_v1_workbench_llm_config_put",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LlmConfigIn"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LlmConfigUpdateOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "tags": [
-          "workbench"
-        ]
-      }
-    },
-    "/api/v1/auxilio/conversations/{conversation_id}/messages": {
-      "get": {
-        "summary": "获取会话内的消息列表（按时间正序）。",
-        "operationId": "list_messages_api_v1_auxilio_conversations_conversation_id_messages_get",
+        "description": "番茄钟专注统计：总轮数 / 总时长 / 今日 / 近 N 天分布（喂给学习助手 Skill）。",
+        "operationId": "get_pomodoro_stats_api_v1_workbench_stats_pomodoro_get",
         "parameters": [
           {
-            "in": "path",
-            "name": "conversation_id",
-            "required": true,
+            "in": "query",
+            "name": "days",
+            "required": false,
             "schema": {
-              "title": "Conversation Id",
+              "default": 30,
+              "maximum": 90,
+              "minimum": 1,
+              "title": "Days",
               "type": "integer"
             }
           }
@@ -16464,22 +16552,10 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChatMessageListOut"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
-          },
-          "404": {
-            "description": "会话不存在（conversation not found）",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Not Found"
-                }
-              }
-            }
           },
           "422": {
             "content": {
@@ -16497,8 +16573,10 @@
             "OAuth2PasswordBearer": []
           }
         ],
+        "summary": "Get Pomodoro Stats",
         "tags": [
-          "学习助手"
+          "工作台",
+          "workbench"
         ]
       }
     }

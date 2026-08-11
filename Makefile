@@ -24,7 +24,7 @@ BACKEND_PY := $(CURDIR)/CS-Web-Backend/.venv/bin/python
 BACKEND_PORT := 9000
 FRONTEND_PORT := 2333
 
-.PHONY: dev-up dev-backend dev-frontend dev-logs dev-down restart-frontend setup up down logs ps rebuild status contract-baseline contract-check
+.PHONY: dev-up dev-backend dev-frontend dev-logs dev-down restart-frontend setup up down logs ps rebuild status contract-baseline contract-check check-version
 
 # 本地开发统一用 tmux 会话托管（会话名固定，便于一键停/看日志）。
 # 会话内两个窗口：backend（:9000 热重载）、frontend（:2333 dev）。
@@ -124,4 +124,9 @@ check-docs-links:
 # （密码哈希/权限判定/JWT 签发等），后端为认证/授权唯一权威。
 check-bff-boundary:
 	cd CS-Web-Frontend && pnpm run check:bff-boundary
+
+# ---- 版本四源一致校验（ER-33）----
+# 校验 pyproject / __init__ / package.json / uv.lock 四处版本号一致，不一致即失败。
+check-version:
+	python3 scripts/check_version_sync.py
 

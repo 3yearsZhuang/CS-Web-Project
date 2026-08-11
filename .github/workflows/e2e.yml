@@ -28,6 +28,11 @@ jobs:
           submodules: recursive
           ref: ${{ github.event.inputs.ref || '' }}
 
+      - name: Check version sources in sync (ER-33)
+        # 四源版本号（pyproject / __init__ / package.json / uv.lock）不一致即失败，
+        # 避免发版时漏改某一处。仅依赖 Python 标准库，runner 自带 python3 即可。
+        run: python3 scripts/check_version_sync.py
+
       - name: Generate .env for docker-compose
         # CI 一次性环境，全部用占位值；ADMIN_PASSWORD 供后端 rbac_init seed 建管理员
         run: |
