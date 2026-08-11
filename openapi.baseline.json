@@ -13360,108 +13360,6 @@
         ]
       }
     },
-    "/api/v1/test/test-exception": {
-      "get": {
-        "description": "测试异常日志记录",
-        "operationId": "test_exception_api_v1_test_test_exception_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Test Exception",
-        "tags": [
-          "异常测试"
-        ]
-      }
-    },
-    "/api/v1/test/test-http-exception": {
-      "get": {
-        "description": "测试HTTP异常日志记录",
-        "operationId": "test_http_exception_api_v1_test_test_http_exception_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Test Http Exception",
-        "tags": [
-          "异常测试"
-        ]
-      }
-    },
-    "/api/v1/test/test-validation-exception": {
-      "post": {
-        "description": "测试验证异常日志记录（body 无 schema 约束，用于触发自定义验证流程）",
-        "operationId": "test_validation_exception_api_v1_test_test_validation_exception_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Data",
-                "type": "object"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Test Validation Exception",
-        "tags": [
-          "异常测试"
-        ]
-      }
-    },
-    "/api/v1/test/test-zero-division": {
-      "get": {
-        "description": "测试除零异常日志记录",
-        "operationId": "test_zero_division_api_v1_test_test_zero_division_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Test Zero Division",
-        "tags": [
-          "异常测试"
-        ]
-      }
-    },
     "/api/v1/tools/admin/exam": {
       "get": {
         "operationId": "admin_list_exams_api_v1_tools_admin_exam_get",
@@ -14505,9 +14403,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create Component Api V1 Tools Component Registry Post",
-                  "type": "object"
+                  "title": "Response Create Component Api V1 Tools Component Registry Post"
                 }
               }
             },
@@ -16473,6 +16369,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "summary": "Get Api Usage Stats",
         "tags": [
           "工作台",
