@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input</title>
+  <link rel="stylesheet" href="../colors_and_type.css">
+  <style>
+    /* Page scaffold — NOT extracted */
+    body { margin: 0; padding: 12px; background: var(--color-background); font-family: var(--font-family-sans); color: var(--color-foreground); }
+    .specimen { display: flex; flex-direction: column; gap: 12px; }
+    .stage { display: flex; flex-direction: column; gap: 8px; }
+    .story { display: flex; gap: 12px; align-items: flex-start; }
+    .story-label { width: 92px; flex-shrink: 0; font-family: var(--font-family-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-muted-foreground); }
+    .rail { display: flex; gap: 12px; align-items: center; flex: 1; flex-wrap: wrap; }
+    .divider { width: 100%; height: 1px; border: none; background: var(--color-input); margin: 0; }
+
+    /* @component-css-start */
+    /* Component definitions — extracted to components.css by deterministic script */
+    .field-wrapper { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 160px; }
+    .field-label { font-family: var(--font-family-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-muted-foreground); }
+    .field { width: 100%; padding: 8px 12px; background: var(--color-background); color: var(--color-foreground); border: 1px solid var(--color-input); border-radius: var(--radius); font-family: var(--font-family-sans); font-size: 14px; line-height: 1.5; box-sizing: border-box; outline: none; }
+    .field::placeholder { color: var(--color-muted-foreground); opacity: 1; }
+    .field:focus-visible { outline: 1px solid var(--color-ring); outline-offset: 2px; }
+    .field.error { border-color: var(--color-destructive); }
+    .field:disabled { opacity: 0.5; cursor: not-allowed; }
+    .field-error { font-family: var(--font-family-mono); font-size: 11px; color: var(--color-destructive); }
+    /* @component-css-end */
+  </style>
+</head>
+<body>
+  <div class="specimen">
+    <div class="stage">
+      <div class="story">
+        <div class="story-label">文本输入</div>
+        <div class="rail">
+          <div class="field-wrapper">
+            <label class="field-label" for="input-default">邮箱</label>
+            <input id="input-default" class="field" type="text" placeholder="name@example.com">
+          </div>
+          <div class="field-wrapper">
+            <label class="field-label" for="input-error">邮箱</label>
+            <input id="input-error" class="field error" type="text" value="无效邮箱" aria-invalid="true">
+            <span class="field-error">请输入有效的邮箱地址</span>
+          </div>
+          <div class="field-wrapper">
+            <label class="field-label" for="input-disabled">用户名</label>
+            <input id="input-disabled" class="field" type="text" value="fztbucs" disabled>
+          </div>
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="story">
+        <div class="story-label">多行 / 选择</div>
+        <div class="rail">
+          <div class="field-wrapper">
+            <label class="field-label" for="input-textarea">备注</label>
+            <textarea id="input-textarea" class="field" rows="3" placeholder="补充说明…"></textarea>
+          </div>
+          <div class="field-wrapper">
+            <label class="field-label" for="input-select">类型</label>
+            <select id="input-select" class="field">
+              <option>个人</option>
+              <option>团队</option>
+              <option>企业</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

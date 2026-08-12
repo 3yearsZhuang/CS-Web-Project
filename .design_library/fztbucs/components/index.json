@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 2,
+  "libraryName": "fztbucs",
+  "sourceKind": "structured-spec",
+  "generatedAt": "2026-08-12",
+  "components": [
+    {
+      "slug": "button",
+      "name": "Button",
+      "semanticTypes": ["button"],
+      "confidence": "medium"
+    },
+    {
+      "slug": "input",
+      "name": "Input",
+      "semanticTypes": ["input", "textarea", "select"],
+      "confidence": "medium"
+    },
+    {
+      "slug": "card",
+      "name": "Card",
+      "semanticTypes": ["card"],
+      "confidence": "medium"
+    },
+    {
+      "slug": "navbar",
+      "name": "Navbar",
+      "semanticTypes": ["navigation"],
+      "confidence": "medium"
+    },
+    {
+      "slug": "toast",
+      "name": "Toast",
+      "semanticTypes": ["toast", "notification"],
+      "confidence": "medium"
+    },
+    {
+      "slug": "avatar",
+      "name": "Avatar",
+      "semanticTypes": ["avatar"],
+      "confidence": "medium"
+    }
+  ]
+}

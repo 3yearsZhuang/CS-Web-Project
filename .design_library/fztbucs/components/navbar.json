@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 2,
+  "slug": "navbar",
+  "name": "Navbar",
+  "sourceKind": "structured-spec",
+  "confidence": "medium",
+  "semanticTypeCandidates": ["navigation", "header"],
+  "variantDimensions": {
+    "theme": ["light", "dark"],
+    "state": ["default", "scrolled"]
+  },
+  "representativeVariants": [
+    { "theme": "light", "state": "default" },
+    { "theme": "dark", "state": "default" }
+  ],
+  "anatomy": {
+    "parts": [
+      { "name": "root", "role": "fixed top navigation container" },
+      { "name": "brand", "role": "logo or site name" },
+      { "name": "links", "role": "primary navigation links" },
+      { "name": "actions", "role": "cta buttons or utility icons" }
+    ],
+    "requiredParts": ["root", "brand", "links"]
+  },
+  "structurePatterns": {
+    "layout": "flex row, space-between, full width, fixed top",
+    "text": "mono uppercase nav links, 12px, tracking 0.05em",
+    "spacing": "px-6 py-4 internal padding",
+    "radius": "0",
+    "borders": "bottom 1px solid var(--border)",
+    "colors": {
+      "light": "var(--background) background, var(--foreground) text",
+      "dark": "var(--foreground) background, var(--background) text",
+      "link-hover": "var(--primary) text"
+    }
+  },
+  "usageHints": {
+    "whenToUse": "Top-level page navigation, landing pages, dashboards",
+    "accessibility": "Use semantic nav element; links must have visible focus states",
+    "doNot": "Do not use more than 6 primary links; avoid dropdown-only navigation"
+  },
+  "doNotInvent": ["No hamburger menu without mobile evidence", "No search bar unless evidenced"],
+  "unknowns": ["Exact mobile breakpoint behavior"]
+}

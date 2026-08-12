@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>fztbucs · UI Kit</title>
+<link rel="stylesheet" href="../../colors_and_type.css">
+<link rel="stylesheet" href="../../components.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+:root {
+  --space-2: 8px;
+  --space-4: 16px;
+  --uikit-sidebar-w: 220px;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-family-sans);
+}
+
+.uikit-shell {
+  position: relative;
+  width: 100%;
+  max-width: 1184px;
+  margin: 0 auto;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: var(--uikit-sidebar-w, 220px) minmax(0, 1fr);
+  gap: var(--space-4);
+  min-height: 100vh;
+}
+.uikit-sidebar,
+.uikit-main,
+.uikit-toolbar { min-width: 0; }
+.uikit-sidebar {
+  overflow: hidden;
+  max-width: 100%;
+  padding: 16px 0 16px 16px;
+}
+.uikit-main {
+  padding: 16px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+[data-component] {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+.uikit-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.uikit-responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.uikit-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+.uikit-truncate {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.uikit-nowrap {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.uikit-action-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 160px;
+  overflow: hidden;
+}
+.uikit-action {
+  min-width: 0;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .uikit-shell { grid-template-columns: minmax(0, 1fr); }
+  .uikit-sidebar { display: none; }
+  .uikit-responsive-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .uikit-toolbar { flex-direction: column; align-items: stretch; }
+  .uikit-responsive-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeIn 0.3s ease both;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-title {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  margin: 0;
+  line-height: 1.2;
+}
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  color: var(--color-primary);
+  line-height: 1.2;
+}
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.event-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 560px;
+}
+.event-table th,
+.event-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+.event-table th {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--color-muted-foreground);
+  letter-spacing: 0.05em;
+  background: var(--color-muted);
+  white-space: nowrap;
+}
+.event-table td { color: var(--color-foreground); }
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-muted-foreground);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-left: 2px solid transparent;
+  transition: background 0.15s, color 0.15s;
+}
+.sidebar-link:hover,
+.sidebar-link.active {
+  color: var(--color-primary);
+  border-left-color: var(--color-primary);
+  background: var(--color-accent);
+}
+.toast-stack {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: var(--z-toast);
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+const events = [
+  { id: 1, title: '春季校园人工智能论坛', date: '2026-03-15', time: '14:00', location: '图书馆报告厅', status: '报名中', spots: 120 },
+  { id: 2, title: '开源软件工作坊', date: '2026-03-18', time: '18:30', location: '信工楼 302', status: '已结束', spots: 40 },
+  { id: 3, title: '数据可视化设计分享', date: '2026-03-22', time: '19:00', location: '设计学院展厅', status: '即将开始', spots: 80 },
+  { id: 4, title: '毕业生求职经验谈', date: '2026-03-25', time: '16:00', location: '学生活动中心', status: '报名中', spots: 200 }
+];
+
+const members = [
+  { name: '陈一楠', role: '管理员', initials: '陈' },
+  { name: '林思远', role: '编辑', initials: '林' },
+  { name: '王雨桐', role: '志愿者', initials: '王' },
+  { name: '张子轩', role: '志愿者', initials: '张' }
+];
+
+const Toast = ({ t, onClose }) => (
+  <div data-component="toast" className={`toast toast-${t.type}`} role="status">
+    <i data-lucide={t.type === 'success' ? 'check-circle' : t.type === 'error' ? 'alert-circle' : 'info'} className="toast-icon"></i>
+    <span className="toast-message">{t.message}</span>
+    <button className="toast-close" aria-label="关闭" onClick={() => onClose(t.id)}>
+      <i data-lucide="x" style={{ width: 16, height: 16 }}></i>
+    </button>
+  </div>
+);
+
+const TopNav = ({ onNotify }) => (
+  <nav data-component="navbar" className="navbar">
+    <div className="navbar-brand uikit-truncate">FZTBUCS 管理后台</div>
+    <div className="navbar-links">
+      <a href="#" className="navbar-link">看板</a>
+      <a href="#" className="navbar-link">活动</a>
+      <a href="#" className="navbar-link">成员</a>
+    </div>
+    <div className="navbar-actions">
+      <button className="navbar-btn navbar-btn-outline" onClick={onNotify}>通知</button>
+      <button className="navbar-btn" onClick={onNotify}>新建</button>
+    </div>
+  </nav>
+);
+
+const Sidebar = ({ active, setView }) => {
+  const items = [
+    ['dashboard', '活动概览', 'layout-dashboard'],
+    ['create', '发布活动', 'plus'],
+    ['members', '成员设置', 'users']
+  ];
+  return (
+    <aside className="uikit-sidebar">
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 500 }}>FZTBUCS</div>
+        <div className="meta-mono" style={{ marginTop: 4 }}>校园活动平台</div>
+      </div>
+      <nav>
+        {items.map(([key, label, icon]) => (
+          <a
+            key={key}
+            href="#"
+            className={`sidebar-link ${active === key ? 'active' : ''}`}
+            onClick={(e) => { e.preventDefault(); setView(key); }}
+          >
+            <i data-lucide={icon} style={{ width: 16, height: 16, flexShrink: 0 }}></i>
+            <span className="uikit-truncate">{label}</span>
+          </a>
+        ))}
+      </nav>
+    </aside>
+  );
+};
+
+const Dashboard = ({ addToast }) => (
+  <div className="screen">
+    <TopNav onNotify={() => addToast('info', '已发送系统通知')} />
+    <h1 className="page-title">活动概览</h1>
+    <div className="uikit-responsive-grid">
+      <article data-component="card" className="card">
+        <div className="card-body">
+          <div className="stat-value">12</div>
+          <div className="stat-label">本月活动</div>
+        </div>
+      </article>
+      <article data-component="card" className="card">
+        <div className="card-body">
+          <div className="stat-value">1,248</div>
+          <div className="stat-label">累计报名</div>
+        </div>
+      </article>
+    </div>
+    <div className="uikit-toolbar">
+      <div data-component="input" className="field-wrapper" style={{ flex: 1, maxWidth: 320, minWidth: 160 }}>
+        <label className="field-label" htmlFor="search">搜索活动</label>
+        <input id="search" className="field" type="text" placeholder="输入活动名称..." />
+      </div>
+      <button data-component="button" className="btn btn-sm btn-outline">
+        <i data-lucide="filter" style={{ width: 14, height: 14 }}></i>
+        筛选
+      </button>
+      <button data-component="button" className="btn btn-sm btn-primary" onClick={() => addToast('success', '已创建草稿活动')}>
+        发布活动
+      </button>
+    </div>
+    <div className="uikit-table-wrap">
+      <table className="event-table">
+        <thead>
+          <tr>
+            <th>活动名称</th>
+            <th>时间</th>
+            <th>地点</th>
+            <th>状态</th>
+            <th>名额</th>
+            <th className="uikit-action-cell">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {events.map((e) => (
+            <tr key={e.id}>
+              <td className="uikit-truncate" style={{ maxWidth: 220 }}>{e.title}</td>
+              <td className="uikit-nowrap">{e.date} {e.time}</td>
+              <td className="uikit-truncate" style={{ maxWidth: 140 }}>{e.location}</td>
+              <td><span className="status-pill">{e.status}</span></td>
+              <td className="uikit-nowrap">{e.spots}</td>
+              <td className="uikit-action-cell">
+                <button className="uikit-action btn btn-sm btn-outline" onClick={() => addToast('success', '已复制活动链接')}>
+                  复制
+                </button>
+                <button className="btn btn-sm btn-primary" style={{ padding: '0.375rem 0.5rem' }} onClick={() => addToast('info', '进入编辑模式')}>
+                  <i data-lucide="edit" style={{ width: 14, height: 14 }}></i>
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <div className="uikit-responsive-grid">
+      {events.slice(0, 2).map((e) => (
+        <article key={e.id} data-component="card" className="card">
+          <header className="card-header">
+            <h3 className="card-title">{e.title}</h3>
+            <span className="card-meta">{e.date} · {e.time}</span>
+          </header>
+          <div className="card-body">{e.location} · {e.status}</div>
+          <div className="card-footer">
+            <button data-component="button" className="btn btn-sm btn-outline">查看详情</button>
+            <button data-component="button" className="btn btn-sm btn-primary">立即报名</button>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+);
+
+const CreateEvent = ({ addToast }) => (
+  <div className="screen">
+    <TopNav onNotify={() => addToast('info', '通知已发送')} />
+    <h1 className="page-title">发布活动</h1>
+    <article data-component="card" className="card">
+      <header className="card-header">
+        <h3 className="card-title">活动信息</h3>
+        <span className="card-meta">STEP 01 / 基础资料</span>
+      </header>
+      <div className="card-body">
+        <div className="uikit-responsive-grid">
+          <div data-component="input" className="field-wrapper">
+            <label className="field-label" htmlFor="title">活动标题</label>
+            <input id="title" className="field" type="text" placeholder="例如：春季人工智能论坛" />
+          </div>
+          <div data-component="input" className="field-wrapper">
+            <label className="field-label" htmlFor="location">活动地点</label>
+            <input id="location" className="field" type="text" placeholder="例如：图书馆报告厅" />
+          </div>
+        </div>
+        <div className="uikit-responsive-grid" style={{ marginTop: 16 }}>
+          <div data-component="input" className="field-wrapper">
+            <label className="field-label" htmlFor="date">日期</label>
+            <input id="date" className="field" type="date" />
+          </div>
+          <div data-component="input" className="field-wrapper">
+            <label className="field-label" htmlFor="time">时间</label>
+            <input id="time" className="field" type="time" />
+          </div>
+        </div>
+        <div data-component="input" className="field-wrapper" style={{ marginTop: 16 }}>
+          <label className="field-label" htmlFor="desc">活动简介</label>
+          <input id="desc" className="field" type="text" placeholder="一句话介绍活动亮点..." />
+        </div>
+      </div>
+      <div className="card-footer">
+        <button data-component="button" className="btn btn-md btn-outline">保存草稿</button>
+        <button data-component="button" className="btn btn-md btn-primary" onClick={() => addToast('success', '活动发布成功')}>
+          确认发布
+        </button>
+      </div>
+    </article>
+  </div>
+);
+
+const Members = ({ addToast }) => (
+  <div className="screen">
+    <TopNav onNotify={() => addToast('info', '成员列表已更新')} />
+    <h1 className="page-title">成员与设置</h1>
+    <div className="uikit-responsive-grid">
+      {members.map((m, i) => (
+        <article key={i} data-component="card" className="card">
+          <div className="card-body" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <span data-component="avatar" className="avatar avatar-md avatar-bordered">
+              <span className="avatar-fallback">{m.initials}</span>
+            </span>
+            <div style={{ minWidth: 0 }}>
+              <h3 className="card-title" style={{ margin: 0 }}>{m.name}</h3>
+              <div className="card-meta">{m.role}</div>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+    <article data-component="card" className="card">
+      <header className="card-header">
+        <h3 className="card-title">通知设置</h3>
+      </header>
+      <div className="card-body">
+        <div className="uikit-toolbar">
+          <div data-component="input" className="field-wrapper" style={{ flex: 1, maxWidth: 320, minWidth: 160 }}>
+            <label className="field-label" htmlFor="email">联系邮箱</label>
+            <input id="email" className="field" type="email" placeholder="club@example.edu.cn" />
+          </div>
+          <button data-component="button" className="btn btn-md btn-primary" onClick={() => addToast('success', '设置已保存')}>
+            保存
+          </button>
+        </div>
+      </div>
+    </article>
+  </div>
+);
+
+const App = () => {
+  const [view, setView] = useState('dashboard');
+  const [toasts, setToasts] = useState([]);
+
+  const addToast = (type, message) => {
+    const id = Date.now() + Math.random();
+    setToasts((ts) => [...ts, { id, type, message }]);
+    setTimeout(() => setToasts((ts) => ts.filter((t) => t.id !== id)), 3000);
+  };
+  const removeToast = (id) => setToasts((ts) => ts.filter((t) => t.id !== id));
+
+  useEffect(() => {
+    if (window.lucide) window.lucide.createIcons();
+  });
+
+  return (
+    <div className="uikit-shell" data-layout-guard="uikit-v1" style={{ '--uikit-sidebar-w': '220px' }}>
+      <Sidebar active={view} setView={setView} />
+      <main className="uikit-main">
+        {view === 'dashboard' && <Dashboard addToast={addToast} />}
+        {view === 'create' && <CreateEvent addToast={addToast} />}
+        {view === 'members' && <Members addToast={addToast} />}
+      </main>
+      <div className="toast-stack">
+        {toasts.map((t) => (
+          <Toast key={t.id} t={t} onClose={removeToast} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

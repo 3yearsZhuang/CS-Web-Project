@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 2,
+  "slug": "toast",
+  "name": "Toast",
+  "sourceKind": "structured-spec",
+  "confidence": "medium",
+  "semanticTypeCandidates": ["toast", "notification"],
+  "variantDimensions": {
+    "variant": ["info", "success", "error"],
+    "state": ["default", "dismissed"]
+  },
+  "representativeVariants": [
+    { "variant": "info", "state": "default" },
+    { "variant": "success", "state": "default" },
+    { "variant": "error", "state": "default" }
+  ],
+  "anatomy": {
+    "parts": [
+      { "name": "root", "role": "notification container" },
+      { "name": "icon", "role": "variant indicator icon" },
+      { "name": "message", "role": "short status text" },
+      { "name": "close", "role": "dismiss action" }
+    ],
+    "requiredParts": ["root", "message"]
+  },
+  "structurePatterns": {
+    "layout": "flex row, gap-3, align-center, full width on mobile / max-width on desktop",
+    "text": "sans body text, 13px",
+    "spacing": "px-4 py-3",
+    "radius": "0",
+    "borders": "1px solid var(--border) with left 3px accent border",
+    "colors": {
+      "info": "var(--card) background, var(--primary) left border",
+      "success": "var(--card) background, var(--chart-3) left border",
+      "error": "var(--card) background, var(--destructive) left border"
+    }
+  },
+  "usageHints": {
+    "whenToUse": "Feedback after user actions, async operation completion, form errors",
+    "accessibility": "Use role=status/alert; include close button with aria-label",
+    "doNot": "Do not stack more than 3 toasts; avoid persistent toasts without dismissal"
+  },
+  "doNotInvent": ["No progress toast variant", "No action buttons inside toast"],
+  "unknowns": []
+}

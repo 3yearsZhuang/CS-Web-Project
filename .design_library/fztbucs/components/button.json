@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 2,
+  "slug": "button",
+  "name": "Button",
+  "sourceKind": "structured-spec",
+  "confidence": "medium",
+  "semanticTypeCandidates": ["button"],
+  "variantDimensions": {
+    "variant": ["primary", "outline", "danger"],
+    "size": ["md", "sm"],
+    "state": ["default", "hover", "disabled", "loading"]
+  },
+  "representativeVariants": [
+    { "variant": "primary", "size": "md", "state": "default" },
+    { "variant": "primary", "size": "sm", "state": "default" },
+    { "variant": "outline", "size": "md", "state": "default" },
+    { "variant": "outline", "size": "sm", "state": "default" },
+    { "variant": "danger", "size": "md", "state": "default" },
+    { "variant": "primary", "size": "md", "state": "disabled" },
+    { "variant": "primary", "size": "md", "state": "loading" }
+  ],
+  "anatomy": {
+    "parts": [
+      { "name": "root", "role": "interactive button element" },
+      { "name": "icon", "role": "optional leading icon" },
+      { "name": "label", "role": "uppercase mono text" },
+      { "name": "spinner", "role": "loading indicator" }
+    ],
+    "requiredParts": ["root", "label"]
+  },
+  "structurePatterns": {
+    "layout": "inline-flex row with gap",
+    "text": "12px / 11px mono uppercase, tracking 0.1em",
+    "spacing": "px-6 py-3 for md; px-3 py-1.5 for sm",
+    "radius": "0 (editorial squared)",
+    "borders": "1px solid var(--border) for outline variant",
+    "colors": {
+      "primary": "var(--primary) background, var(--primary-foreground) text",
+      "outline": "transparent background, var(--foreground) text, var(--border) border",
+      "danger": "var(--destructive) background, var(--destructive-foreground) text"
+    }
+  },
+  "usageHints": {
+    "whenToUse": "Primary actions, destructive actions, secondary actions in forms and dialogs",
+    "accessibility": "Focus-visible outline via --primary; disabled state uses opacity 0.3",
+    "doNot": "Do not use danger variant for non-destructive actions; avoid mixing multiple primary buttons in one form"
+  },
+  "doNotInvent": ["No ghost variant", "No icon-only variant", "No rounded radius"],
+  "unknowns": []
+}

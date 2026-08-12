@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 2,
+  "slug": "input",
+  "name": "Input",
+  "sourceKind": "structured-spec",
+  "confidence": "medium",
+  "semanticTypeCandidates": ["input", "textarea", "select"],
+  "variantDimensions": {
+    "as": ["input", "textarea", "select"],
+    "state": ["default", "error", "disabled"]
+  },
+  "representativeVariants": [
+    { "as": "input", "state": "default" },
+    { "as": "input", "state": "error" },
+    { "as": "textarea", "state": "default" },
+    { "as": "select", "state": "default" }
+  ],
+  "anatomy": {
+    "parts": [
+      { "name": "wrapper", "role": "vertical stack container" },
+      { "name": "label", "role": "meta-mono caption above field" },
+      { "name": "field", "role": "input / textarea / select element" },
+      { "name": "error", "role": "11px mono destructive message" }
+    ],
+    "requiredParts": ["field"]
+  },
+  "structurePatterns": {
+    "layout": "block-level vertical stack, label + field + error",
+    "text": "foreground text, meta-mono label, 11px mono error",
+    "spacing": "compact padding, full width",
+    "radius": "4px for field (INPUT_CLASS exception)",
+    "borders": "1px solid var(--input)",
+    "colors": {
+      "field": "var(--background) background, var(--foreground) text, var(--input) border",
+      "error": "var(--destructive) text"
+    }
+  },
+  "usageHints": {
+    "whenToUse": "Form fields, search inputs, text areas, dropdown selections",
+    "accessibility": "Associated label via meta-mono; error text below field",
+    "doNot": "Do not remove label for complex forms"
+  },
+  "doNotInvent": ["No floating label", "No helper text slot beyond error"],
+  "unknowns": ["Exact INPUT_CLASS padding values are encoded in the frontend utility file"]
+}

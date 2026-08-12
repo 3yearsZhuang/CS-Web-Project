@@ -1,13 +1,13 @@
 # 数据迁移与多数据库支持评估报告（RootDoc-MigEval）
 
 > 更新人：3yearsZ
-> 最后更新：2026-08-09（并入原 `CS-Web-Frontend/tools/docs/FrontDoc-PGMig.md` 前端迁移执行细节为 §八，原文件删除）
+> 最后更新：2026-08-09（补充 §八 前端迁移执行细节）
 > 评估内容时点：2026-08-05（归档说明见下）
 > 评估对象：`CS-Web-Frontend/data/app.db`（SQLite，旧前端单体数据库）
 > 目标库：`CS-Web-Backend` 后端 PostgreSQL（库名 `domefff`，Alembic 管理）
 > 评估日期：2026-08-05
 >
-> ⚠️ **归档说明（2026-08-07，2026-08-09 补充）**：本报告为迁移**执行前**的时点评估记录，文中"前端已原生支持 SQLite/PG 双引擎""`shared/db` 为迁移过渡期保留"等描述反映 2026-08-05 状态。迁移已于 2026-08-05 完成，前端 `src/shared/db/*`、遗留脚本与 `better-sqlite3` 依赖已于 2026-08-06/07 全部删除，当前前端零 SQLite、纯 BFF。本文保留作为迁移决策历史审计证据。2026-08-09 并入原 `CS-Web-Frontend/tools/docs/FrontDoc-PGMig.md`（前端迁移执行细节与踩坑记录，§八）。
+> ⚠️ **归档说明（2026-08-07，2026-08-09 补充）**：本报告为迁移**执行前**的时点评估记录，文中"前端已原生支持 SQLite/PG 双引擎""`shared/db` 为迁移过渡期保留"等描述反映 2026-08-05 状态。迁移已于 2026-08-05 完成，前端 `src/shared/db/*`、遗留脚本与 `better-sqlite3` 依赖已于 2026-08-06/07 全部删除，当前前端零 SQLite、纯 BFF。本文保留作为迁移决策历史审计证据。
 
 ---
 
@@ -110,7 +110,7 @@
 
 ### 4.1 迁移脚本（必须新建）
 
-`CS-Web-Frontend/tools/scripts/migrate-sqlite-to-pg.mjs`（迁移计划 Phase 6 已规划并实现、于 2026-08-05 完成数据迁移；**该脚本已于 2026-08-07 随 SQLite 清理一并删除，见文首归档说明**），详见 `CS-Web-Frontend/tools/docs/FrontDoc-PGMig.md` 的用法说明，实际执行结果见 `项目演变历史.md` 的"数据迁移"节）：
+`CS-Web-Frontend/tools/scripts/migrate-sqlite-to-pg.mjs`（迁移计划 Phase 6 已规划并实现、于 2026-08-05 完成数据迁移；**该脚本已于 2026-08-07 随 SQLite 清理一并删除，见文首归档说明**），用法与执行细节见本文 §八，实际执行结果见 `项目演变历史.md` 的"数据迁移"节）：
 1. 读 SQLite → 建 `UUID → Integer` 全局映射（含 users、events、community_posts 等所有主表）。
 2. 按外键依赖顺序导入：`roles` → `users`（派生 username、映射角色、scrypt 哈希搬移）→ `community_categories` → `community_posts` → `community_comments` → `events` → `exams/questions/options` → `resources` → `component_registry*` 等。
 3. 类型转换：布尔、日期 ISO→tz、JSON 文本→jsonb。
@@ -222,17 +222,16 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 
 - 源库：`CS-Web-Frontend/data/app.db` 43 张表，~1700 行（含 1458 组件变体种子），users 15 人（UUID 主键）。
 - 目标库：`domefff` 本地 PG 运行中，52 张表（Alembic 建），已有 1 seed 用户。
-- 迁移计划：后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md` §六 迁移验证（原 `BackDoc-MigV.md` 已并入）Phase 6 已规划数据迁移脚本，**脚本 `migrate-sqlite-to-pg.mjs` 已于 2026-08-05 实现并跑通（19 张表全部入库，外键完整、类型转换正确），该脚本已于 2026-08-07 删除**。
+- 迁移计划：后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md` §六 迁移验证 Phase 6 已规划数据迁移脚本，**脚本 `migrate-sqlite-to-pg.mjs` 已于 2026-08-05 实现并跑通（19 张表全部入库，外键完整、类型转换正确），该脚本已于 2026-08-07 删除**。
 - 主键差异：后端 `app/models/user.py` 明确 `id: Mapped[int]`；SQLite users 为 TEXT UUID。
 - 现行 Alembic head（2026-08-08）：**`d3e4f5a6b7c8`**（详见本文 §七）；`focus_sessions` 迁移 `c2d3e4f5a6b7`。
 
 ---
 
-## 八、前端迁移执行细节（原 FrontDoc-PGMig.md 并入，已归档）
+## 八、前端迁移执行细节
 
-> 本节承接原 `CS-Web-Frontend/tools/docs/FrontDoc-PGMig.md`（2026-08-09 并入，原文件删除）。
 > 状态：✅ **已归档**（2026-08-07）。迁移已于 2026-08-05 执行完成（19 张表全量入库）；迁移脚本 `tools/scripts/migrate-sqlite-to-pg.mjs` 与前端全部 SQLite 依赖（`better-sqlite3`）已于 2026-08-07 随清理删除。如需重跑（不应发生），可从 git 历史恢复脚本并临时安装依赖。
-> 关联：数据库双引擎演进与迁移规划见本文 §八（迁移执行细节，原 FrontDoc-PGMig 已并入）；前端架构见 `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md`。
+> 关联：数据库双引擎演进与迁移规划见本文 §八；前端架构见 `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md`。
 
 ### 8.1 迁移历史概述
 
@@ -300,9 +299,9 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 
 ### 8.5 关联文档
 
-- 迁移规划 / 双引擎演进：见本文 §八（迁移执行细节，原 FrontDoc-PGMig 已并入）
+- 迁移规划 / 双引擎演进：见本文 §八
 - 运维 / 回滚流程：`CS-Web-Frontend/tools/docs/FrontDoc-Ops.md`
-- 后端迁移计划与验证：`CS-Web-Backend/tools/docs/BackDoc-Infra.md` §六 迁移验证（原 `BackDoc-MigV.md` 已并入）
+- 后端迁移计划与验证：`CS-Web-Backend/tools/docs/BackDoc-Infra.md` §六 迁移验证
 
 ---
 
@@ -311,4 +310,4 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 - **迁移 head 与任务参数卡不一致**：本文任务参数卡标注"迁移 head = `a3b4c5d6e7f8`"，但当前代码（2026-08-08）实际 Alembic head 为 **`d3e4f5a6b7c8`**（`a3b4c5d6e7f8` 为链上中间里程碑，提供中文检索 zhparser 能力）。本文以代码实际状态为准写入 §七；参数卡口径需由主理人校正。
 - **`focus_sessions` 迁移 ID 已确认**：`c2d3e4f5a6b7`，与参数卡一致。
 - **SQLite 双引擎 / `migrate-sqlite-to-pg.mjs`**：已删除并归档（见文首），现行无此能力，无待补数据。
-- **外部链接核查**：本文引用的 `BackDoc-Infra.md` / `项目演变历史.md` / `项目待办事项.md` 均存在，无坏链；原 `FrontDoc-PGMig.md` 已于 2026-08-09 并入本文 §八（原文件删除）；已删除文件（`migrate-sqlite-to-pg.mjs`、`BackDoc-MigV.md`）均在正文显式标注"已删除/已并入"，非失效引用。
+- **外部链接核查**：本文引用的 `BackDoc-Infra.md` / `项目演变历史.md` / `项目待办事项.md` 均存在，无坏链；已删除文件（`migrate-sqlite-to-pg.mjs`、`BackDoc-MigV.md`）均在正文显式标注"已删除/已并入"，非失效引用。

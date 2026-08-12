@@ -1,0 +1,1054 @@
+/**
+ * 全局样式与主题变量 — 编辑式技术极简 (Editorial Tech Minimalism)
+ *
+ * 设计原则：
+ * - 深蓝 #1e40af 作为浅色模式强调色，琥珀金 #d4a574 作为深色模式强调色
+ * - Fraunces 变体衬线作为展示字体，JetBrains Mono 作为元数据字体
+ * - 严格 12 栏栅格 + 数字章节标记 + 1px 发丝线
+ * - 克制动效：clip-path 揭示 + 字符级文字动画
+ *
+ * 主题色：浅色模式深蓝 #1e40af / 深色模式琥珀金 #d4a574
+ */
+
+/* 字体加载（CodeGov-F1）— 拉丁字族本地托管 + CJK 经 @import
+ *
+ * 字体策略（编辑式技术极简）：
+ * - Fraunces (variable serif) — 英文展示衬线（next/font/local 本地托管，CSS 变量 --font-fraunces）
+ * - Noto Serif SC — 中文展示衬线（与 Fraunces 配对；体积大，经 @import 从 Google CDN 拉取）
+ * - Manrope — 英文正文（next/font/local 本地托管，CSS 变量 --font-manrope）
+ * - Noto Sans SC — 中文正文（思源黑体；体积大，经 @import 从 Google CDN 拉取）
+ * - JetBrains Mono — 等宽元数据（next/font/local 本地托管，CSS 变量 --font-jetbrains）
+ *
+ * 拉丁字族已自托管（消除外链依赖）；仅 CJK 两个字族保留 @import（本地全量托管体积过大不现实）。
+ * display=swap 保证字体加载期间不阻塞首屏渲染（使用 fallback 字体过渡）。
+ */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300..700&family=Noto+Serif+SC:wght@300..600&display=swap');
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Tailwind 主题变量映射 */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --z-base: var(--z-base);
+  --z-sticky: var(--z-sticky);
+  --z-banner: var(--z-banner);
+  --z-header: var(--z-header);
+  --z-toast: var(--z-toast);
+  --z-transition: var(--z-transition);
+  --z-overlay: var(--z-overlay);
+  --duration-fast: var(--duration-fast);
+  --duration-base: var(--duration-base);
+  --duration-cinematic: var(--duration-cinematic);
+  --duration-epic: var(--duration-epic);
+  --ease-ark: var(--ease-ark);
+  --font-sans:
+    var(--font-manrope), 'Noto Sans SC', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', ui-sans-serif, system-ui,
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  --font-mono:
+    var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, 'Liberation Mono', 'Courier New', monospace;
+  --font-serif:
+    var(--font-fraunces), 'Noto Serif SC', 'Songti SC', ui-serif,
+    Georgia, Cambria, 'Times New Roman', Times, serif;
+}
+
+/* 运行时字体组合栈 — 供 body / .display-serif / .meta-mono 等 CSS 类引用
+ * （@theme inline 的变量会被内联进工具类、不一定作为运行时变量存在，
+ * 故此处显式定义一份，保证 var(--font-sans/mono/serif) 必然可解析） */
+:root {
+  --font-sans:
+    var(--font-manrope), 'Noto Sans SC', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', ui-sans-serif, system-ui,
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  --font-mono:
+    var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, 'Liberation Mono', 'Courier New', monospace;
+  --font-serif:
+    var(--font-fraunces), 'Noto Serif SC', 'Songti SC', ui-serif,
+    Georgia, Cambria, 'Times New Roman', Times, serif;
+}
+
+/**
+ * 设计系统主题变量 — 双主题（浅色为默认，深色通过 .dark 类切换）
+ *
+ * 浅色：浅粉底 + 深黑紫文字 + 深蓝强调 — 柔和现代
+ * 深色：纯黑底 + 暖白文字 + 琥珀强调 — 深邃技术感
+ */
+
+/* 浅色主题（默认） — 浅粉底 + 深黑紫 + 深蓝强调
+ *
+ * 设计要点：
+ *   - 背景：浅粉 #fdf5f7，温暖柔和，比纯白更有氛围
+ *   - 前景：深黑紫 #1e1233，带紫调的深色，比纯黑更有深度
+ *   - 强调色：深蓝 #1e40af（blue-800），沉稳鲜明
+ *   - 次级色：暖粉灰阶，层次分明
+ *   - 边框：紫调发丝线，融合背景
+ */
+:root {
+  --radius: 0.25rem;
+  /* 圆角例外 token — 编辑式风格默认直角，仅以下语义圆角被允许（见 FrontDoc-UID §11 白名单）：
+   *   --radius-input    输入框 / 行内代码 4px
+   *   --radius-capsule  悬浮胶囊容器 28px
+   *   --radius-capsule-item  胶囊内 Tab 项 22px
+   */
+  --radius-capsule: 28px;
+  --radius-capsule-item: 22px;
+  /* 浮层阴影 token — 克制且无发光：下拉/弹层仅用极淡投影与边框区分层次 */
+  --shadow-popover: 0 4px 24px rgba(0, 0, 0, 0.04);
+  --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.08);
+  --background: #fdf5f7; /* 浅粉底，温暖柔和 */
+  --foreground: #1e1233; /* 深黑紫，比纯黑更有深度 */
+  --card: #ffffff;
+  --card-foreground: #1e1233;
+  --popover: #ffffff;
+  --popover-foreground: #1e1233;
+  --primary: #1e40af; /* 深蓝（blue-800），沉稳鲜明 */
+  --primary-foreground: #ffffff;
+  --secondary: #f0e8ee; /* 暖粉灰 */
+  --secondary-foreground: #1e1233;
+  --muted: #f8eef2; /* 浅粉灰 */
+  --muted-foreground: #6b5572; /* 紫灰，可读性好 */
+  --accent: #e8ecf5; /* 淡蓝灰 */
+  --accent-foreground: #1e1233;
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: #ffffff;
+  --border: rgba(30, 18, 51, 0.08); /* 紫调发丝线 */
+  --input: rgba(30, 18, 51, 0.1);
+  --ring: #1e40af;
+  --chart-1: #1e40af;
+  --chart-2: #ec4899;
+  --chart-3: #14b8a6;
+  --chart-4: #6366f1;
+  --chart-5: #8b5cf6;
+
+  /* 主题切换 token — 用于卡片悬停的细微叠加色 */
+  --hover-overlay: rgba(0, 0, 0, 0.015);
+  /* 装饰网格线 — 白色半透明发丝网格（叠加在深色背景装饰区），GENERAL 2.5 精确值令牌化 */
+  --grid-line: rgba(255, 255, 255, 0.03);
+}
+
+/* 深色主题（通过 .dark 类激活） */
+.dark {
+  --background: #000000;
+  --foreground: #f5f5f4;
+  --card: #0a0a0a;
+  --card-foreground: #f5f5f4;
+  --popover: #0a0a0a;
+  --popover-foreground: #f5f5f4;
+  --primary: #d4a574;
+  --primary-foreground: #000000;
+  --secondary: #131313;
+  --secondary-foreground: #f5f5f4;
+  --muted: #0f0f0f;
+  --muted-foreground: #8a8a85;
+  --accent: #1a1a1a;
+  --accent-foreground: #f5f5f4;
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.06);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: #d4a574;
+  --chart-1: #d4a574;
+  --chart-2: #5bc9c5;
+  --chart-3: #e88565;
+  --chart-4: #c77dba;
+  --chart-5: #8b9dc3;
+
+  --hover-overlay: rgba(255, 255, 255, 0.02);
+  /* 装饰网格线 — 深色主题略亮以保证可见度 */
+  --grid-line: rgba(255, 255, 255, 0.06);
+}
+
+/* z-index 层级 token — 集中管理全站层级，消除 ad-hoc 与注释维护依赖
+ *
+ * 层级体系（由低到高）：
+ *   --z-base       = 10   — 页面主要内容区域
+ *   --z-sticky     = 30   — 粘性页头 hero-acrylic / section-nav / capsule-sidebar
+ *   --z-banner     = 40   — 公告横幅 / 子页面导航
+ *   --z-header     = 50   — 顶部导航栏 / 下拉菜单 / Modal
+ *   --z-toast      = 60   — Toast 消息容器
+ *   --z-transition = 70   — 页面过渡遮罩 (page-transition)
+ *   --z-overlay    = 9998 — 全屏装饰层 (ark-scanline / noise-overlay)
+ *
+ * 注意：--z-banner(z-40) 与 --z-header(z-50) 之间，
+ * Navbar 移动端全屏菜单用 z-[45] 确保高于公告但低于 header，
+ * 该值不纳入 token（仅一处使用，无复用价值）。
+ */
+:root {
+  --z-base: 10;
+  --z-sticky: 30;
+  --z-banner: 40;
+  --z-header: 50;
+  --z-toast: 60;
+  --z-transition: 70;
+  --z-overlay: 9998;
+}
+
+/* 动画时长 token — 替代散落在全站的 duration-[800ms] 等硬编码
+ *
+ * 语义命名，便于全局统调：
+ *   --duration-fast      = 200ms — hover 颜色过渡、微交互
+ *   --duration-base      = 300ms — 标准过渡（常用）
+ *   --duration-cinematic = 800ms — Hero 折叠 / 焦点拉近入场
+ *   --duration-epic      = 1400ms — 首页莫比乌斯环入场
+ *
+ * 缓动曲线统一为项目级 EASE = cubic-bezier(0.16, 1, 0.3, 1)
+ */
+:root {
+  --duration-fast: 200ms;
+  --duration-base: 300ms;
+  --duration-cinematic: 800ms;
+  --duration-epic: 1400ms;
+  --ease-ark: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  letter-spacing: 0;
+  font-feature-settings: 'palt' 1, 'kern' 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* logo 色板 — 仅用于装饰元素（莫比乌斯环、logo 周边光效）
+ * 主色板：粉蓝渐变（黎明日出色调）
+ * 浅色：#a0d0f0 浅蓝 + #f0b0c0 浅粉 + #4070e0 中蓝
+ * 深色：#90d0f0 浅蓝 + #f0c0d0 浅粉 + #5080e0 中蓝（略亮以维持深色背景可见度）
+ */
+:root {
+  --logo-blue: #4070e0;
+  --logo-blue-light: #80a0f0;
+  --logo-blue-pale: #a0d0f0;
+  --logo-pink: #f0b0c0;
+  --logo-pink-pale: #f0c0d0;
+  --logo-gradient: linear-gradient(135deg, #a0d0f0 0%, #f0b0c0 50%, #4070e0 100%);
+}
+
+.dark {
+  --logo-blue: #5080e0;
+  --logo-blue-light: #90c0f0;
+  --logo-blue-pale: #a0d0f0;
+  --logo-pink: #f0b0c0;
+  --logo-pink-pale: #f0c0d0;
+}
+
+/* ============= 编辑式工具类 ============= */
+
+/* 数字章节标记 — [01] [02] 风格 */
+.section-marker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--primary);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* 发丝线 — 极细分割线 */
+.hairline {
+  height: 1px;
+  background: var(--border);
+  width: 100%;
+}
+
+/* 编辑式展示标题 — Fraunces + Noto Serif SC 衬线
+ * 字重 350 介于 light(300) 与 normal(400) 之间，更柔和
+ * opsz auto 让大字号自动用展示光学尺寸
+ * 中文衬线 Noto Serif SC 与 Fraunces 在视觉粗细上对齐 */
+.display-serif {
+  font-family: var(--font-serif);
+  font-weight: 350;
+  font-optical-sizing: auto;
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+  font-feature-settings: 'liga' 1, 'calt' 1, 'kern' 1;
+}
+
+/* 衬线斜体强调 — 用于关键词点缀 */
+.serif-italic {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 350;
+  font-optical-sizing: auto;
+  /* 斜体不压缩字距，保持优雅 */
+  letter-spacing: 0;
+}
+
+/* 元数据标签 — 等宽小字 */
+.meta-mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+}
+
+/* 12 栏栅格 — 可见栅格线（用于背景） */
+.editorial-grid-bg {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px);
+  background-size: calc(100% / 12) 100%;
+}
+
+/* 字符级文字揭示动画 — 从下方clip-path 升起 */
+@keyframes char-reveal {
+  from {
+    clip-path: inset(0 0 100% 0);
+    opacity: 0;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+
+.char-reveal {
+  animation: char-reveal 0.8s var(--ease-ark) forwards;
+  opacity: 0;
+}
+
+/* 滚动揭示 — 整行从左往右擦除出现 */
+@keyframes wipe-right {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.wipe-right {
+  animation: wipe-right 1s var(--ease-ark) forwards;
+}
+
+/* 滚动横向进度线 — 沿顶部移动 */
+@keyframes line-expand {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.line-expand {
+  animation: line-expand 1.2s var(--ease-ark) forwards;
+}
+
+/* 下划线动画 — 从左往右滑出 */
+.underline-grow {
+  position: relative;
+}
+.underline-grow::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 1px;
+  width: 0;
+  background: var(--primary);
+  transition: width 0.4s var(--ease-ark);
+}
+.underline-grow:hover::after {
+  width: 100%;
+}
+
+/* 卡片悬停 — 收敛到极简（去除浮起与发光） */
+.card-minimal {
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+.card-minimal:hover {
+  border-color: var(--primary);
+  background-color: var(--hover-overlay);
+}
+
+/* 焦点状态 — 语义化焦点环（颜色跟随主题 --primary，浅色蓝 / 深色琥珀）
+ * 全局兜底：所有可交互元素统一可见焦点环（键盘可达性基线）。
+ * 新代码统一使用 .focus-ring；.focus-amber 为历史别名（等宽无圆角风格遗留），
+ * 二者行为一致，全局 a/button 等提供基础兜底，互不冲突。
+ */
+.focus-ring:focus-visible,
+.focus-amber:focus-visible {
+  outline: 1px solid var(--primary);
+  outline-offset: 2px;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 1px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ============= 保留的旧工具类（向后兼容） ============= */
+
+/* 噪点纹理 — 大幅降低强度，仅作微妙质感 */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.008;
+  z-index: var(--z-overlay);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* 旧 fade-up — 替换为更克制的版本 */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s var(--ease-ark) forwards;
+  opacity: 0;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease forwards;
+  opacity: 0;
+}
+
+.animate-delay-100 { animation-delay: 100ms; }
+.animate-delay-200 { animation-delay: 200ms; }
+.animate-delay-300 { animation-delay: 300ms; }
+.animate-delay-400 { animation-delay: 400ms; }
+.animate-delay-500 { animation-delay: 500ms; }
+.animate-delay-600 { animation-delay: 600ms; }
+.animate-delay-700 { animation-delay: 700ms; }
+
+/* 旧 tag-badge — 替换为更编辑化的样式 */
+.tag-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  background: transparent;
+  border-radius: 0; /* 编辑化：直角 */
+}
+
+/* 旧 section-divider — 保留 */
+.section-divider {
+  height: 1px;
+  background: var(--border);
+}
+
+/* ============= 长文排版 — 活动详情正文 =============
+ * 编辑式技术极简：衬线正文 + 等宽元信息 + 发丝线分割
+ * 全站唯一权威来源（原散落在 events/[id] 的内联 <style jsx global> 已迁移至此） */
+.prose-ark {
+  --prose-gap: 1.5rem;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.8;
+  letter-spacing: 0.005em;
+  max-width: 68ch;
+}
+
+.prose-ark > * + * {
+  margin-top: var(--prose-gap);
+}
+
+/* 章节标题 */
+.prose-ark h1,
+.prose-ark h2,
+.prose-ark h3,
+.prose-ark h4 {
+  font-family: var(--font-serif);
+  font-weight: 350;
+  font-optical-sizing: auto;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--foreground);
+  scroll-margin-top: 6rem;
+}
+.prose-ark h2 {
+  font-size: 1.6rem;
+  margin-top: 3rem;
+  /* 编辑式章节标记：标题上方加发丝线与章节号风格引导 */
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+.prose-ark h3 {
+  font-size: 1.25rem;
+  margin-top: 2.25rem;
+}
+.prose-ark h4 {
+  font-size: 1.05rem;
+  margin-top: 1.75rem;
+  color: var(--muted-foreground);
+}
+
+/* 行内代码 */
+.prose-ark code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--hover-overlay);
+  border: 1px solid var(--border);
+  padding: 0.1em 0.4em;
+  border-radius: 2px;
+  color: var(--primary);
+}
+
+/* 代码块 — 终端风格 */
+.prose-ark pre {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  background: color-mix(in srgb, var(--muted) 40%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+}
+.prose-ark pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--foreground);
+}
+
+/* 引用 — 左侧发丝线 */
+.prose-ark blockquote {
+  border-left: 2px solid var(--primary);
+  padding-left: 1.25rem;
+  margin-left: 0;
+  color: var(--muted-foreground);
+  font-style: italic;
+  font-family: var(--font-serif);
+  font-weight: 350;
+}
+
+/* 链接 — 下划线从左滑出 */
+.prose-ark a {
+  color: var(--foreground);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  transition: border-color 0.3s var(--ease-ark);
+}
+.prose-ark a:hover {
+  border-color: var(--primary);
+}
+
+/* 有序/无序列表 */
+.prose-ark ul,
+.prose-ark ol {
+  padding-left: 1.5rem;
+}
+.prose-ark li {
+  margin-top: 0.5rem;
+}
+.prose-ark ul li::marker {
+  color: var(--primary);
+}
+.prose-ark ol li::marker {
+  font-family: var(--font-mono);
+  color: var(--muted-foreground);
+}
+
+/* 图片 — 圆角 + 轻微描边 */
+.prose-ark img {
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  width: 100%;
+}
+
+/* 表格 — 等宽元信息 + 发丝线 */
+.prose-ark table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.prose-ark th,
+.prose-ark td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.6rem 0.9rem;
+  text-align: left;
+}
+.prose-ark th {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+/* 水平分割 — 编辑式发丝线 */
+.prose-ark hr {
+  border: 0;
+  height: 1px;
+  background: var(--border);
+  margin: 3rem 0;
+}
+
+/* 动效守卫 — 尊重用户减少动态偏好（全局统一收敛，覆盖全站动效类） */
+@media (prefers-reduced-motion: reduce) {
+  /* 第三方 prose 覆盖 · 已审批（GENERAL 2.5 例外项，须集中） */
+  .prose-ark a,
+  .prose-ark * {
+    transition: none !important;
+  }
+
+  /* 全站 CSS 动画类统一降级：入场/揭示/脉冲动画 → 立即定格完成态 */
+  .char-reveal,
+  .wipe-right,
+  .line-expand,
+  .animate-fade-up,
+  .animate-fade-in,
+  .ark-cinematic-reveal,
+  .ark-wipe-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    filter: none !important;
+  }
+
+  /* 状态圆点脉冲 — 降级为静态 */
+  .ark-status-dot::after {
+    animation: none !important;
+    opacity: 0;
+  }
+
+  /* 下划线滑出 — 直接显示，避免 hover 动画 */
+  .underline-grow::after {
+    transition: none !important;
+  }
+  .underline-grow:hover::after {
+    width: 100%;
+  }
+
+  /* 全局滚动行为 */
+  html {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* 选中文本 — 琥珀色 */
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* 主题切换过渡 — 仅对 body 和特定元素应用，避免 html * 全局选择器造成性能问题
+ * （html * 会让浏览器对每个 DOM 节点每帧计算 transition，配合 Canvas RAF 导致 CPU 满载） */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+body,
+.bg-themed,
+.card-minimal {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* ============= 明日方舟风格视觉元素（ak.hypergryph.com） =============
+ *
+ * 应用位置：
+ *   - .ark-divider // 工业双斜杠分隔
+ *   - .ark-corner-bracket 角标 [ ] 装饰
+ *   - .ark-scanline 扫描线纹理叠加
+ *   - .ark-cinematic-reveal 影院级入场动画
+ *   - .ark-status-dot 状态圆点（脉冲呼吸）
+ */
+
+/* Hero 收缩态亚克力框 — 借鉴彩蛋卡片的毛玻璃质感
+ * 应用位置：各页 Hero 收缩后 sticky 顶栏背景
+ * 60% 背景色保证文字可读性 + 24px 模糊 + 150% 饱和度提升
+ */
+.hero-acrylic {
+  background: color-mix(in srgb, var(--background) 60%, transparent);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-popover);
+}
+
+/* 工业双斜杠分隔标签 — 3yearsZ Design // 风格 */
+.ark-divider {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.ark-divider::before {
+  content: '';
+  width: 16px;
+  height: 1px;
+  background: var(--primary);
+}
+.ark-divider::after {
+  content: '//';
+  color: var(--primary);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* 工业角标 — 包裹标题或卡片的 [ ] 装饰 */
+.ark-corner-bracket {
+  position: relative;
+}
+.ark-corner-bracket::before,
+.ark-corner-bracket::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--primary);
+  pointer-events: none;
+}
+.ark-corner-bracket::before {
+  top: -4px;
+  left: -4px;
+  border-top: 1px solid;
+  border-left: 1px solid;
+}
+.ark-corner-bracket::after {
+  bottom: -4px;
+  right: -4px;
+  border-bottom: 1px solid;
+  border-right: 1px solid;
+}
+
+/* 扫描线纹理 — 极淡的水平扫描线，叠加在背景上
+ * 移除 mix-blend-mode: overlay（会降低文字对比度并触发额外合成层），
+ * 改用普通叠加并调低透明度，兼顾质感与可读性/性能。
+ */
+.ark-scanline {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-overlay);
+  opacity: 0.025;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    currentColor 2px,
+    currentColor 3px
+  );
+  color: var(--foreground);
+}
+
+/* 减少动态偏好下禁用扫描线 */
+@media (prefers-reduced-motion: reduce) {
+  .ark-scanline {
+    opacity: 0;
+  }
+}
+
+/* 状态圆点 — 呼吸脉冲，用于活动状态标记 */
+.ark-status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  position: relative;
+  vertical-align: middle;
+}
+.ark-status-dot::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid var(--primary);
+  animation: ark-pulse 2s ease-out infinite;
+}
+@keyframes ark-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* 影院级揭示 — scale + blur + opacity 慢入
+ * 模拟电影镜头焦点拉近的过程，2 秒内完成 */
+@keyframes ark-cinematic {
+  0% {
+    opacity: 0;
+    transform: scale(1.03);
+    filter: blur(12px);
+  }
+  60% {
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+.ark-cinematic-reveal {
+  animation: ark-cinematic 1.8s var(--ease-ark) forwards;
+  opacity: 0;
+}
+
+/* 横向擦除揭示 — 用于工业感文本行进入 */
+@keyframes ark-wipe-in {
+  from {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+.ark-wipe-in {
+  animation: ark-wipe-in 1s var(--ease-ark) forwards;
+}
+
+/* 链接 hover — 工业感反向擦除 */
+.ark-link {
+  position: relative;
+  display: inline-block;
+  transition: color 0.3s ease;
+}
+.ark-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.5s var(--ease-ark);
+}
+.ark-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* 强制全局 will-change 优化 — 避免首次动画跳帧 */
+.ark-cinematic-reveal,
+.ark-wipe-in {
+  will-change: transform, opacity, filter;
+}
+
+/* ─── 统一按钮系统 — 编辑式技术极简 ───
+ *
+ * 三种标准 variant：
+ *   btn-primary  — 主要操作（solid primary 背景）
+ *   btn-danger   — 破坏性操作（solid destructive 背景）
+ *   btn-outline  — 描边/次要操作（透明 + border）
+ *
+ * 设计原则：
+ *   - 等宽字体 12px uppercase tracking-wider
+ *   - focus-amber 可访问性焦点环
+ *   - disabled:opacity-30 + cursor-not-allowed
+ *   - transition-colors 统一过渡
+ *
+ * 每个 variant 有两个尺寸：
+ *   .btn-primary（大按钮 px-6 py-3）
+ *   .btn-primary-sm（小按钮 px-3 py-1.5 text-[11px]）
+ */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: opacity 0.2s;
+}
+.btn-primary:hover {
+  opacity: 0.9;
+}
+.btn-primary:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-primary-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: opacity 0.2s;
+}
+.btn-primary-sm:hover {
+  opacity: 0.9;
+}
+.btn-primary-sm:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: opacity 0.2s;
+}
+.btn-danger:hover {
+  opacity: 0.9;
+}
+.btn-danger:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 1px solid var(--border);
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-outline:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.btn-outline:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-outline-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background: transparent;
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 1px solid var(--border);
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-outline-sm:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.btn-outline-sm:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Hero 入场统一过渡 — 替代全站散落的 duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)]
+ *
+ * 所有子页面的 Hero 标题/副标题/描述块均使用：
+ *   <div className="hero-reveal">
+ * 等价于同时写入 transition-duration + transition-timing-function，
+ * 配合 motion primitives 的 opacity/transform 属性驱动。
+ */
+.hero-reveal {
+  transition-duration: var(--duration-cinematic);
+  transition-timing-function: var(--ease-ark);
+}

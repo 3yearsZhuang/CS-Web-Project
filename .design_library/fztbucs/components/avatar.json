@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 2,
+  "slug": "avatar",
+  "name": "Avatar",
+  "sourceKind": "structured-spec",
+  "confidence": "medium",
+  "semanticTypeCandidates": ["avatar"],
+  "variantDimensions": {
+    "size": ["sm", "md", "lg"],
+    "state": ["default", "fallback"]
+  },
+  "representativeVariants": [
+    { "size": "sm", "state": "default" },
+    { "size": "md", "state": "default" },
+    { "size": "lg", "state": "fallback" }
+  ],
+  "anatomy": {
+    "parts": [
+      { "name": "root", "role": "circular image container" },
+      { "name": "image", "role": "user photo" },
+      { "name": "fallback", "role": "initials or placeholder icon when image missing" }
+    ],
+    "requiredParts": ["root"]
+  },
+  "structurePatterns": {
+    "layout": "inline-flex, circular overflow hidden",
+    "text": "sans uppercase initials, scaled to size",
+    "spacing": "none",
+    "radius": "50%",
+    "borders": "none or 1px solid var(--border)",
+    "colors": {
+      "background": "var(--muted)",
+      "foreground": "var(--muted-foreground)"
+    },
+    "sizes": {
+      "sm": "24px",
+      "md": "40px",
+      "lg": "64px"
+    }
+  },
+  "usageHints": {
+    "whenToUse": "User profile pictures, author attribution, comment lists",
+    "accessibility": "Include alt text on image; fallback must present initials",
+    "doNot": "Do not use avatar alone as the only user identifier in dense lists"
+  },
+  "doNotInvent": ["No status indicator dot", "No square avatar variant"],
+  "unknowns": []
+}

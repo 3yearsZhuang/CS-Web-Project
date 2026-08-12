@@ -4,7 +4,7 @@
 > 最后更新：2026-08-08（补充 0.9.8 部署要点：可选 LLM_* 环境变量与 Auxilio 降级、/health 健康检查端点、Node>=22 / Python>=3.13 运行环境、docker-compose 子仓库(submodule) 构建上下文）
 > 对应版本：0.9.8（后端 `CS-Web-Backend/app/__init__.py` `__version__ = "0.9.8"`）。部署文档权威基线，端侧细节见深链接。
 > 根级编排层的部署唯一权威。覆盖：本地开发并行启动、容器化全栈部署（db+backend+redis+worker+frontend）、回滚、数据卷与备份。
-> 深链接（各端专项，勿在此重复）：前端 `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md`（Docker/外部反向代理/SLO/Runbook）、后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md`（运维端点 `/health /readyz /metrics/json /status`）。跨端 SLO 与可观测性基线见本文 **§七**（原 `BackDoc-SLO.md` 已并入）。
+> 深链接（各端专项，勿在此重复）：前端 `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md`（Docker/外部反向代理/SLO/Runbook）、后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md`（运维端点 `/health /readyz /metrics/json /status`）。跨端 SLO 与可观测性基线见本文 **§七**。
 
 ---
 
@@ -219,7 +219,7 @@ docker compose exec db psql -U postgres -d domefff -c \
 
 ## 七、SLO 与可观测性基线
 
-> **合并说明**：本章原位于 `CS-Web-Backend/tools/docs/BackDoc-SLO.md`（跨前后端的 SLO 与可观测性基线权威），于 2026-08-07 并入本文，作为根级编排层的 SLO 单一事实源。前端 BFF 端点级 SLO / 错误预算消耗规则 / 评审流程见前端 `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part B（两者为补充关系，非重复）。
+> 本章为根级编排层的 SLO 与可观测性基线单一事实源。前端 BFF 端点级 SLO / 错误预算消耗规则 / 评审流程见前端 `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part B（两者为补充关系，非重复）。
 
 # SLO 与可观测性基线（1.0.0）
 

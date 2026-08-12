@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 2,
+  "slug": "card",
+  "name": "Card",
+  "sourceKind": "structured-spec",
+  "confidence": "medium",
+  "semanticTypeCandidates": ["card"],
+  "variantDimensions": {
+    "state": ["default", "hover"],
+    "density": ["default", "minimal"]
+  },
+  "representativeVariants": [
+    { "state": "default", "density": "default" },
+    { "state": "hover", "density": "minimal" }
+  ],
+  "anatomy": {
+    "parts": [
+      { "name": "root", "role": "content container" },
+      { "name": "header", "role": "optional title / marker area" },
+      { "name": "body", "role": "main content" },
+      { "name": "footer", "role": "optional actions or meta" }
+    ],
+    "requiredParts": ["root"]
+  },
+  "structurePatterns": {
+    "layout": "block container with optional header/body/footer",
+    "text": "sans body, serif headings, mono meta",
+    "spacing": "consistent internal padding",
+    "radius": "0 (editorial squared)",
+    "borders": "1px solid var(--border)",
+    "colors": {
+      "root": "var(--card) background, var(--card-foreground) text",
+      "hover": "border transitions to var(--primary), subtle hover-overlay"
+    }
+  },
+  "usageHints": {
+    "whenToUse": "Grouping related content: event cards, post previews, feature summaries",
+    "accessibility": "Use semantic headings inside card header",
+    "doNot": "Do not nest interactive cards without clear focus target"
+  },
+  "doNotInvent": ["No elevated shadow by default", "No rounded style"],
+  "unknowns": []
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "screensGenerated": 3,
+  "coreComponentsUsed": ["button", "card", "avatar", "input", "navbar", "toast"],
+  "supportComponentsUsed": [],
+  "previewClassReuseRate": 0.85,
+  "hasProductContext": true,
+  "inventedComponents": [],
+  "renderedFromEvidence": [],
+  "interactiveStatesRendered": ["default", "hover", "focus-visible", "disabled", "active"],
+  "primaryActionPerScreen": {
+    "dashboard": "发布活动",
+    "create": "确认发布",
+    "members": "保存"
+  },
+  "warnings": []
+}

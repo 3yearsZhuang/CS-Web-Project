@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Avatar - fztbucs</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  /* Page scaffold — NOT extracted */
+  body { margin: 0; padding: 12px; background: var(--color-background); font-family: var(--font-family-sans); color: var(--color-foreground); }
+  .row { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+  .label { width: 92px; flex-shrink: 0; font-family: var(--font-family-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--color-muted-foreground); text-transform: uppercase; }
+  .divider { border: none; height: 1px; background: var(--color-border); margin: 12px 0; }
+
+  /* @component-css-start */
+  /* Component definitions — extracted to components.css by deterministic script */
+  .avatar { display: inline-flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 50%; flex-shrink: 0; background: var(--color-muted); color: var(--color-muted-foreground); }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar-sm { width: 24px; height: 24px; }
+  .avatar-md { width: 40px; height: 40px; }
+  .avatar-lg { width: 64px; height: 64px; }
+  .avatar-bordered { border: 1px solid var(--color-border); }
+  .avatar-fallback { display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-family-sans); font-weight: 500; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1; white-space: nowrap; }
+  .avatar-sm .avatar-fallback { font-size: 10px; }
+  .avatar-md .avatar-fallback { font-size: 14px; }
+  .avatar-lg .avatar-fallback { font-size: 22px; }
+  /* @component-css-end */
+</style>
+</head>
+<body>
+  <div class="row">
+    <span class="label">默认头像</span>
+    <img class="avatar avatar-sm" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20fill%3D%27%23e8ecf5%27%2F%3E%3Ccircle%20cx%3D%2732%27%20cy%3D%2724%27%20r%3D%2712%27%20fill%3D%27%236b5572%27%2F%3E%3Cpath%20d%3D%27M8%2060c0-12%2010.7-22%2024-22s24%2010%2024%2022%27%20fill%3D%27%236b5572%27%2F%3E%3C%2Fsvg%3E" alt="用户头像" data-evidence-sample="sm-default">
+    <img class="avatar avatar-md" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20fill%3D%27%23e8ecf5%27%2F%3E%3Ccircle%20cx%3D%2732%27%20cy%3D%2724%27%20r%3D%2712%27%20fill%3D%27%236b5572%27%2F%3E%3Cpath%20d%3D%27M8%2060c0-12%2010.7-22%2024-22s24%2010%2024%2022%27%20fill%3D%27%236b5572%27%2F%3E%3C%2Fsvg%3E" alt="用户头像" data-evidence-sample="md-default">
+    <img class="avatar avatar-lg" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20fill%3D%27%23e8ecf5%27%2F%3E%3Ccircle%20cx%3D%2732%27%20cy%3D%2724%27%20r%3D%2712%27%20fill%3D%27%236b5572%27%2F%3E%3Cpath%20d%3D%27M8%2060c0-12%2010.7-22%2024-22s24%2010%2024%2022%27%20fill%3D%27%236b5572%27%2F%3E%3C%2Fsvg%3E" alt="用户头像" data-evidence-sample="lg-default">
+  </div>
+  <hr class="divider">
+  <div class="row">
+    <span class="label">文字备选</span>
+    <span class="avatar avatar-sm avatar-fallback avatar-bordered" role="img" aria-label="张明" data-evidence-sample="sm-fallback">张</span>
+    <span class="avatar avatar-md avatar-fallback avatar-bordered" role="img" aria-label="李华" data-evidence-sample="md-fallback">李</span>
+    <span class="avatar avatar-lg avatar-fallback avatar-bordered" role="img" aria-label="王芳" data-evidence-sample="lg-fallback">王</span>
+  </div>
+</body>
+</html>

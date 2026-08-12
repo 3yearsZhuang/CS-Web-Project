@@ -1,0 +1,506 @@
+/**
+ * Design Library — colors_and_type.css
+ * Library: fztbucs
+ * Theme mode: light-dark
+ * Source: structured-spec
+ *
+ * Generated from: .design_library/fztbucs/specs/globals.css
+ *
+ * 编辑式技术极简 (Editorial Tech Minimalism)
+ * - 浅色模式强调色：深蓝 #1e40af
+ * - 深色模式强调色：琥珀金 #d4a574
+ * - Fraunces 变体衬线展示 + JetBrains Mono 元数据等宽
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300..700&family=Noto+Serif+SC:wght@300..600&display=swap');
+
+/* @group-priority: primary, background, card, chart, logo */
+
+/* 运行时字体组合栈 */
+:root {
+  --font-sans:
+    var(--font-manrope), 'Noto Sans SC', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', ui-sans-serif, system-ui,
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif; /* Source: structured-spec */
+  --font-mono:
+    var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, 'Liberation Mono', 'Courier New', monospace; /* Source: structured-spec */
+  --font-serif:
+    var(--font-fraunces), 'Noto Serif SC', 'Songti SC', ui-serif,
+    Georgia, Cambria, 'Times New Roman', Times, serif; /* Source: structured-spec */
+}
+
+/* 浅色主题（默认） — 浅粉底 + 深黑紫 + 深蓝强调 */
+:root {
+  /* background */
+  --background: #fdf5f7; /* Source: structured-spec */
+
+  /* foreground */
+  --foreground: #1e1233; /* Source: structured-spec */
+
+  /* card */
+  --card: #ffffff; /* Source: structured-spec */
+  --card-foreground: #1e1233; /* Source: structured-spec */
+
+  /* popover */
+  --popover: #ffffff; /* Source: structured-spec */
+  --popover-foreground: #1e1233; /* Source: structured-spec */
+
+  /* primary */
+  --primary: #1e40af; /* @primary */ /* Source: structured-spec */
+  --primary-foreground: #ffffff; /* Source: structured-spec */
+
+  /* secondary */
+  --secondary: #f0e8ee; /* Source: structured-spec */
+  --secondary-foreground: #1e1233; /* Source: structured-spec */
+
+  /* accent */
+  --accent: #e8ecf5; /* Source: structured-spec */
+  --accent-foreground: #1e1233; /* Source: structured-spec */
+
+  /* muted */
+  --muted: #f8eef2; /* Source: structured-spec */
+  --muted-foreground: #6b5572; /* Source: structured-spec */
+
+  /* destructive */
+  --destructive: #e7000b; /* Source: structured-spec */
+  --destructive-foreground: #ffffff; /* Source: structured-spec */
+
+  /* border */
+  --border: rgba(30, 18, 51, 0.08); /* Source: structured-spec */
+
+  /* input */
+  --input: rgba(30, 18, 51, 0.1); /* Source: structured-spec */
+
+  /* ring */
+  --ring: #1e40af; /* Source: structured-spec */
+
+  /* chart */
+  --chart-1: #1e40af; /* Source: structured-spec */
+  --chart-2: #ec4899; /* Source: structured-spec */
+  --chart-3: #14b8a6; /* Source: structured-spec */
+  --chart-4: #6366f1; /* Source: structured-spec */
+  --chart-5: #8b5cf6; /* Source: structured-spec */
+
+  /* hover-overlay */
+  --hover-overlay: rgba(0, 0, 0, 0.015); /* Source: structured-spec */
+
+  /* grid-line */
+  --grid-line: rgba(255, 255, 255, 0.03); /* Source: structured-spec */
+
+  /* logo */
+  --logo-blue: #4070e0; /* Source: structured-spec */
+  --logo-blue-light: #80a0f0; /* Source: structured-spec */
+  --logo-blue-pale: #a0d0f0; /* Source: structured-spec */
+  --logo-pink: #f0b0c0; /* Source: structured-spec */
+  --logo-pink-pale: #f0c0d0; /* Source: structured-spec */
+  --logo-gradient: linear-gradient(135deg, #a0d0f0 0%, #f0b0c0 50%, #4070e0 100%); /* Source: structured-spec */
+
+  /* radius */
+  --radius: 0.25rem; /* Source: structured-spec */
+  --radius-capsule: 28px; /* Source: structured-spec */
+  --radius-capsule-item: 22px; /* Source: structured-spec */
+  --radius-sm: calc(var(--radius) - 4px); /* Source: structured-spec */
+  --radius-md: calc(var(--radius) - 2px); /* Source: structured-spec */
+  --radius-lg: var(--radius); /* Source: structured-spec */
+  --radius-xl: calc(var(--radius) + 4px); /* Source: structured-spec */
+  --radius-2xl: calc(var(--radius) + 8px); /* Source: structured-spec */
+  --radius-3xl: calc(var(--radius) + 12px); /* Source: structured-spec */
+  --radius-4xl: calc(var(--radius) + 16px); /* Source: structured-spec */
+
+  /* shadow */
+  --shadow-popover: 0 4px 24px rgba(0, 0, 0, 0.04); /* Source: structured-spec */
+  --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.08); /* Source: structured-spec */
+
+  /* z-index */
+  --z-base: 10; /* Source: structured-spec */
+  --z-sticky: 30; /* Source: structured-spec */
+  --z-banner: 40; /* Source: structured-spec */
+  --z-header: 50; /* Source: structured-spec */
+  --z-toast: 60; /* Source: structured-spec */
+  --z-transition: 70; /* Source: structured-spec */
+  --z-overlay: 9998; /* Source: structured-spec */
+
+  /* motion */
+  --duration-fast: 200ms; /* Source: structured-spec */
+  --duration-base: 300ms; /* Source: structured-spec */
+  --duration-cinematic: 800ms; /* Source: structured-spec */
+  --duration-epic: 1400ms; /* Source: structured-spec */
+  --ease-ark: cubic-bezier(0.16, 1, 0.3, 1); /* Source: structured-spec */
+
+  /* color */
+  --color-background: var(--background); /* Source: structured-spec */
+  --color-foreground: var(--foreground); /* Source: structured-spec */
+  --color-card: var(--card); /* Source: structured-spec */
+  --color-card-foreground: var(--card-foreground); /* Source: structured-spec */
+  --color-popover: var(--popover); /* Source: structured-spec */
+  --color-popover-foreground: var(--popover-foreground); /* Source: structured-spec */
+  --color-primary: var(--primary); /* Source: structured-spec */
+  --color-primary-foreground: var(--primary-foreground); /* Source: structured-spec */
+  --color-secondary: var(--secondary); /* Source: structured-spec */
+  --color-secondary-foreground: var(--secondary-foreground); /* Source: structured-spec */
+  --color-accent: var(--accent); /* Source: structured-spec */
+  --color-accent-foreground: var(--accent-foreground); /* Source: structured-spec */
+  --color-muted: var(--muted); /* Source: structured-spec */
+  --color-muted-foreground: var(--muted-foreground); /* Source: structured-spec */
+  --color-destructive: var(--destructive); /* Source: structured-spec */
+  --color-destructive-foreground: var(--destructive-foreground); /* Source: structured-spec */
+  --color-border: var(--border); /* Source: structured-spec */
+  --color-input: var(--input); /* Source: structured-spec */
+  --color-ring: var(--ring); /* Source: structured-spec */
+  --color-chart-1: var(--chart-1); /* Source: structured-spec */
+  --color-chart-2: var(--chart-2); /* Source: structured-spec */
+  --color-chart-3: var(--chart-3); /* Source: structured-spec */
+  --color-chart-4: var(--chart-4); /* Source: structured-spec */
+  --color-chart-5: var(--chart-5); /* Source: structured-spec */
+  --color-hover-overlay: var(--hover-overlay); /* Source: structured-spec */
+  --color-grid-line: var(--grid-line); /* Source: structured-spec */
+  --color-logo-blue: var(--logo-blue); /* Source: structured-spec */
+  --color-logo-blue-light: var(--logo-blue-light); /* Source: structured-spec */
+  --color-logo-blue-pale: var(--logo-blue-pale); /* Source: structured-spec */
+  --color-logo-pink: var(--logo-pink); /* Source: structured-spec */
+  --color-logo-pink-pale: var(--logo-pink-pale); /* Source: structured-spec */
+  --color-logo-gradient: var(--logo-gradient); /* Source: structured-spec */
+
+  /* font */
+  --font-family-sans: var(--font-sans); /* Source: structured-spec */
+  --font-family-mono: var(--font-mono); /* Source: structured-spec */
+  --font-family-serif: var(--font-serif); /* Source: structured-spec */
+
+  /* type */
+  --type-sans: var(--font-sans); /* Source: structured-spec */
+  --type-mono: var(--font-mono); /* Source: structured-spec */
+  --type-serif: var(--font-serif); /* Source: structured-spec */
+
+  /* shadow-layer */
+  --shadow-popover-layer: var(--shadow-popover); /* Source: structured-spec */
+  --shadow-modal-layer: var(--shadow-modal); /* Source: structured-spec */
+}
+
+/* 深色主题（通过 .dark 类激活） */
+.dark {
+  /* background */
+  --background: #000000; /* Source: structured-spec */
+
+  /* foreground */
+  --foreground: #f5f5f4; /* Source: structured-spec */
+
+  /* card */
+  --card: #0a0a0a; /* Source: structured-spec */
+  --card-foreground: #f5f5f4; /* Source: structured-spec */
+
+  /* popover */
+  --popover: #0a0a0a; /* Source: structured-spec */
+  --popover-foreground: #f5f5f4; /* Source: structured-spec */
+
+  /* primary */
+  --primary: #d4a574; /* @primary */ /* Source: structured-spec */
+  --primary-foreground: #000000; /* Source: structured-spec */
+
+  /* secondary */
+  --secondary: #131313; /* Source: structured-spec */
+  --secondary-foreground: #f5f5f4; /* Source: structured-spec */
+
+  /* accent */
+  --accent: #1a1a1a; /* Source: structured-spec */
+  --accent-foreground: #f5f5f4; /* Source: structured-spec */
+
+  /* muted */
+  --muted: #0f0f0f; /* Source: structured-spec */
+  --muted-foreground: #8a8a85; /* Source: structured-spec */
+
+  /* destructive */
+  --destructive: #e7000b; /* Source: structured-spec */
+  --destructive-foreground: #ffffff; /* Source: structured-spec */
+
+  /* border */
+  --border: rgba(255, 255, 255, 0.06); /* Source: structured-spec */
+
+  /* input */
+  --input: rgba(255, 255, 255, 0.08); /* Source: structured-spec */
+
+  /* ring */
+  --ring: #d4a574; /* Source: structured-spec */
+
+  /* chart */
+  --chart-1: #d4a574; /* Source: structured-spec */
+  --chart-2: #5bc9c5; /* Source: structured-spec */
+  --chart-3: #e88565; /* Source: structured-spec */
+  --chart-4: #c77dba; /* Source: structured-spec */
+  --chart-5: #8b9dc3; /* Source: structured-spec */
+
+  /* hover-overlay */
+  --hover-overlay: rgba(255, 255, 255, 0.02); /* Source: structured-spec */
+
+  /* grid-line */
+  --grid-line: rgba(255, 255, 255, 0.06); /* Source: structured-spec */
+
+  /* logo */
+  --logo-blue: #5080e0; /* Source: structured-spec */
+  --logo-blue-light: #90c0f0; /* Source: structured-spec */
+  --logo-blue-pale: #a0d0f0; /* Source: structured-spec */
+  --logo-pink: #f0b0c0; /* Source: structured-spec */
+  --logo-pink-pale: #f0c0d0; /* Source: structured-spec */
+
+  /* radius */
+  --radius: 0.25rem; /* Source: structured-spec */
+  --radius-capsule: 28px; /* Source: structured-spec */
+  --radius-capsule-item: 22px; /* Source: structured-spec */
+  --radius-sm: calc(var(--radius) - 4px); /* Source: structured-spec */
+  --radius-md: calc(var(--radius) - 2px); /* Source: structured-spec */
+  --radius-lg: var(--radius); /* Source: structured-spec */
+  --radius-xl: calc(var(--radius) + 4px); /* Source: structured-spec */
+  --radius-2xl: calc(var(--radius) + 8px); /* Source: structured-spec */
+  --radius-3xl: calc(var(--radius) + 12px); /* Source: structured-spec */
+  --radius-4xl: calc(var(--radius) + 16px); /* Source: structured-spec */
+
+  /* shadow */
+  --shadow-popover: 0 4px 24px rgba(0, 0, 0, 0.04); /* Source: structured-spec */
+  --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.08); /* Source: structured-spec */
+
+  /* color */
+  --color-background: var(--background); /* Source: structured-spec */
+  --color-foreground: var(--foreground); /* Source: structured-spec */
+  --color-card: var(--card); /* Source: structured-spec */
+  --color-card-foreground: var(--card-foreground); /* Source: structured-spec */
+  --color-popover: var(--popover); /* Source: structured-spec */
+  --color-popover-foreground: var(--popover-foreground); /* Source: structured-spec */
+  --color-primary: var(--primary); /* Source: structured-spec */
+  --color-primary-foreground: var(--primary-foreground); /* Source: structured-spec */
+  --color-secondary: var(--secondary); /* Source: structured-spec */
+  --color-secondary-foreground: var(--secondary-foreground); /* Source: structured-spec */
+  --color-accent: var(--accent); /* Source: structured-spec */
+  --color-accent-foreground: var(--accent-foreground); /* Source: structured-spec */
+  --color-muted: var(--muted); /* Source: structured-spec */
+  --color-muted-foreground: var(--muted-foreground); /* Source: structured-spec */
+  --color-destructive: var(--destructive); /* Source: structured-spec */
+  --color-destructive-foreground: var(--destructive-foreground); /* Source: structured-spec */
+  --color-border: var(--border); /* Source: structured-spec */
+  --color-input: var(--input); /* Source: structured-spec */
+  --color-ring: var(--ring); /* Source: structured-spec */
+  --color-chart-1: var(--chart-1); /* Source: structured-spec */
+  --color-chart-2: var(--chart-2); /* Source: structured-spec */
+  --color-chart-3: var(--chart-3); /* Source: structured-spec */
+  --color-chart-4: var(--chart-4); /* Source: structured-spec */
+  --color-chart-5: var(--chart-5); /* Source: structured-spec */
+  --color-hover-overlay: var(--hover-overlay); /* Source: structured-spec */
+  --color-grid-line: var(--grid-line); /* Source: structured-spec */
+  --color-logo-blue: var(--logo-blue); /* Source: structured-spec */
+  --color-logo-blue-light: var(--logo-blue-light); /* Source: structured-spec */
+  --color-logo-blue-pale: var(--logo-blue-pale); /* Source: structured-spec */
+  --color-logo-pink: var(--logo-pink); /* Source: structured-spec */
+  --color-logo-pink-pale: var(--logo-pink-pale); /* Source: structured-spec */
+
+  /* font */
+  --font-family-sans: var(--font-sans); /* Source: structured-spec */
+  --font-family-mono: var(--font-mono); /* Source: structured-spec */
+  --font-family-serif: var(--font-serif); /* Source: structured-spec */
+
+  /* type */
+  --type-sans: var(--font-sans); /* Source: structured-spec */
+  --type-mono: var(--font-mono); /* Source: structured-spec */
+  --type-serif: var(--font-serif); /* Source: structured-spec */
+
+  /* shadow-layer */
+  --shadow-popover-layer: var(--shadow-popover); /* Source: structured-spec */
+  --shadow-modal-layer: var(--shadow-modal); /* Source: structured-spec */
+}
+
+/* ============= 编辑式工具类 ============= */
+
+/* 数字章节标记 — [01] [02] 风格 */
+.section-marker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--primary);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* 发丝线 — 极细分割线 */
+.hairline {
+  height: 1px;
+  background: var(--border);
+  width: 100%;
+}
+
+/* 编辑式展示标题 — Fraunces + Noto Serif SC 衬线 */
+.display-serif {
+  font-family: var(--font-serif);
+  font-weight: 350;
+  font-optical-sizing: auto;
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+  font-feature-settings: 'liga' 1, 'calt' 1, 'kern' 1;
+}
+
+/* 衬线斜体强调 — 用于关键词点缀 */
+.serif-italic {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 350;
+  font-optical-sizing: auto;
+  letter-spacing: 0;
+}
+
+/* 元数据标签 — 等宽小字 */
+.meta-mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+}
+
+/* 12 栏栅格 — 可见栅格线（用于背景） */
+.editorial-grid-bg {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px);
+  background-size: calc(100% / 12) 100%;
+}
+
+/* 焦点状态 — 语义化焦点环 */
+.focus-ring:focus-visible,
+.focus-amber:focus-visible {
+  outline: 1px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* 标签徽章 — 编辑化样式 */
+.tag-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  background: transparent;
+  border-radius: 0;
+}
+
+/* 章节分割线 — 保留 */
+.section-divider {
+  height: 1px;
+  background: var(--border);
+}
+
+/* Hero 入场统一过渡 */
+.hero-reveal {
+  transition-duration: var(--duration-cinematic);
+  transition-timing-function: var(--ease-ark);
+}
+
+/* ─── 统一按钮系统 — 编辑式技术极简 ─── */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: opacity 0.2s;
+}
+.btn-primary:hover {
+  opacity: 0.9;
+}
+.btn-primary:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-primary-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: opacity 0.2s;
+}
+.btn-primary-sm:hover {
+  opacity: 0.9;
+}
+.btn-primary-sm:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: opacity 0.2s;
+}
+.btn-danger:hover {
+  opacity: 0.9;
+}
+.btn-danger:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 1px solid var(--border);
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-outline:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.btn-outline:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-outline-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background: transparent;
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 1px solid var(--border);
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-outline-sm:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.btn-outline-sm:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}

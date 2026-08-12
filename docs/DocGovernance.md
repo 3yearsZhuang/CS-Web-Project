@@ -50,7 +50,7 @@
 ## 5. 文档结构优化收口（2026-08-09 批次 A，已完成）
 
 - [x] **Onboarding ADR 指针纠偏**：A.4/A.5/A.7 三处原指向被掏空归档 `项目演变历史-0.9.1.md` 的 ADR 指针，改为 → `RootDoc-ADR.md`（L0 索引/速查）+ `项目演变历史.md`（完整记录）+ `项目待办事项.md`（待评估）。消除"活文档引用只读归档"的红线违反。
-- [x] **孤儿文档登记**：`项目待办事项.md`、`FeatureModuleVisibility-Plan.md` 补登 `docs/README.md` 根级表。（FeatureModuleVisibility-Plan.md 已于 2026-08-09 并入 `项目演变历史-0.9.9.md`，原 tools-workbench-redesign-plan.md 同并入）
+- [x] **孤儿文档登记**：`项目待办事项.md`、`FeatureModuleVisibility-Plan.md` 补登 `docs/README.md` 根级表。（FeatureModuleVisibility-Plan.md 已于 2026-08-09 并入 `项目演变历史-0.9.9.md`）
 - [x] **历史引用边界强化**（§2 矩阵 + §3 反模式 #1 改写）：明确活文档**仅可引用历史主索引 `项目演变历史.md`**，禁止引用 `项目演变历史-0.9.x` 等分卷；ADR 完整记录归属主索引、待评估项归 `项目待办事项.md`。
 - [x] **坏锚点修复**（锚点审计发现）：`BackDoc-Infra.md#六迁移验证`→`#六迁移验证migration_verification`（后端 tools/docs/README、FrontDoc-Ops 共 2 处）、`RootDoc-MigEval.md#八前端迁移执行细节原-frontdoc-pgmigm-…`→`…frontdoc-pgmigmd…`（前端 README），共 3 处。
 - [x] **FrontDoc-01-Arch Part B 契约 SSOT 边界**：开头加桥接说明——原始端点契约权威为 `docs/api-reference.md`（自动生成），Part B 仅做模块视图 + BFF 翻译层，不重复罗列原始参数（保留 L1 模块契约权威，未掏空正文）。

@@ -1,0 +1,307 @@
+{
+  "color": {
+    "chart": {
+      "chart-4": {
+        "hex": "#c77dba",
+        "opacity": "1"
+      },
+      "chart-5": {
+        "hex": "#8b9dc3",
+        "opacity": "1"
+      },
+      "chart-3": {
+        "hex": "#e88565",
+        "opacity": "1",
+        "isPrimary": true
+      },
+      "chart-1": {
+        "hex": "#d4a574",
+        "opacity": "1"
+      },
+      "chart-2": {
+        "hex": "#5bc9c5",
+        "opacity": "1"
+      }
+    },
+    "logo": {
+      "logo-blue": {
+        "hex": "#4070e0",
+        "opacity": "1",
+        "isPrimary": true
+      },
+      "logo-blue-light": {
+        "hex": "#80a0f0",
+        "opacity": "1"
+      },
+      "logo-pink": {
+        "hex": "#f0b0c0",
+        "opacity": "1"
+      },
+      "logo-blue-pale": {
+        "hex": "#a0d0f0",
+        "opacity": "1"
+      },
+      "logo-pink-pale": {
+        "hex": "#f0c0d0",
+        "opacity": "1"
+      }
+    },
+    "color": {
+      "color-hover-overlay": {
+        "hex": "#000000",
+        "opacity": "0.015"
+      },
+      "color-popover-foreground": {
+        "hex": "#1e1233",
+        "opacity": "1"
+      },
+      "color-border": {
+        "hex": "#1e1233",
+        "opacity": "0.08"
+      },
+      "color-primary": {
+        "hex": "#1e40af",
+        "opacity": "1"
+      },
+      "color-destructive": {
+        "hex": "#e7000b",
+        "opacity": "1",
+        "isPrimary": true
+      },
+      "color-logo-pink": {
+        "hex": "#f0b0c0",
+        "opacity": "1"
+      },
+      "color-secondary": {
+        "hex": "#f0e8ee",
+        "opacity": "1"
+      },
+      "color-muted": {
+        "hex": "#f8eef2",
+        "opacity": "1"
+      },
+      "color-popover": {
+        "hex": "#ffffff",
+        "opacity": "1"
+      },
+      "color-grid-line": {
+        "hex": "#ffffff",
+        "opacity": "0.03"
+      }
+    },
+    "color-chart": {
+      "color-chart-4": {
+        "hex": "#c77dba",
+        "opacity": "1"
+      },
+      "color-chart-5": {
+        "hex": "#8b9dc3",
+        "opacity": "1"
+      },
+      "color-chart-3": {
+        "hex": "#e88565",
+        "opacity": "1",
+        "isPrimary": true
+      },
+      "color-chart-1": {
+        "hex": "#d4a574",
+        "opacity": "1"
+      },
+      "color-chart-2": {
+        "hex": "#5bc9c5",
+        "opacity": "1"
+      }
+    },
+    "card": {
+      "card-foreground": {
+        "hex": "#1e1233",
+        "opacity": "1",
+        "isPrimary": true
+      },
+      "card": {
+        "hex": "#ffffff",
+        "opacity": "1"
+      }
+    },
+    "popover": {
+      "popover-foreground": {
+        "hex": "#1e1233",
+        "opacity": "1",
+        "isPrimary": true
+      },
+      "popover": {
+        "hex": "#ffffff",
+        "opacity": "1"
+      }
+    },
+    "primary": {
+      "primary": {
+        "hex": "#1e40af",
+        "opacity": "1",
+        "isPrimary": true
+      },
+      "primary-foreground": {
+        "hex": "#ffffff",
+        "opacity": "1"
+      }
+    },
+    "secondary": {
+      "secondary-foreground": {
+        "hex": "#1e1233",
+        "opacity": "1",
+        "isPrimary": true
+      },
+      "secondary": {
+        "hex": "#f0e8ee",
+        "opacity": "1"
+      }
+    },
+    "accent": {
+      "accent-foreground": {
+        "hex": "#1e1233",
+        "opacity": "1",
+        "isPrimary": true
+      },
+      "accent": {
+        "hex": "#e8ecf5",
+        "opacity": "1"
+      }
+    },
+    "muted": {
+      "muted-foreground": {
+        "hex": "#6b5572",
+        "opacity": "1"
+      },
+      "muted": {
+        "hex": "#f8eef2",
+        "opacity": "1",
+        "isPrimary": true
+      }
+    },
+    "destructive": {
+      "destructive": {
+        "hex": "#e7000b",
+        "opacity": "1",
+        "isPrimary": true
+      },
+      "destructive-foreground": {
+        "hex": "#ffffff",
+        "opacity": "1"
+      }
+    },
+    "background": {
+      "background": {
+        "hex": "#fdf5f7",
+        "opacity": "1",
+        "isPrimary": true
+      }
+    },
+    "foreground": {
+      "foreground": {
+        "hex": "#1e1233",
+        "opacity": "1",
+        "isPrimary": true
+      }
+    },
+    "border": {
+      "border": {
+        "hex": "#1e1233",
+        "opacity": "0.08",
+        "isPrimary": true
+      }
+    },
+    "input": {
+      "input": {
+        "hex": "#1e1233",
+        "opacity": "0.1",
+        "isPrimary": true
+      }
+    },
+    "ring": {
+      "ring": {
+        "hex": "#1e40af",
+        "opacity": "1",
+        "isPrimary": true
+      }
+    },
+    "hover-overlay": {
+      "hover-overlay": {
+        "hex": "#000000",
+        "opacity": "0.015",
+        "isPrimary": true
+      }
+    },
+    "grid-line": {
+      "grid-line": {
+        "hex": "#ffffff",
+        "opacity": "0.03",
+        "isPrimary": true
+      }
+    }
+  },
+  "font": {
+    "family": {
+      "font-sans": "var(--font-manrope), 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+      "font-mono": "var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+      "font-serif": "var(--font-fraunces), 'Noto Serif SC', 'Songti SC', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif",
+      "font-family-sans": "var(--font-manrope), 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+      "font-family-mono": "var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+      "font-family-serif": "var(--font-fraunces), 'Noto Serif SC', 'Songti SC', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif"
+    },
+    "size": {
+      "type-sans": "var(--font-manrope), 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+    },
+    "weight": {},
+    "lineHeight": {}
+  },
+  "shadow": {
+    "shadow-popover·Source: structured-spec": {
+      "xOffset": "0px",
+      "yOffset": "4px",
+      "blur": "24px",
+      "spread": "0px",
+      "color": {
+        "hex": "#000000",
+        "opacity": "0.04"
+      }
+    },
+    "shadow-modal·Source: structured-spec": {
+      "xOffset": "0px",
+      "yOffset": "8px",
+      "blur": "40px",
+      "spread": "0px",
+      "color": {
+        "hex": "#000000",
+        "opacity": "0.08"
+      }
+    },
+    "shadow-popover-layer·Source: structured-spec": {
+      "xOffset": "0px",
+      "yOffset": "4px",
+      "blur": "24px",
+      "spread": "0px",
+      "color": {
+        "hex": "#000000",
+        "opacity": "0.04"
+      }
+    },
+    "shadow-modal-layer·Source: structured-spec": {
+      "xOffset": "0px",
+      "yOffset": "8px",
+      "blur": "40px",
+      "spread": "0px",
+      "color": {
+        "hex": "#000000",
+        "opacity": "0.08"
+      }
+    }
+  },
+  "radius": {
+    "radius": "4px",
+    "radius-capsule": "28px",
+    "radius-capsule-item": "22px",
+    "radius-lg": "4px"
+  },
+  "spacing": {},
+  "size": {}
+}

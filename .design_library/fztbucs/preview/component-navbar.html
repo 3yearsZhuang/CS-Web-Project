@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navbar Preview</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  /* Page scaffold — NOT extracted */
+  body { margin: 0; padding: 12px; background: var(--color-background); font-family: var(--font-sans); color: var(--color-foreground); }
+  .row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+  .label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--color-muted-foreground); text-transform: uppercase; min-width: 92px; white-space: nowrap; }
+
+  /* @component-css-start */
+  .navbar { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 16px 24px; background: var(--color-background); color: var(--color-foreground); border-bottom: 1px solid var(--color-border); box-sizing: border-box; position: relative; }
+  .navbar.dark { background: var(--color-foreground); color: var(--color-background); }
+  .navbar-brand { font-family: var(--font-mono); font-size: 14px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; flex-shrink: 0; }
+  .navbar-links { display: flex; align-items: center; gap: 24px; flex-shrink: 0; }
+  .navbar-link { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: inherit; text-decoration: none; padding: 4px 0; transition: color .15s; white-space: nowrap; }
+  .navbar-link:hover { color: var(--color-primary); }
+  .navbar-link:focus-visible { outline: 1px solid var(--color-primary); outline-offset: 2px; }
+  .navbar-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .navbar-btn { display: inline-flex; align-items: center; padding: 8px 16px; background: var(--color-primary); color: var(--color-primary-foreground); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; border: none; cursor: pointer; transition: opacity .2s; white-space: nowrap; min-width: 32px; }
+  .navbar-btn:hover { opacity: .9; }
+  .navbar-btn-outline { background: transparent; color: inherit; border: 1px solid var(--color-border); transition: border-color .2s, color .2s; }
+  .navbar-btn-outline:hover { border-color: var(--color-primary); color: var(--color-primary); opacity: 1; }
+  /* @component-css-end */
+</style>
+</head>
+<body>
+  <div class="row"><span class="label">Light / Default</span></div>
+  <div class="row">
+    <nav class="navbar" aria-label="主导航">
+      <div class="navbar-brand">FztbuCS</div>
+      <div class="navbar-links">
+        <a class="navbar-link" href="#">首页</a>
+        <a class="navbar-link" href="#">产品</a>
+        <a class="navbar-link" href="#">文档</a>
+        <a class="navbar-link" href="#">关于</a>
+      </div>
+      <div class="navbar-actions">
+        <a class="navbar-btn navbar-btn-outline" href="#">登录</a>
+        <a class="navbar-btn" href="#">开始使用</a>
+      </div>
+    </nav>
+  </div>
+  <div class="row"><span class="label">Dark / Default</span></div>
+  <div class="row">
+    <nav class="navbar dark" aria-label="主导航">
+      <div class="navbar-brand">FztbuCS</div>
+      <div class="navbar-links">
+        <a class="navbar-link" href="#">首页</a>
+        <a class="navbar-link" href="#">产品</a>
+        <a class="navbar-link" href="#">文档</a>
+        <a class="navbar-link" href="#">关于</a>
+      </div>
+      <div class="navbar-actions">
+        <a class="navbar-btn navbar-btn-outline" href="#">登录</a>
+        <a class="navbar-btn" href="#">开始使用</a>
+      </div>
+    </nav>
+  </div>
+</body>
+</html>
