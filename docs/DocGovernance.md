@@ -36,7 +36,7 @@
    - 子仓 ↔ 子仓：`../../../CS-Web-*/tools/docs/...`（3 级上溯）
 4. **专题文档（L2）不得重述上层（L0/L1）SSOT**。
 5. **新增文档必须登记**到 `docs/README.md` 索引（见其「新增文档登记规范」）。
-6. **版本号必须四处同步（强制）**：后端 `CS-Web-Backend/pyproject.toml` 的 `version`、后端 `CS-Web-Backend/app/__init__.py` 的 `__version__`、前端 `CS-Web-Frontend/package.json` 的 `version`、后端 `CS-Web-Backend/uv.lock`（根包 `fastapi-witchcat-framework`）须保持一致；**改版本须四处一起改**，任一遗漏即视为缺陷（发布前自检）。
+6. **版本号必须四处同步（强制）**：后端 `CS-Web-Backend/pyproject.toml` 的 `version`、后端 `CS-Web-Backend/app/__init__.py` 的 `__version__`、前端 `CS-Web-Frontend/package.json` 的 `version`、后端 `CS-Web-Backend/uv.lock`（根包 `cs-web-backend`）须保持一致；**改版本须四处一起改**，任一遗漏即视为缺陷（发布前自检）。
 7. **术语一致（强制）**：repo 层统一称「子仓库(submodule)」；代码内模块称「子模块 / 模块」（仅指代码模块，非 repo）。**禁止在 repo 层用「子模块」指代子仓库**。
 
 ## 4. 治理收口待办（非本文件范围，按优先级）

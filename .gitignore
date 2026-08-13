@@ -24,6 +24,7 @@
 *.swo
 *~
 .codebuddy/
+.trae-cn/
 .workbuddy/
 
 # OS
@@ -44,6 +45,9 @@ overview.md
 dump.rdb
 *.rdb
 appendonlydir/
+
+# 构建/CI 临时错误日志（散落根目录的非源码产物；本地排障用，不入库）
+*_err.txt
 
 # 注：pgdata 等为 Docker 命名卷，由 Docker 管理，
 # 不落在工作区目录，无需在此忽略。

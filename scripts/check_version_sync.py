@@ -5,7 +5,7 @@
   1. CS-Web-Backend/pyproject.toml         -> [project].version
   2. CS-Web-Backend/app/__init__.py        -> __version__
   3. CS-Web-Frontend/package.json          -> version
-  4. CS-Web-Backend/uv.lock                -> 包 fastapi-witchcat-framework 的 version
+  4. CS-Web-Backend/uv.lock                -> 包 cs-web-backend 的 version
 
 仅依赖标准库（tomllib 需 Python >= 3.11，与项目 requires-python 一致）。
 适配 CI：exit code 非 0 即失败。
@@ -46,9 +46,9 @@ def _read_uvlock_package() -> str:
     with open(ROOT / "CS-Web-Backend" / "uv.lock", "rb") as f:
         data = tomllib.load(f)
     for pkg in data.get("package", []):
-        if pkg.get("name") == "fastapi-witchcat-framework":
+        if pkg.get("name") == "cs-web-backend":
             return str(pkg["version"])
-    raise RuntimeError("uv.lock 未找到包 fastapi-witchcat-framework")
+    raise RuntimeError("uv.lock 未找到包 cs-web-backend")
 
 
 def main() -> int:
@@ -56,7 +56,7 @@ def main() -> int:
         "pyproject.toml [project].version": _read_pyproject(),
         "app/__init__.py __version__": _read_init_version(),
         "package.json version": _read_package_json(),
-        "uv.lock (fastapi-witchcat-framework)": _read_uvlock_package(),
+        "uv.lock (cs-web-backend)": _read_uvlock_package(),
     }
 
     distinct = set(sources.values())
@@ -71,7 +71,7 @@ def main() -> int:
         print(f"  {marker} {label} = {value}", file=sys.stderr)
     print(
         "请同步更新：pyproject.toml / app/__init__.py / package.json / uv.lock"
-        "（fastapi-witchcat-framework）四处版本号。",
+        "（cs-web-backend）四处版本号。",
         file=sys.stderr,
     )
     return 1
