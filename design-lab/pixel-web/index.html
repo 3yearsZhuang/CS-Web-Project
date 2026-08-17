@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FZTBU·CS — PIXEL CONGREGATION 像素集会</title>
+<!--
+  Pixel Congregation · 像素集会 — 设计哲学落地的完整网页
+  哲学：每一个成员是一个像素；近看是数据，远看是图像。
+  语言系统：
+  - 深墨蓝 #0a0e1a 底 + 30px 像素发丝网格（世界观，不是装饰）
+  - 琥珀 #d4a574 = 点亮 / 粉 #f0b0c0 · 浅蓝 #a0d0f0 · 奶油 #f7ead8 = 成员
+  - 像素字体（Silkscreen / Pixelify）承载机械声；中文宋体只做印章与锚点
+  - 文字是坐标、序列号、单一短句 — 绝不解释图像，只盖印来源
+  - 三屏画布：THE RING(环) → THE DAWN(黎明数据) → THE RECURSION(递归方向)
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Serif+SC:wght@400;600;900&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #0a0e1a;            /* 夜之墨蓝 */
+    --ink-raise: #0e141d;      /* 面板 */
+    --ink-deep: #060a12;       /* 更深 */
+    --amber: #d4a574;
+    --amber-dim: rgba(212, 165, 116, 0.10);
+    --pink: #f0b0c0;
+    --pale: #a0d0f0;
+    --mid: #4070e0;
+    --cream: #f7ead8;
+    --white: #f5f5f4;
+    --muted: #7d8a99;
+    --line: rgba(245, 245, 244, 0.08);
+    --line-strong: rgba(245, 245, 244, 0.16);
+    --pixel: 'Silkscreen', 'Pixelify Sans', monospace;
+    --pix2: 'Pixelify Sans', 'Silkscreen', monospace;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --serif: 'Noto Serif SC', 'Songti SC', serif;
+    --sans: 'Noto Sans SC', 'PingFang SC', system-ui, sans-serif;
+    --cell: 30px;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--ink); color: var(--white);
+    font-family: var(--sans); -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility; overflow-x: hidden;
+    /* 像素发丝网格 — 世界观 */
+    background-image:
+      linear-gradient(to right, rgba(245,245,244,.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(245,245,244,.035) 1px, transparent 1px);
+    background-size: var(--cell) var(--cell);
+  }
+  ::selection { background: var(--amber); color: var(--ink); }
+  :where(a, button):focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+
+  .mono { font-family: var(--mono); }
+  .pix { font-family: var(--pixel); }
+  .t-amber { color: var(--amber); }
+  .t-muted { color: var(--muted); }
+  .t-pink { color: var(--pink); }
+  .t-pale { color: var(--pale); }
+
+  /* ═══════════ 顶栏 — 状态栏 ═══════════ */
+  .topbar {
+    position: fixed; inset: 0 0 auto 0; z-index: 60; height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px; background: rgba(10, 14, 26, 0.82);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+    font-family: var(--pixel); font-size: 12px;
+  }
+  .topbar .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--white); letter-spacing: .08em; }
+  .topbar .brand .mark { width: 14px; height: 14px; background: var(--amber); box-shadow: 0 0 0 1px var(--ink), 0 0 0 3px var(--amber-dim); }
+  .topbar .brand em { font-style: normal; color: var(--amber); }
+  .topbar .coords { color: var(--muted); letter-spacing: .1em; display: none; }
+  .topbar nav { display: flex; gap: 22px; align-items: center; }
+  .topbar nav a { color: var(--muted); text-decoration: none; letter-spacing: .06em; transition: color .2s; }
+  .topbar nav a::before { content: '/'; color: var(--line-strong); margin-right: 6px; }
+  .topbar nav a:hover { color: var(--amber); }
+  .topbar .canvasno { color: var(--muted); }
+
+  /* ═══════════ 通用 ═══════════ */
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 28px; }
+  .kicker { font-family: var(--mono); font-size: 12px; letter-spacing: .18em; color: var(--muted); text-transform: uppercase; display: flex; align-items: center; gap: 14px; }
+  .kicker::before { content: '//'; color: var(--amber); font-weight: 700; }
+  .kicker .rule { flex: 1; height: 1px; background: var(--line); }
+
+  /* ═══════════ HERO — THE RING ═══════════ */
+  .hero { position: relative; min-height: 100vh; display: flex; align-items: center; padding: 120px 0 80px; overflow: hidden; }
+  .hero .ring-wrap {
+    position: absolute; right: -4%; top: 50%; transform: translateY(-50%);
+    width: min(54vw, 640px); height: min(54vw, 640px); pointer-events: none;
+    opacity: .9; z-index: 0;
+  }
+  .hero .ring-wrap .ring { width: 100%; height: 100%; animation: ring-drift 26s ease-in-out infinite alternate; }
+  .hero .ring-mask { position: absolute; inset: 0; background: linear-gradient(to right, var(--ink) 8%, transparent 55%); z-index: 1; }
+  @keyframes ring-drift { from { transform: rotate(0deg) scale(1); } to { transform: rotate(8deg) scale(1.04); } }
+
+  .hero-inner { position: relative; z-index: 2; width: 100%; }
+  .hero .title {
+    font-family: var(--pixel); font-weight: 700;
+    font-size: clamp(46px, 9.5vw, 118px); line-height: 1.02; letter-spacing: .02em;
+    margin-top: 30px;
+  }
+  .hero .title .l2 { color: var(--amber); display: block; }
+  .hero .zh-title {
+    margin-top: 18px; font-family: var(--serif); font-weight: 900;
+    font-size: clamp(20px, 2.6vw, 30px); letter-spacing: .42em; color: var(--cream);
+  }
+  .hero .decl {
+    margin-top: 30px; font-family: var(--mono); font-size: 13px;
+    letter-spacing: .12em; color: var(--muted); text-transform: uppercase;
+  }
+  .hero .decl b { color: var(--amber); font-weight: 500; }
+  .hero-cta { margin-top: 44px; display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 12px; padding: 15px 30px;
+    font-family: var(--pixel); font-size: 14px; letter-spacing: .08em;
+    text-decoration: none; border: 1px solid transparent; cursor: pointer;
+    transition: all .25s var(--ease);
+  }
+  .btn-amber { background: var(--amber); color: var(--ink); font-weight: 700; }
+  .btn-amber:hover { transform: translateY(-2px); box-shadow: 0 10px 34px rgba(212, 165, 116, 0.3); }
+  .btn-line { border-color: var(--line-strong); color: var(--white); background: transparent; }
+  .btn-line:hover { border-color: var(--amber); color: var(--amber); transform: translateY(-2px); }
+  .btn .caret { animation: caret 1.1s steps(1) infinite; }
+  @keyframes caret { 50% { opacity: 0; } }
+
+  .hero .hud {
+    margin-top: 64px; display: flex; align-items: center; gap: 18px;
+    font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .1em;
+  }
+  .hero .hud .px { width: 8px; height: 8px; background: var(--amber); display: inline-block; }
+  .hero .hud .px.pink { background: var(--pink); } .hero .hud .px.pale { background: var(--pale); }
+
+  /* ═══════════ 数据带 — THE DAWN ═══════════ */
+  .dawn { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--ink-deep); position: relative; }
+  .dawn::before {
+    content: ''; position: absolute; inset: 0 0 auto 0; height: 4px;
+    background: linear-gradient(90deg, var(--mid), var(--pale) 34%, var(--pink) 62%, var(--amber) 100%);
+  }
+  .dawn-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .metric { padding: 44px 36px; border-right: 1px solid var(--line); position: relative; }
+  .metric:last-child { border-right: none; }
+  .metric .k { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+  .metric .k .sq { width: 8px; height: 8px; }
+  .metric .v { font-family: var(--pix2); font-weight: 700; font-size: clamp(38px, 4.6vw, 56px); color: var(--white); margin-top: 14px; letter-spacing: .02em; }
+  .metric .v i { font-style: normal; font-size: .45em; color: var(--amber); font-family: var(--mono); }
+  .metric .d { margin-top: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: .1em; color: var(--muted); }
+
+  /* ═══════════ 方向 — THE RECURSION ═══════════ */
+  section.panel { padding: 120px 0; }
+  .panel-head { display: flex; align-items: baseline; gap: 24px; margin-bottom: 64px; }
+  .panel-head h2 { font-family: var(--pix2); font-weight: 700; font-size: clamp(26px, 3.4vw, 42px); letter-spacing: .04em; }
+  .panel-head h2 .n { color: var(--amber); font-size: .55em; vertical-align: middle; margin-right: 14px; font-family: var(--pixel); }
+  .panel-head .rule { flex: 1; height: 1px; background: var(--line); }
+
+  .tracks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .track {
+    position: relative; background: var(--ink-raise); border: 1px solid var(--line);
+    padding: 34px 30px 30px; overflow: hidden; transition: border-color .3s var(--ease), transform .3s var(--ease);
+    color: inherit; text-decoration: none; display: block;
+  }
+  .track, .track * { color: inherit; text-decoration: none; }
+  .track h3 { color: var(--white); }
+  .track:hover { border-color: var(--amber); transform: translateY(-4px); }
+  /* 递归框：内层嵌套 + 角标 + 中心像素 */
+  .track::before {
+    content: ''; position: absolute; top: 18px; right: 18px; width: 64px; height: 64px;
+    border: 1px solid var(--line-strong); pointer-events: none;
+  }
+  .track::after {
+    content: ''; position: absolute; top: 30px; right: 30px; width: 40px; height: 40px;
+    border: 1px solid var(--amber); opacity: .5; pointer-events: none; transition: opacity .3s;
+  }
+  .track:hover::after { opacity: 1; }
+  .track .zoom { position: absolute; top: 20px; right: 26px; font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .1em; }
+  .track .core {
+    position: absolute; bottom: 22px; right: 24px; width: 7px; height: 7px;
+    background: var(--muted); transition: all .3s var(--ease);
+  }
+  .track:hover .core { background: var(--amber); box-shadow: 0 0 0 4px var(--amber-dim), 0 0 18px rgba(212,165,116,.5); }
+  .track .path { font-family: var(--mono); font-size: 11px; color: var(--amber); letter-spacing: .08em; }
+  .track h3 { font-family: var(--pix2); font-weight: 600; font-size: 24px; margin: 18px 0 12px; letter-spacing: .03em; }
+  .track p { color: var(--muted); font-size: 14px; line-height: 1.85; font-family: var(--sans); font-weight: 300; max-width: 26em; }
+  .track .foot { margin-top: 26px; display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .1em; }
+  .track .foot .chip { width: 10px; height: 10px; display: inline-block; }
+  .chip-pink { background: var(--pink); } .chip-pale { background: var(--pale); } .chip-cream { background: var(--cream); }
+
+  /* ═══════════ 活动 — LOG ═══════════ */
+  .log-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 44px; }
+  .log-head h2 { font-family: var(--mono); font-size: 16px; font-weight: 500; color: var(--white); letter-spacing: .06em; }
+  .log-head h2 .p { color: var(--amber); }
+  .log-row {
+    display: grid; grid-template-columns: 150px 96px 1fr auto; gap: 24px; align-items: center;
+    padding: 20px 18px; border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: 13px; text-decoration: none; color: var(--white);
+    transition: background .25s var(--ease); position: relative;
+  }
+  .log-row::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--amber); opacity: 0; transition: opacity .25s; }
+  .log-row:hover { background: var(--amber-dim); }
+  .log-row:hover::before { opacity: 1; }
+  .log-row .ts { color: var(--muted); font-size: 12px; }
+  .log-row .lv { font-size: 10px; letter-spacing: .12em; padding: 4px 8px; text-align: center; }
+  .lv-info { background: rgba(160, 208, 240, 0.12); color: var(--pale); }
+  .lv-warn { background: rgba(240, 176, 192, 0.12); color: var(--pink); }
+  .lv-build { background: rgba(212, 165, 116, 0.12); color: var(--amber); }
+  .log-row .msg { color: var(--white); }
+  .log-row .msg em { font-style: normal; color: var(--amber); font-weight: 500; }
+  .log-row .go { color: var(--muted); transition: all .25s var(--ease); }
+  .log-row:hover .go { color: var(--amber); transform: translateX(5px); }
+
+  /* ═══════════ 招新 — ONE PIXEL MISSING ═══════════ */
+  .recruit { border-top: 1px solid var(--line); background: var(--ink-deep); position: relative; overflow: hidden; }
+  .recruit::after {
+    content: ''; position: absolute; right: -10%; top: 50%; transform: translateY(-50%);
+    width: 46%; height: 46%; background: radial-gradient(circle, var(--amber-dim), transparent 65%);
+    pointer-events: none;
+  }
+  .recruit-inner { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 130px 28px; display: grid; grid-template-columns: 1fr auto; gap: 48px; align-items: center; }
+  .recruit h2 { font-family: var(--pix2); font-weight: 700; font-size: clamp(34px, 5vw, 60px); line-height: 1.15; letter-spacing: .03em; }
+  .recruit h2 .one { color: var(--amber); }
+  .recruit .zh { margin-top: 20px; font-family: var(--serif); font-weight: 600; font-size: 17px; letter-spacing: .35em; color: var(--cream); }
+  .recruit .pct { margin-top: 14px; font-family: var(--mono); font-size: 12px; letter-spacing: .12em; color: var(--muted); }
+  .recruit .pct b { color: var(--amber); }
+  .recruit-cta { margin-top: 40px; display: flex; gap: 14px; flex-wrap: wrap; }
+  /* 印章 */
+  .seal {
+    width: 108px; height: 108px; background: #b03a2c; color: #fdf6ec;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-weight: 900; font-size: 34px; letter-spacing: .1em;
+    border-radius: 10px; box-shadow: 4px 4px 0 rgba(0,0,0,.35);
+    transform: rotate(-4deg); transition: transform .35s var(--ease);
+  }
+  .seal:hover { transform: rotate(0deg) scale(1.04); }
+  .seal-note { margin-top: 18px; font-family: var(--mono); font-size: 10px; letter-spacing: .18em; color: var(--muted); text-align: center; text-transform: uppercase; }
+
+  /* ═══════════ 页脚 ═══════════ */
+  footer { border-top: 1px solid var(--line); }
+  .foot-inner { max-width: 1280px; margin: 0 auto; padding: 34px 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .1em; }
+  .foot-inner .ok { color: var(--amber); }
+
+  /* ═══════════ 滚动入场 ═══════════ */
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
+  .reveal.in { opacity: 1; transform: none; }
+  .tracks .track:nth-child(2).in { transition-delay: .08s; }
+  .tracks .track:nth-child(3).in { transition-delay: .16s; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal { opacity: 1; transform: none; }
+  }
+
+  /* ═══════════ 响应式 ═══════════ */
+  @media (max-width: 960px) {
+    .topbar .coords { display: none; }
+    .topbar nav a:not(.join) { display: none; }
+    .hero { padding-top: 110px; }
+    .hero .ring-wrap { opacity: .3; right: -30%; }
+    .dawn-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric { border-bottom: 1px solid var(--line); }
+    .metric:nth-child(2) { border-right: none; }
+    .tracks { grid-template-columns: 1fr; }
+    .log-row { grid-template-columns: 1fr auto; }
+    .log-row .ts, .log-row .lv { display: none; }
+    .recruit-inner { grid-template-columns: 1fr; padding: 90px 24px; }
+    .seal-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════ 顶栏 ═══════ -->
+<header class="topbar">
+  <a class="brand" href="#top"><span class="mark"></span>FZTBU·CS <em>//</em> 像素集会</a>
+  <span class="coords">N 26°04′ &nbsp;E 119°17′ · FUZHOU</span>
+  <nav>
+    <a href="#dawn">data</a>
+    <a href="#tracks">tracks</a>
+    <a href="#log">log</a>
+    <a class="join" href="#recruit" style="color: var(--amber);">join.exe</a>
+  </nav>
+</header>
+
+<!-- ═══════ HERO · THE RING ═══════ -->
+<section class="hero" id="top">
+  <div class="ring-wrap">
+    <img class="ring" src="pixel-ring.svg" alt="像素莫比乌斯环 — 298 个成员像素汇聚成环" />
+  </div>
+  <div class="ring-mask"></div>
+  <div class="wrap hero-inner">
+    <span class="kicker reveal in">FZTBU CS ASSOCIATION — EST.2018 <span class="rule"></span></span>
+    <h1 class="title reveal in">
+      PIXEL<br />CONGREGATION<span class="l2">像素集会</span>
+    </h1>
+    <p class="zh-title">福州大学计算机协会</p>
+    <p class="decl">298 PIXELS · ONE IMAGE &nbsp;—&nbsp; <b>每一位成员都是像素</b></p>
+    <div class="hero-cta">
+      <a class="btn btn-amber" href="#recruit">JOIN.EXE <span class="caret">▌</span></a>
+      <a class="btn btn-line" href="#dawn">README <span>↓</span></a>
+    </div>
+    <div class="hud">
+      <span class="px"></span><span>AMBER = ACTIVE</span>
+      <span class="px pink"></span><span>PINK = MEMBER</span>
+      <span class="px pale"></span><span>PALE = FUTURE</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 数据带 · THE DAWN ═══════ -->
+<div class="dawn" id="dawn">
+  <div class="wrap dawn-grid">
+    <div class="metric reveal">
+      <div class="k"><span class="sq" style="background: var(--mid);"></span>members / 在册</div>
+      <div class="v">298<i>人</i></div>
+      <div class="d">▲ 12% vs 2025 秋</div>
+    </div>
+    <div class="metric reveal">
+      <div class="k"><span class="sq" style="background: var(--pale);"></span>events / 年度</div>
+      <div class="v">47<i>场</i></div>
+      <div class="d">读书会 · 比赛 · 分享</div>
+    </div>
+    <div class="metric reveal">
+      <div class="k"><span class="sq" style="background: var(--pink);"></span>projects / 开源</div>
+      <div class="v">12<i>项</i></div>
+      <div class="d">OJ · Wiki · 工具链</div>
+    </div>
+    <div class="metric reveal">
+      <div class="k"><span class="sq" style="background: var(--amber);"></span>years / 传承</div>
+      <div class="v">08<i>年</i></div>
+      <div class="d">薪火相传 · 持续构建</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ 方向 · THE RECURSION ═══════ -->
+<section class="panel" id="tracks">
+  <div class="wrap">
+    <div class="panel-head reveal">
+      <span class="kicker"><span class="rule"></span>CANVAS 03 / THE RECURSION</span>
+      <h2><span class="n">03</span>TRACKS<span style="color: var(--muted); font-size: .6em;"> · 三个坐标</span></h2>
+      <span class="rule" style="flex: .4;"></span>
+    </div>
+    <div class="tracks">
+      <a class="track reveal" href="#">
+        <span class="zoom">×1</span>
+        <span class="path">~/tracks/algo-icpc</span>
+        <h3>算法与竞赛</h3>
+        <p>ICPC 区域赛集训体系，Codeforces 周赛复盘。每周三次集体训练，从铜牌到金牌的完整路径。</p>
+        <div class="foot"><span>members: <b class="t-amber">128</b></span><span class="chip chip-pink"></span></div>
+        <span class="core"></span>
+      </a>
+      <a class="track reveal" href="#">
+        <span class="zoom">×4</span>
+        <span class="path">~/tracks/web-design</span>
+        <h3>Web 与设计</h3>
+        <p>React、设计系统与可访问性。本站即本方向的实战作品——欢迎 review 我们的源码。</p>
+        <div class="foot"><span>members: <b class="t-amber">96</b></span><span class="chip chip-pale"></span></div>
+        <span class="core"></span>
+      </a>
+      <a class="track reveal" href="#">
+        <span class="zoom">×16</span>
+        <span class="path">~/tracks/systems</span>
+        <h3>系统与底层</h3>
+        <p>操作系统、编译器与分布式系统。读 xv6，写玩具内核，理解代码脚下的土地。</p>
+        <div class="foot"><span>members: <b class="t-amber">74</b></span><span class="chip chip-cream"></span></div>
+        <span class="core"></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 活动 · LOG ═══════ -->
+<section class="panel" id="log" style="padding-top: 0;">
+  <div class="wrap">
+    <div class="log-head reveal">
+      <h2><span class="p">$</span> tail -f /var/log/events — 2026 秋</h2>
+      <span class="kicker" style="gap: 8px;">BUILD #2026</span>
+    </div>
+    <a class="log-row reveal" href="#">
+      <span class="ts">2026-08-24 19:00</span><span class="lv lv-warn">EVENT</span>
+      <span class="msg">秋季新生见面会 · <em>技术栈巡礼</em> — 旗山校区 计院 302</span><span class="go">→</span>
+    </a>
+    <a class="log-row reveal" href="#">
+      <span class="ts">2026-09-05 14:00</span><span class="lv lv-info">READ</span>
+      <span class="msg">Rust 系统编程读书会 · <em>第 12 期：异步运行时解剖</em></span><span class="go">→</span>
+    </a>
+    <a class="log-row reveal" href="#">
+      <span class="ts">2026-09-19 09:00</span><span class="lv lv-warn">HACK</span>
+      <span class="msg">Hackathon 2026 · <em>48 小时极限开发</em> — 报名截止 09.12</span><span class="go">→</span>
+    </a>
+    <a class="log-row reveal" href="#">
+      <span class="ts">2026-10-11 19:30</span><span class="lv lv-build">TALK</span>
+      <span class="msg">开源之夏分享 · <em>从第一个 PR 到 Committer</em></span><span class="go">→</span>
+    </a>
+  </div>
+</section>
+
+<!-- ═══════ 招新 · ONE PIXEL MISSING ═══════ -->
+<section class="recruit" id="recruit">
+  <div class="recruit-inner">
+    <div>
+      <h2 class="reveal">ONE PIXEL<br /><span class="one">MISSING</span></h2>
+      <p class="zh reveal">缺一个像素，画面便不完整。</p>
+      <p class="pct reveal">CURRENTLY <b>297 / 298</b> — 最后一块，也许是你</p>
+      <div class="recruit-cta reveal">
+        <a class="btn btn-amber" href="#">JOIN 2026 秋 <span class="caret">▌</span></a>
+        <a class="btn btn-line" href="#">招新手册.pdf</a>
+      </div>
+    </div>
+    <div class="seal-box reveal">
+      <div class="seal" title="计协">计协</div>
+      <p class="seal-note">EST.2018 · FUZHOU</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 页脚 ═══════ -->
+<footer>
+  <div class="foot-inner">
+    <span>© 2026 FZTBU·CS — PIXEL CONGREGATION</span>
+    <span>N 26°04′ E 119°17′</span>
+    <span class="ok">EXIT CODE 0</span>
+  </div>
+</footer>
+
+<script>
+  // 滚动入场 — 克制的 reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+  // 兼容 prefers-reduced-motion：直接显示
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.reveal').forEach((el) => el.classList.add('in'));
+  }
+</script>
+</body>
+</html>
