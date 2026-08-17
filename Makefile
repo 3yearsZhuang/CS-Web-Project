@@ -67,12 +67,24 @@ dev-frontend:
 dev-logs:
 	@tail -f $(DEV_BACKEND_LOG) $(DEV_FRONTEND_LOG)
 
-# 按 .dev.pid 记录的 PID 精准关停前后端（不残留进程）
+# 按 .dev.pid 关停前后端，并递归杀进程树 + 按端口兜底清理，避免 worker 子进程残留占端口。
 dev-down:
 	@if [ -f $(DEV_PID) ]; then \
-		while read pid; do kill $$pid 2>/dev/null && echo "已停止 PID $$pid" || echo "PID $$pid 已不存在"; done < $(DEV_PID); \
+		while read pid; do \
+			pkill -P $$pid 2>/dev/null; \
+			kill $$pid 2>/dev/null && echo "已停止 PID $$pid" || echo "PID $$pid 已不存在"; \
+		done < $(DEV_PID); \
 		rm -f $(DEV_PID); \
 	else echo "无 $(DEV_PID)，进程可能已停或从未用 make dev-up 启动"; fi
+	@# 兜底：清理仍占用端口的残留进程（父进程被杀后 fork 出的孤儿 worker）
+	@for p in $(BACKEND_PORT) $(FRONTEND_PORT); do \
+		pids=$$(lsof -nP -iTCP:$$p -sTCP:LISTEN -t 2>/dev/null); \
+		if [ -n "$$pids" ]; then \
+			echo ">>> 端口 $$p 仍有残留进程 $$pids，强制清理"; \
+			echo "$$pids" | xargs -r kill -9 2>/dev/null; \
+		fi; \
+	done
+	@echo ">>> dev-down 完成"
 
 # 前端 BFF 路由（活动/社区/登录）全部 500、静态页却正常时，多为 tsx watch 热重载
 # 缓存损坏（如大规模删代码后）。无需改代码，冷重启 dev server 即可恢复。
