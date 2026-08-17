@@ -101,7 +101,7 @@ make down         # 停止
 | 后端 | `uv.lock` 依赖锁定版本 | `CS-Web-Backend/uv.lock` |
 
 - 改版本号**四处同步**：前端 `package.json` + 后端 `pyproject.toml` + 后端 `app/__init__.py.__version__` + 后端 `uv.lock`（依赖锁定随版本一起更新）。
-- 发布说明（版本锚点）：[`CHANGELOG.md`](CHANGELOG.md)，按 Keep a Changelog 维护，记录各版本显著变更（0.9.8 含工作台 / Auxilio 等新增能力）。
+- 变更记录（唯一权威）：[`CHANGELOG.md`](CHANGELOG.md)，按 Keep a Changelog 维护，全量记录各版本显著变更（0.9.8 含工作台 / Auxilio 等新增能力；2026-08-17 起并入原 `docs/项目演变历史.md`）。
 - 当前语义版本线：`0.9.x`（尚未进入 1.0.0）。
 
 **架构一句话**
@@ -132,8 +132,7 @@ A：不能。前端仅 BFF 转发，业务数据全在后端 PG。
 | 前端架构 / 目录设计 | [`docs/RootDoc-FEArch.md`](docs/RootDoc-FEArch.md)（CS-Web-Frontend 专属方法论） |
 | 入职流程 / 环境搭建 | [`docs/Onboarding.md`](docs/Onboarding.md) |
 | 数据迁移评估 | [`docs/RootDoc-MigEval.md`](docs/RootDoc-MigEval.md) |
-| 历史变更 | [`docs/项目演变历史.md`](docs/项目演变历史.md) |
-| 发布说明（版本锚点） | [`CHANGELOG.md`](CHANGELOG.md) |
+| 历史变更 / 发布说明（唯一权威） | [`CHANGELOG.md`](CHANGELOG.md) |
 
 ## 安装
 
@@ -432,5 +431,5 @@ docs: 补充 README 使用示例
 
 **唯一文档地图：**[`docs/README.md`](docs/README.md)（根级文档索引 + 各子仓库文档入口，新增/合并/删除文档须先登记于此）。
 
-- 跨项目/编排层文档统一在根 `docs/`（单一权威、零漂移）：`RootDoc-FEArch`（前端方法论，以 CS-Web-Frontend 真实结构为锚）、`RootDoc-EngConv`（通用工程规范）、`RootDoc-Deploy`（全栈部署/运维）、`RootDoc-MigEval`（迁移评估）、`Onboarding`（新开发者/管理员上手）、`api-reference`（API 参考，由 openapi 契约自动生成）、`CHANGELOG`（发布说明）、`项目演变历史`（历史变更）、`项目待办事项`——完整清单与说明见文档地图。
+- 跨项目/编排层文档统一在根 `docs/`（单一权威、零漂移）：`RootDoc-FEArch`（前端方法论，以 CS-Web-Frontend 真实结构为锚）、`RootDoc-EngConv`（通用工程规范）、`RootDoc-Deploy`（全栈部署/运维）、`RootDoc-MigEval`（迁移评估）、`Onboarding`（新开发者/管理员上手）、`api-reference`（API 参考，由 openapi 契约自动生成）、`CHANGELOG`（变更记录唯一权威，2026-08-17 起并入原 `项目演变历史`）、`项目待办事项`——完整清单与说明见文档地图。
 - 前后端专项文档保留在各子仓库(submodule)：后端 `CS-Web-Backend/tools/docs/`（入口 `README.md`）、前端 `CS-Web-Frontend/tools/docs/`（入口 `README.md`）。

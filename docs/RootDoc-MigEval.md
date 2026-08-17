@@ -110,7 +110,7 @@
 
 ### 4.1 迁移脚本（必须新建）
 
-`CS-Web-Frontend/tools/scripts/migrate-sqlite-to-pg.mjs`（迁移计划 Phase 6 已规划并实现、于 2026-08-05 完成数据迁移；**该脚本已于 2026-08-07 随 SQLite 清理一并删除，见文首归档说明**），用法与执行细节见本文 §八，实际执行结果见 `项目演变历史.md` 的"数据迁移"节）：
+`CS-Web-Frontend/tools/scripts/migrate-sqlite-to-pg.mjs`（迁移计划 Phase 6 已规划并实现、于 2026-08-05 完成数据迁移；**该脚本已于 2026-08-07 随 SQLite 清理一并删除，见文首归档说明**），用法与执行细节见本文 §八，实际执行结果见 `../CHANGELOG.md` 的"数据迁移"节）：
 1. 读 SQLite → 建 `UUID → Integer` 全局映射（含 users、events、community_posts 等所有主表）。
 2. 按外键依赖顺序导入：`roles` → `users`（派生 username、映射角色、scrypt 哈希搬移）→ `community_categories` → `community_posts` → `community_comments` → `events` → `exams/questions/options` → `resources` → `component_registry*` 等。
 3. 类型转换：布尔、日期 ISO→tz、JSON 文本→jsonb。
@@ -166,14 +166,14 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 - **不建议**给后端引入多数据库——项目铁律明确「**SQLite 禁止作生产库**」，后端唯一生产库 = PostgreSQL。多库只会增加维护成本，收益低。
 - **正确姿势**：前端**曾**保留双引擎用于「迁移过渡期」开发兜底；**生产数据统一走后端 PG**。
 >
-> ℹ️ 变更记录/待办条目见本目录 `项目演变历史.md` / `项目待办事项.md`。
+> ℹ️ 变更记录见 `../CHANGELOG.md`，待办条目见 `项目待办事项.md`。
 - 若要「本地无 PG 也能跑」，更轻的方案是 **Docker 起 PG**（根级 `docker-compose.yml` 已内置），而非维护 SQLite 方言。
 
 ---
 
 ## 六、行动建议清单
 
-> ℹ️ 变更记录/待办条目见本目录 `项目演变历史.md` / `项目待办事项.md`。
+> ℹ️ 变更记录见 `../CHANGELOG.md`，待办条目见 `项目待办事项.md`。
 
 ---
 
@@ -310,4 +310,4 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 - **迁移 head 与任务参数卡不一致**：本文任务参数卡标注"迁移 head = `a3b4c5d6e7f8`"，但当前代码（2026-08-08）实际 Alembic head 为 **`d3e4f5a6b7c8`**（`a3b4c5d6e7f8` 为链上中间里程碑，提供中文检索 zhparser 能力）。本文以代码实际状态为准写入 §七；参数卡口径需由主理人校正。
 - **`focus_sessions` 迁移 ID 已确认**：`c2d3e4f5a6b7`，与参数卡一致。
 - **SQLite 双引擎 / `migrate-sqlite-to-pg.mjs`**：已删除并归档（见文首），现行无此能力，无待补数据。
-- **外部链接核查**：本文引用的 `BackDoc-Infra.md` / `项目演变历史.md` / `项目待办事项.md` 均存在，无坏链；已删除文件（`migrate-sqlite-to-pg.mjs`、`BackDoc-MigV.md`）均在正文显式标注"已删除/已并入"，非失效引用。
+- **外部链接核查**：本文引用的 `BackDoc-Infra.md` / `CHANGELOG.md` / `项目待办事项.md` 均存在，无坏链；已删除文件（`migrate-sqlite-to-pg.mjs`、`BackDoc-MigV.md`）均在正文显式标注"已删除/已并入"，非失效引用。

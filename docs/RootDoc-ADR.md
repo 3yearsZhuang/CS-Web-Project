@@ -2,15 +2,15 @@
 
 > 文档层级：**L0（根级 `docs/`，跨仓库权威）**
 > 角色：架构决策（ADR）索引、边界上下文、数据流、韧性机制、BFF 交互风格的**唯一权威位置（SSOT）**
-> 来源：2026-08-09 文档治理重构，从 0.9.1 演变分卷抽离上述活内容（原归档已合并入 `项目演变历史.md` 后删除）
-> 关联：完整 ADR 决策记录见归档 `[项目演变历史.md](./项目演变历史.md)`；前端权威架构见 `[FrontDoc-01-Arch.md](../CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md)`；治理规则见 `[DocGovernance.md](./DocGovernance.md) §2（所有权矩阵）
-> 治理红线：禁止在 `项目演变历史*.md` 归档文档中复述以下内容（归档文档对应章节已改为指向本文档的指针）
+> 来源：2026-08-09 文档治理重构，从 0.9.1 演变分卷抽离上述活内容（原归档已并入根 `CHANGELOG.md` 后删除）
+> 关联：完整 ADR 决策记录见 `[CHANGELOG.md](../CHANGELOG.md)`；前端权威架构见 `[FrontDoc-01-Arch.md](../CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md)`；治理规则见 `[DocGovernance.md](./DocGovernance.md) §2（所有权矩阵）
+> 治理红线：禁止在根 `CHANGELOG.md` 历史章节中复述以下内容（对应章节已改为指向本文档的指针）
 
 ---
 
 ## 一、架构决策记录（ADR）索引
 
-> ADR-001 ~ ADR-019 的完整决策记录已迁移至 `项目演变历史.md`（已实施项）与 `项目待办事项.md`（待评估项）。本节为索引速查 SSOT。
+> ADR-001 ~ ADR-019 的完整决策记录已迁移至根 `CHANGELOG.md`（已实施项）与 `项目待办事项.md`（待评估项）。本节为索引速查 SSOT。
 
 | ADR | 主题 | 状态 | 摘要 |
 |-----|------|------|------|
@@ -21,13 +21,13 @@
 | ADR-018 | 0.9.1 预发布就绪包 | ✅ 已实施 | SLO + alerting + load test + restore drill + runbook + rollback + CI 加固 |
 | ADR-019 | 前端重建适配 community v2 | ✅ 已实施 | 2026-08-03 前端重建 |
 
-> 完整 ADR 表（含 ADR-003/004/006-008/010-017）见归档 `[项目演变历史.md](./项目演变历史.md)`。
+> 完整 ADR 表（含 ADR-003/004/006-008/010-017）见根 `[CHANGELOG.md](../CHANGELOG.md)`。
 
 ---
 
 ## 二、边界上下文（Bounded Context）
 
-> 当前 BFF 视角的权威架构图见 `[FrontDoc-01-Arch.md](../CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md) Part A`。下方「当前（BFF 视角）」为 SSOT 快照；「迁移前单体」仅作演进对照，归档快照见统一历史 `项目演变历史.md`（0.9.1 分卷已并入）。
+> 当前 BFF 视角的权威架构图见 `[FrontDoc-01-Arch.md](../CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md) Part A`。下方「当前（BFF 视角）」为 SSOT 快照；「迁移前单体」仅作演进对照，归档快照见根 `CHANGELOG.md`（0.9.1 分卷已并入）。
 
 **当前（BFF 视角）**：
 

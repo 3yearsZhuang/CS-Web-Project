@@ -20,15 +20,15 @@
 | 命名 / 质量红线 / 错误处理 / 安全配置 / 测试 / Git 约定 | `RootDoc-EngConv.md` | Onboarding 附录 A、*-Conv 的全量重述 |
 | 禁止事项 / 禁止清单 | `RootDoc-EngConv.md`（通用红线）；**前端编码侧→`FrontDoc-Conv.md §12`、UI 视觉侧→`FrontDoc-UID.md §11`**（仓内差异） | Onboarding A.1（2026-08-09 已改为入口指针，不再复述） |
 | 防再犯清单（安全教训） | `*-Sec.md`「教训」节 | Onboarding A.7 |
-| 架构 / 模块契约 / 前后端联动 | 子仓 `*-01-Arch.md`（L1） | RootDoc-FEArch（仅桥接索引）、演变历史 |
-| 迁移可行性 / 执行细节 | `RootDoc-MigEval.md` | 演变历史附录、FrontDoc-Ops |
-| ADR / 边界上下文 / 数据流图 / 健壮函数 / BFF 交互风格 | `RootDoc-ADR.md`（索引/速查）＋ `项目演变历史.md`（完整记录）＋ `项目待办事项.md`（待评估） | 演变历史-0.9.1 等分卷（已迁出，2026-08-09；活文档不得引用分卷） |
+| 架构 / 模块契约 / 前后端联动 | 子仓 `*-01-Arch.md`（L1） | RootDoc-FEArch（仅桥接索引）、根 CHANGELOG.md |
+| 迁移可行性 / 执行细节 | `RootDoc-MigEval.md` | 根 CHANGELOG.md、FrontDoc-Ops |
+| ADR / 边界上下文 / 数据流图 / 健壮函数 / BFF 交互风格 | `RootDoc-ADR.md`（索引/速查）＋ 根 `CHANGELOG.md`（完整记录）＋ `项目待办事项.md`（待评估） | 原演变历史分卷（2026-08-17 并入根 CHANGELOG.md；活文档不得引用） |
 | 安全要点（每模块） | `*-01-Arch.md` 摘要 ＋ `*-Sec.md` 深潜 | — |
 | API 契约 | `api-reference.md`（由 `openapi.baseline.json` 生成） | 任何手写重复 |
 
 ## 3. 反模式清单（红线）
 
-1. **历史文档不得承载活内容（仅主索引可被活文档引用）**：`项目演变历史-0.9.x.md` 等分卷已于 2026-08-17 合并为单一 `项目演变历史.md`（全量合并版）；活文档**仅可引用 `项目演变历史.md`**，原 `docs/archive/` 分卷已于 2026-08-17 合并删除、不得再引用；规划长文见 `docs/plans/`。
+1. **历史文档不得承载活内容（仅主索引可被活文档引用）**：原 `项目演变历史-0.9.x.md` 等分卷与 `项目演变历史.md` 已于 2026-08-17 全量并入根 `CHANGELOG.md` 并删除；活文档**仅可引用根 `CHANGELOG.md`**，原 `docs/archive/` 分卷不得再引用；规划长文见 `docs/plans/`。
 2. **同一事实只写一次**：定义处写全，其余处只链接，不重述。
 3. **跨仓相对链接深度必须正确**（当前存在系统性错误，见 §4）：
    - 子仓 `tools/docs/` → 根 `docs/`：`../../../docs/...`（3 级上溯）
@@ -49,9 +49,9 @@
 
 ## 5. 文档结构优化收口（2026-08-09 批次 A，已完成）
 
-- [x] **Onboarding ADR 指针纠偏**：A.4/A.5/A.7 三处原指向被掏空归档 `项目演变历史-0.9.1.md` 的 ADR 指针，改为 → `RootDoc-ADR.md`（L0 索引/速查）+ `项目演变历史.md`（完整记录）+ `项目待办事项.md`（待评估）。消除"活文档引用只读归档"的红线违反。
+- [x] **Onboarding ADR 指针纠偏**：A.4/A.5/A.7 三处原指向被掏空归档 `项目演变历史-0.9.1.md` 的 ADR 指针，改为 → `RootDoc-ADR.md`（L0 索引/速查）+ 根 `CHANGELOG.md`（完整记录）+ `项目待办事项.md`（待评估）。消除"活文档引用只读归档"的红线违反。
 - [x] **孤儿文档登记**：`项目待办事项.md`、`FeatureModuleVisibility-Plan.md` 补登 `docs/README.md` 根级表。（FeatureModuleVisibility-Plan.md 已于 2026-08-09 并入 `项目演变历史-0.9.9.md`，2026-08-17 随全量合并抽离至 `docs/plans/功能可见性管理方案.md`）
-- [x] **历史引用边界强化**（§2 矩阵 + §3 反模式 #1 改写）：明确活文档**仅可引用历史主索引 `项目演变历史.md`**，禁止引用已删除的 `docs/archive/` 下 `项目演变历史-0.9.x` 等分卷（2026-08-17 合并删除）；ADR 完整记录归属主索引、待评估项归 `项目待办事项.md`。
+- [x] **历史引用边界强化**（§2 矩阵 + §3 反模式 #1 改写）：明确活文档**仅可引用变更记录主索引根 `CHANGELOG.md`**，禁止引用已删除的 `docs/archive/` 下 `项目演变历史-0.9.x` 等分卷（2026-08-17 并入根 CHANGELOG.md）；ADR 完整记录归属主索引、待评估项归 `项目待办事项.md`。
 - [x] **坏锚点修复**（锚点审计发现）：`BackDoc-Infra.md#六迁移验证`→`#六迁移验证migration_verification`（后端 tools/docs/README、FrontDoc-Ops 共 2 处）、`RootDoc-MigEval.md#八前端迁移执行细节原-frontdoc-pgmigm-…`→`…frontdoc-pgmigmd…`（前端 README），共 3 处。
 - [x] **FrontDoc-01-Arch Part B 契约 SSOT 边界**：开头加桥接说明——原始端点契约权威为 `docs/api-reference.md`（自动生成），Part B 仅做模块视图 + BFF 翻译层，不重复罗列原始参数（保留 L1 模块契约权威，未掏空正文）。
 - [x] **审计固化**：Skill `monorepo-doc-audit` 新增 `scripts/audit_anchors.py`（锚点腐化审计，已修全角标点 slug 口径）。复跑确认 **0 死链 + 0 坏锚点**。

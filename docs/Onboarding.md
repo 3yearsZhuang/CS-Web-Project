@@ -220,19 +220,19 @@ make logs          # 跟踪日志
 ## A.4 ADR 引用规则
 
 - 何时创建：影响多模块/引入移除关键技术依赖/改变模块通信/不可逆决策/安全相关 → 记录 ADR。
-- 格式：`### ADR-XXX` + 状态/上下文/决策/替代方案/后果/可逆性/实施记录。ADR 索引与速查的权威位置为 L0 设计决策 SSOT [`RootDoc-ADR.md`](RootDoc-ADR.md)（已实施项）；完整决策记录见 [`项目演变历史.md`](./项目演变历史.md)，待评估项见 [`项目待办事项.md`](./项目待办事项.md)。（注：`项目演变历史-0.9.1.md` 等分卷为只读归档，活文档不引用其已迁出内容。）
+- 格式：`### ADR-XXX` + 状态/上下文/决策/替代方案/后果/可逆性/实施记录。ADR 索引与速查的权威位置为 L0 设计决策 SSOT [`RootDoc-ADR.md`](RootDoc-ADR.md)（已实施项）；完整决策记录见 [`CHANGELOG.md`](../CHANGELOG.md)，待评估项见 [`项目待办事项.md`](./项目待办事项.md)。（注：原 `项目演变历史-0.9.1.md` 等分卷及 `项目演变历史.md` 已于 2026-08-17 并入根 `CHANGELOG.md` 并删除，活文档仅引用 `CHANGELOG.md`。）
 - 锚点规则：GitHub 风格（标题转小写 + 空格转连字符 + 去标点，中文保留）。
 - 编号：连续递增（ADR-015…），废弃不回收；状态必须反映实施事实（防再犯 #2）。
 
 ## A.5 文档维护流程
 
-- 每个系统维度有且仅有一个权威位置（Source-of-Truth 无重复规则）：禁止事项→前端 `FrontDoc-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 侧）/ 根 `RootDoc-EngConv.md §二`（通用）；ADR→`RootDoc-ADR.md`（索引/速查，L0 SSOT）/ `项目演变历史.md`（完整记录）/ `项目待办事项.md`（待评估）；风险→`项目演变历史.md` R 表；依赖矩阵→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` 2.3；安全发现→`CS-Web-Frontend/tools/docs/FrontDoc-02-Sec.md`；API 契约→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part B（模块组织视图，原始契约以 `docs/api-reference.md` 为准）；环境变量→`CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part A。
+- 每个系统维度有且仅有一个权威位置（Source-of-Truth 无重复规则）：禁止事项→前端 `FrontDoc-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 侧）/ 根 `RootDoc-EngConv.md §二`（通用）；ADR→`RootDoc-ADR.md`（索引/速查，L0 SSOT）/ 根 `CHANGELOG.md`（完整记录）/ `项目待办事项.md`（待评估）；风险→根 `CHANGELOG.md` R 表；依赖矩阵→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` 2.3；安全发现→`CS-Web-Frontend/tools/docs/FrontDoc-02-Sec.md`；API 契约→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part B（模块组织视图，原始契约以 `docs/api-reference.md` 为准）；环境变量→`CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part A。
 - 变更同步检查清单（PR 自检模板）：
   - [ ] `pnpm run ts-check` 通过
   - [ ] 调目录结构 → `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part A
   - [ ] 新增/修改 API → `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part B
   - [ ] 新增管理员权限 → `CS-Web-Frontend/tools/docs/FrontDoc-02-Sec.md` Part 2
-  - [ ] 架构决策 → L0 SSOT [`RootDoc-ADR.md`](RootDoc-ADR.md)（索引/速查）；完整记录见 `项目演变历史.md`、待评估项见 `项目待办事项.md`
+  - [ ] 架构决策 → L0 SSOT [`RootDoc-ADR.md`](RootDoc-ADR.md)（索引/速查）；完整记录见根 `CHANGELOG.md`、待评估项见 `项目待办事项.md`
   - [ ] 新增禁止事项 → `FrontDoc-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 侧）
   - [ ] 新增页面/组件 → `CS-Web-Frontend/tools/docs/FrontDoc-UID.md`（视觉）+ `FrontDoc-Conv.md`（编码规范）
   - [ ] 新增环境变量 → `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part A + `README.md` 环境变量表
