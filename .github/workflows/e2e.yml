@@ -31,7 +31,13 @@ jobs:
       - name: Check version sources in sync (ER-33)
         # 四源版本号（pyproject / __init__ / package.json / uv.lock）不一致即失败，
         # 避免发版时漏改某一处。仅依赖 Python 标准库，runner 自带 python3 即可。
-        run: python3 scripts/check_version_sync.py
+        run: python3 scripts/check/check_version_sync.py
+
+      - name: Docs dead links (ER-09)
+        # 文档死链审计：扫描 docs/ 与根级 *.md，断文件链接即失败（锚点默认仅警告）。
+        # 根仓 workflow 全量 checkout（含子模块），可访问根 docs/ 与 scripts/；
+        # 后端 submodule 的 ci.yml 拿不到根仓脚本，故死链门禁放在根仓 workflow（与 Jenkinsfile 对等）。
+        run: python3 scripts/check/check_dead_links.py --base . --docs docs
 
       - name: Generate .env for docker-compose
         # CI 一次性环境，全部用占位值；ADMIN_PASSWORD 供后端 rbac_init seed 建管理员

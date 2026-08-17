@@ -16,6 +16,9 @@
 # 开发日志目录（含非 .log 文件时整体排除）
 .devlogs/
 
+# 本地 dev 后台进程 PID 文件（make dev-up 生成，dev-down 清理）
+.dev.pid
+
 # IDE / 编辑器 / 工具数据
 .vscode/
 .idea/

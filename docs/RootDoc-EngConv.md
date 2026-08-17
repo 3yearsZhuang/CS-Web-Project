@@ -70,6 +70,32 @@
 - 本地覆盖用不跟踪的 local 文件（`.env.local`）。
 - 每个功能一块独立配置文件，统一 `index` 聚合导出（"单块 → 聚合"）。
 
+### 5.1 环境变量职责矩阵（层 × 变量 × 归属）
+
+> 三份模板：根 `.env.example`（全栈模板，驱动 docker-compose）、后端 `CS-Web-Backend/.env.example`（最全）、前端 `CS-Web-Frontend/.env.example`（BFF 运行时 + 遗留记录）。改配置时按此矩阵定归属层；新增变量须同步对应模板（见 §五 首条）。
+
+| 变量 | 归属层 | 用途 | 备注 |
+|---|---|---|---|
+| `DATABASE_HOST/PORT/NAME/USER/PASSWORD` | 根 + 后端 | PostgreSQL 连接 | 共享：根驱动 compose `db` 服务（HOST=`db`），后端驱动 SQLAlchemy（HOST=`localhost`） |
+| `DATABASE_URL` | 后端 | 完整连接串 | 后端专属，与拆分字段二选一 |
+| `DB_POOL_SIZE` 等 `DB_POOL_*` | 后端 | 连接池参数 | 后端专属（有默认值） |
+| `SECRET_KEY` | 根 + 后端 | JWT 签名密钥（≥32B） | 共享：根模板必填，compose 注入 backend |
+| `TOTP_ENCRYPTION_KEY` | 根 + 后端 | 2FA 加密密钥（≥32B） | 共享 |
+| `ALLOWED_ORIGINS` | 根 + 后端 + 前端 | CORS / Origin 白名单 | 三层共享，可同一份 |
+| `NEXT_PUBLIC_SITE_URL` | 根 + 前端 | 站点 URL（metadata base） | 前端运行时 |
+| `TRUST_PROXY` | 根 + 后端 + 前端 | 信任反向代理头 | 共享 |
+| `AUTH_SESSION_SECRET` | 根 + 后端 | 会话 token HMAC 密钥 | 权威在后端；前端模板已标遗留 |
+| `BACKEND_URL` | 前端 | BFF 转发后端地址 | 前端专属 |
+| `PASSWORD_RESET_DEFAULT` | 根 + 后端 | 管理员重置默认密码 | 前端模板已标遗留 |
+| `SMTP_*` | 根 + 后端 | 邮件发送（后端 aiosmtplib） | 前端模板已标遗留 |
+| `GITHUB_*` | 根 + 后端 | GitHub OAuth | 前端模板已标遗留 |
+| `REDIS_URL` / `REQUIRE_REDIS_FOR_SECURITY` | 根 + 后端 | Redis 队列 / 缓存 | 共享，可选 |
+| `QUEUE_ENABLED` / `MULTI_INSTANCE` | 根 + 后端 | 异步队列 / 多实例广播 | 共享，可选 |
+| `LLM_*` | 后端 | Auxilio LLM（openai / anthropic） | 后端专属；根模板未列（默认 `none` 可运行） |
+| `COMMUNITY_IP_HASH_SECRET` | 根 + 后端 | 社区浏览去重 IP 哈希 | 共享，可选 |
+
+> 前端模板中的「迁移前单体遗留变量」（`AUTH_SESSION_SECRET` / `SMTP_*` / `PASSWORD_RESET_DEFAULT` / `GITHUB_*`）仅为记录：运行时不被前端 API 引用（认证 / 邮件 / OAuth 已由后端承载），权威在后端，待后续清理。
+
 ---
 
 ## 六、测试约定

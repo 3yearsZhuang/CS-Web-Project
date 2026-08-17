@@ -18,7 +18,8 @@ import sys
 import tomllib
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+# 脚本位于 scripts/check/ 下，需向上三级到项目根（2026-08-17 随 scripts 重排修正）。
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def _read_pyproject() -> str:

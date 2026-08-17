@@ -332,7 +332,22 @@ OTEL_SERVICE_NAME=cs-web-backend
 
 ---
 
-## 八、信息缺口声明（0.9.8）
+## 八、CI 系统分工（Jenkins / GitHub Actions）
+
+后端当前并存两套 CI 定义：`CS-Web-Backend/Jenkinsfile` 与 `CS-Web-Backend/.github/workflows/ci.yml`。两者测试环境（同一组 `docker-compose.ci.yml` 固定端口 54329/63799、同一批环境变量）与多数步骤高度重合；为避免「双轨重叠」造成维护困惑，明确如下分工：
+
+| 系统 | 角色 | 触发 | 独有 / 差异能力 | 备注 |
+|------|------|------|----------------|------|
+| GitHub Actions `ci.yml` | **主验证门禁（活化）** | `push` / `pull_request` → `main` / `master`，外加 `workflow_dispatch` | 安全静态扫描 `scan_security.py`（G1）、PR diff 覆盖率门禁 `diff_coverage.py`（ER-45）、制品上传 | 功能最全，是合入门禁的权威 |
+| Jenkinsfile | **等价备用验证（自托管）** | 由 Jenkins 控制器按需触发 | 文档死链审计 `scripts/check_dead_links.py`（ER-09） | 当前**不含部署 / 发布阶段**，仅为验证对等体；ER-09 目前仅此套覆盖 |
+
+> 两套都只做「验证」，均不含部署 / 发布阶段（部署见本文 §四 容器化部署）。
+> 能力缺口：ER-09 文档死链审计目前仅 Jenkinsfile 覆盖；若希望 GitHub Actions 也覆盖，需将 `check_dead_links.py` 阶段补入 `ci.yml`（建议登记待办）。
+> 契约冻结：基线 `openapi.baseline.json` 只在根仓；`Jenkinsfile` 用 `../openapi.baseline.json`、根 `make contract-check` 均正确指向。ci.yml 原契约步因 submodule CI 拿不到根仓基线而必红，已于 2026-08-17 移除（与 ER-04 同源问题），契约门禁由 Jenkinsfile + 根 Makefile 承担。
+
+---
+
+## 九、信息缺口声明（0.9.8）
 
 - **`.env.example` 未列出 `LLM_*` 变量**：后端 `CS-Web-Backend/app/core/config.py` 已定义 `LLM_PROVIDER/LLM_API_KEY/LLM_BASE_URL/LLM_MODEL/LLM_TIMEOUT/LLM_MAX_TOKENS/LLM_DAILY_BUDGET`，默认 `LLM_PROVIDER=none` 即可运行；如要求示例值显式化，需补 `.env.example`（超出本文档范围，标记待办）。
 - **运行环境版本以代码为准**：Node>=22 / Python>=3.13 取自 `package.json` 与 `pyproject.toml`，后续升级须同步本文 §2.1。

@@ -18,6 +18,7 @@
 | [api-reference.md](api-reference.md) | API 参考（由 `openapi.baseline.json` 0.9.8 冻结契约自动生成，请勿手改） |
 | [项目待办事项.md](项目待办事项.md) | 项目待办 / 进行中事项 + ADR 待评估项存放处（与 `RootDoc-ADR.md` 索引联动） |
 | [DocGovernance.md](DocGovernance.md) | 文档治理规范（三层架构 + 所有权矩阵 + 反模式清单，SSOT 规则） |
+| [公共组件调研报告.md](公共组件调研报告.md) | 前后端公共组件调研（2026-08-12：组件库 / 共享层位置与清单，参考 / 调研类） |
 
 ## 子仓库文档索引（原地保留，非迁移）
 
