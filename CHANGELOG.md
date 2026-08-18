@@ -2,7 +2,7 @@
 
 > 全项目变更记录**唯一权威文件**（Keep a Changelog 格式，覆盖 `[Unreleased]` → `[0.9.1]`）。
 > 格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，每条变动统一为「分类 + 一行精简 bullet」，原编号（ADR / ER / PRR / Phase / M / R / F / G / B / CodeGov / DocGov / AL）内联保留以便追溯。
-> 规划类长文（工具页→工作台改造方案、功能模块可见性方案）位于 `docs/plans/`，本文件仅保留落地结论（见各版本 `Added`/`Changed`）。
+> 规划类长文（工具页→工作台改造方案、功能模块可见性方案）已于 2026-08-18 归档处置（C-20）：落地结论见各版本 `Added`/`Changed`，未完成残余项见 `docs/项目待办事项-优先级重排.md`（C-21 起为待办 SSOT）。
 > 原拆分归档（0.9.1 / 0.9.5~0.9.7 / 0.9.8 / 0.9.9）与 `docs/项目演变历史.md` 已于 2026-08-17 全量并入本文件后删除（不保留 archive 副本）；全仓活文档引用历史统一以本文件为准。编号体系见文末速查表。
 
 ---
@@ -19,6 +19,12 @@
 ### Changed
 
 - **D10 功能边界拍板（1.0.0 scope）**：社区四件套边界确定——Wiki、活动评价纳入 1.0.0 规划（随 1.0 交付跟进）；私信 DM、相册延后至 P1 波次（1.0.0 不含）。活动评价随已有活动模块在 1.0 补；Wiki 作为新模块规划推进。
+
+- **AR-S2 周期任务空转循环治理（轻量闭环）**：`exception_retention` / `token_gc` / `data_retention` 三处启动钩子由常驻 `asyncio.create_task` 循环改为启动兜底跑一次 `_purge_once()`，消除每实例每 worker 各起空转循环；跨实例幂等仍由各 `_purge_once` 内的 `pg_try_advisory_xact_lock` 保证（仅一个实例真正执行）。`view_count` 因进程内存 `_pending` 需周期落库，循环保留（已用 Redis `getset` 原子保证单点）。周期性调度已落地（方案 B）：`WorkerSettings.cron_jobs` 注册 `token_gc`（每小时）/ `data_retention`（每日 03:00）/ `exception_retention`（每日 03:30）三个 cron 任务，由 arq Redis 锁保证集群内单点；web 启动兜底（`startup_*`）保留为 cold-start 兜底。新增 `app/services/maintenance_cron.py` 包装层接收 arq 注入的 `ctx` 并复用既有 `*_INTERVAL_SECONDS` 禁用开关。`test_maintenance_tasks.py` 同步修复因轻量闭环删除循环导致的陈旧测试并补充 cron 覆盖。
+
+- **R17-closeout 管理员审计不丢（门槛#2 闭环）**：逐处核验原 12 处 best-effort `audit.record()`。其中 3 处为管理员操作审计（`password_reset.approve/reject`、`join.approve/reject`，`actor_id=admin_id`），迁 `record_atomic` 并移除其提前 `commit()`，使「状态变更 + 审计」同事务原子提交（审计写失败则整体回滚，杜绝审计丢失）；其余 9 处为 用户级/混合 helper（`auth_service`×8、`event_service._audit`），判定非关键、有主事务兜底（`_record_login_history` / 用户创建已落库），仅加 `# 非关键审计，允许 best-effort` 注释。同步修复 `auth_service` 构造函数（`AuditService()`→`AuditService(self.db)`），使既有的 `create_user_with_audit` 管理员建号原子审计真正可用（原默认构造会令 `record_atomic` 抛 RuntimeError）。`user_service._audit_admin`（`AuditService().record()` best-effort 管理员审计）超出原 12 处范围，记为 P2 后续，本次未改。4 文件 `py_compile` 通过。
+
+- **P2-7 `user_service._audit_admin` 管理员审计原子化（门槛#2 补强）**：`user_service` 构造函数注入 `AuditService(self.db)`，使 `_audit_admin` 由 best-effort `AuditService().record()` 改为 `record_atomic` 同事务提交；同步移除 4 处管理员操作（user.update / enable·disable / reset_password / delete）的提前 `commit()`，使「状态变更 + 审计」原子提交，审计写失败整体回滚（杜绝管理员审计丢失）。`py_compile` 通过；管理员路径集成测试应覆盖。
 
 - **Auxilio v1 上线（LLM 对话重构收口）**：LLM 对话升级为「Auxilio v1」卡片（`widgets/llm-widget.tsx`，primary 左主列、类 DeepSeek 网页版）；头部「用量与设置」统一按钮展开用量统计 + 模型接入设置面板；工作台布局改为问候条顶部全宽 + Auxilio v1 左主列 + 其余功能右栏；删除旧 `/tools/auxilio` 分析页与工具区入口（前后端可见性注册表同步删 `tools-auxilio`、`wb-assistant-chat` 并入 `wb-llm-usage`）。
 
@@ -42,8 +48,8 @@
 
 ### Added
 
-- **工作台 LLM 化**（规划见 `docs/plans/工作台改造方案.md`）：Auxilio 升级 LLM Agent（OpenAI 兼容 + Anthropic 双协议 SSE 流式、7 个 Skills 工具调用、无 key 自动降级规则模式）；`conversations` / `chat_messages` 表；前端对话 UI（流式打字机 + 工具调用状态卡 + 历史会话）；LLM 用量统计 + 用户级 API Key（`llm_configs`，AES-256-GCM 复用 TOTP 加密原语）；新增 `GET /workbench/stats/llm-usage`、`GET/PUT /workbench/llm-config`。
-- **功能模块可见性管理**（规划见 `docs/plans/功能可见性管理方案.md`）：后端 `feature_visibility` 路由（GET 公开 + PUT root + 2FA 校验 + 审计，复用 `settings` 表、无新表/迁移）；前端全组件可见性注册表（37 组件 5 组）+ `VisibilityGate` + 导航/user-menu 改造 + 管理面板。
+- **工作台 LLM 化**（规划：工具页→工作台改造方案）：Auxilio 升级 LLM Agent（OpenAI 兼容 + Anthropic 双协议 SSE 流式、7 个 Skills 工具调用、无 key 自动降级规则模式）；`conversations` / `chat_messages` 表；前端对话 UI（流式打字机 + 工具调用状态卡 + 历史会话）；LLM 用量统计 + 用户级 API Key（`llm_configs`，AES-256-GCM 复用 TOTP 加密原语）；新增 `GET /workbench/stats/llm-usage`、`GET/PUT /workbench/llm-config`。
+- **功能模块可见性管理**（规划：功能模块可见性管理方案）：后端 `feature_visibility` 路由（GET 公开 + PUT root + 2FA 校验 + 审计，复用 `settings` 表、无新表/迁移）；前端全组件可见性注册表（37 组件 5 组）+ `VisibilityGate` + 导航/user-menu 改造 + 管理面板。
 - **测试体系加固（ER-02/11/12）**：repo 层真实 DB 集成测试 3 文件 21（community 8 / events 6 / tools 7）；HTTP 层 3 文件 + `test_http_admin` 共 24+5；安全/合规服务单测 12（`test_compliance_services` 7 + `test_admin_2fa` 5）；E2E 改 nightly 全栈（ER-14）。
 - **并发/竞态集成测试（ER-44）**：`test_concurrency_integration.py` 8 测试（真实 Redis + PG，`asyncio.gather` 并发）：限流 30 并发恰 5 放行（Lua ZSET 原子性）、黑名单同/异 jti 幂等与隔离、令牌并发轮换 ×10 同 family、revoke 与 refresh 终态一致。
 - **覆盖率门禁（ER-45）**：`diff_coverage.py`（仅标准库，新增行覆盖率 <80% 即 exit 1）+ ci.yml PR diff gate；`pytest.ini` 移除全局 `--cov`；`.coveragerc` fail_under 70→72。
@@ -81,7 +87,9 @@
 
 ### Docs
 
-- **文档冲突修正（版本事实 0.9.8 → 0.9.9，2026-08-17）**：`文档冲突审查` 多份页面版本号对齐 0.9.9——待办 F-11 四源版本（F-1）、`RootDoc-Deploy`（F-2）、根 README（F-3）、`api-reference`/`README` 0.9.8 冻结契约标注（F-4）、Onboarding 进度（F-5/F-10）、多份后端文档页眉刷新 0.9.9（F-6）随上述 C-* 动作一并修正；社区重构文档状态（F-8）见 C-12。剩余 F-9（alembic heads 实测复核）转入待办 `项目待办事项.md`。
+- **文档冲突修正（版本事实 0.9.8 → 0.9.9，2026-08-17）**：`文档冲突审查` 多份页面版本号对齐 0.9.9——待办 F-11 四源版本（F-1）、`RootDoc-Deploy`（F-2）、根 README（F-3）、`api-reference`/`README` 0.9.8 冻结契约标注（F-4）、Onboarding 进度（F-5/F-10）、多份后端文档页眉刷新 0.9.9（F-6）随上述 C-* 动作一并修正；社区重构文档状态（F-8）见 C-12。剩余 F-9（alembic heads 实测复核）转入待办 `项目待办事项-优先级重排.md`。
+- **规划长文归档处置（C-20，2026-08-18）**：`docs/plans/` 两份规划（工具页→工作台改造方案、功能模块可见性管理方案）落地结论均已归档于 `[0.9.8]`/`[0.9.9]` Added，无需重复登记；未完成残余项（LeetCode 热力图、每周复盘卡、系统状态角标、浏览器 Notification 可选增强、数据导出、可见性定时上下线）移交 `docs/项目待办事项.md`（2026-08-18 并入 `docs/项目待办事项-优先级重排.md`，见 C-21）；删除 `docs/plans/` 文件夹，同步根文档地图（`docs/README.md`）与 `docs/DocGovernance.md` 引用。
+- **待办 SSOT 合并（C-21，2026-08-18）**：原 `docs/项目待办事项.md`（待办 SSOT）经全量条目对照并入 `docs/项目待办事项-优先级重排.md` 后删除——已迁移条目（P0/P1/P2/P3 主体）按重排结果生效；未迁移条目新建「附录 A」收纳（AR-M3、F-9、LeetCode 热力图、可见性-定时上下线、ER-49/50·51/52/54·57、Phase 4 纵深）；同步修正 D10（已拍板：Wiki/活动评价纳入 1.0、DM/相册延后 P1）与 AR-S2（轻量闭环已落地）结论；重排文件升级为待办唯一权威跟踪（SSOT）；全仓 14 个文档引用点统一改指新文件名。
 
 ---
 
@@ -197,16 +205,16 @@
 | `ER-xx`                       | 1.0.0 收口工程项（安全/治理/质量/测试）             | [0.9.9] / [Unreleased] |
 | `PRR-*`                       | 1.0.0 发布就绪度审查项                       | [0.9.7] / [0.9.9]      |
 | `Phase 0~6`                   | 数据迁移执行阶段                             | [0.9.1]                |
-| `M1/M2…` `P1/P2/P3`           | 里程碑 / 文档合并优先级                        | 项目待办事项.md              |
+| `M1/M2…` `P1/P2/P3`           | 里程碑 / 文档合并优先级                        | 项目待办事项-优先级重排.md       |
 | `R1~R20`                      | 风险登记表（Risk）                          | [0.9.1]                |
-| `L1~L10`                      | 法律/合规类待办条目                           | 项目待办事项.md              |
+| `L1~L10`                      | 法律/合规类待办条目                           | 项目待办事项-优先级重排.md       |
 | `F1~F3`                       | 前端设计评审项                              | [0.9.1]                |
 | `D1~D4`                       | 前后端分离迁移决策                            | [0.9.1]                |
 | `B1~B3`                       | 1.0.0 发布阻塞项（Blocker）                 | [0.9.7]                |
 | `G1~G4`                       | 1.0.0 GA 缺口                          | [0.9.7]                |
 | `CodeGov-*` `DocGov-*` `AL-*` | 代码/文档治理项、BFF 安全边界                    | [0.9.9]                |
-| `C-1~C-19`                    | 0.9.9 时代清理/重构交付项（C-1~C-14 已执行归档，C-15~C-19 架构重构待办） | [0.9.9] / 项目待办事项.md |
-| `F-1~F-9`                     | 文档冲突审查项（F-1~F-8 已随清理修正，F-9 待办）      | [0.9.9] / 项目待办事项.md |
-| `N-01~N-14`                   | 规范化建议项（已落地部分见 C-*，残余 N-01/N-12/N-13 待办） | 项目待办事项.md          |
+| `C-1~C-21`                    | 0.9.9 时代清理/重构交付项（C-1~C-14、C-20、C-21 已执行归档，C-15~C-19 架构重构待办） | [0.9.9] / 项目待办事项-优先级重排.md |
+| `F-1~F-9`                     | 文档冲突审查项（F-1~F-8 已随清理修正，F-9 待办）      | [0.9.9] / 项目待办事项-优先级重排.md |
+| `N-01~N-14`                   | 规范化建议项（已落地部分见 C-*，残余 N-01/N-12/N-13/F-9 待办） | 项目待办事项-优先级重排.md |
 
-> 本文件（根 CHANGELOG.md）为全项目变更记录单一事实源；活文档（L0/L1/L2）引用历史请以本文件为准。规划类长文见 `docs/plans/`。
+> 本文件（根 CHANGELOG.md）为全项目变更记录单一事实源；活文档（L0/L1/L2）引用历史请以本文件为准。待办跟踪唯一权威见 `docs/项目待办事项-优先级重排.md`。
