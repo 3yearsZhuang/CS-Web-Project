@@ -18,6 +18,8 @@
 
 ### Changed
 
+- **D10 功能边界拍板（1.0.0 scope）**：社区四件套边界确定——Wiki、活动评价纳入 1.0.0 规划（随 1.0 交付跟进）；私信 DM、相册延后至 P1 波次（1.0.0 不含）。活动评价随已有活动模块在 1.0 补；Wiki 作为新模块规划推进。
+
 - **Auxilio v1 上线（LLM 对话重构收口）**：LLM 对话升级为「Auxilio v1」卡片（`widgets/llm-widget.tsx`，primary 左主列、类 DeepSeek 网页版）；头部「用量与设置」统一按钮展开用量统计 + 模型接入设置面板；工作台布局改为问候条顶部全宽 + Auxilio v1 左主列 + 其余功能右栏；删除旧 `/tools/auxilio` 分析页与工具区入口（前后端可见性注册表同步删 `tools-auxilio`、`wb-assistant-chat` 并入 `wb-llm-usage`）。
 
 ---

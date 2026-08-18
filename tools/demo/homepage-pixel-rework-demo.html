@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>首页改造 Demo · 像素元数据层 × 编辑式极简</title>
+<style>
+/* 缝合像素字体（与 Kimi 同款，OFL 许可，CDN 直链） */
+@font-face {
+  font-family: 'Fusion Pixel 12px Mono zh_hans';
+  src: url('https://fusion-pixel-font.takwolf.com/fusion-pixel-12px-monospaced-zh_hans.otf.woff2') format('woff2');
+  font-display: swap;
+}
+
+:root {
+  /* 项目深色模式令牌（保持原样） */
+  --bg: #0a0a0a;
+  --fg: #f5f1ea;
+  --muted: #8a857e;
+  --accent: #d4a574;          /* 琥珀金强调 */
+  --hairline: rgba(255,255,255,.08);
+  /* Kimi 灰阶（用于像素元数据层） */
+  --px-light: #f7f7f7;
+  --px-gray: #7a7a7a;
+  --px-dark: #292929;
+
+  --font-pixel: 'Fusion Pixel 12px Mono zh_hans', ui-monospace, monospace;
+  --font-serif: 'Noto Serif SC', 'Songti SC', Georgia, serif;
+  --font-sans: 'Noto Sans SC', system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-sans);
+  overflow-x: hidden; -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--accent); color: #000; }
+
+/* 轻量扫描线 — 像素氛围 */
+.scanlines {
+  pointer-events: none; position: fixed; inset: 0; z-index: 40;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, #00000012 3px 4px);
+  mix-blend-mode: multiply;
+}
+
+/* ============ Boot 启动序列（复刻项目 BootScreen 概念） ============ */
+#boot {
+  position: fixed; inset: 0; z-index: 100; background: #000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 18px; transition: opacity .6s steps(4);
+  font-family: var(--font-pixel);
+}
+#boot.done { opacity: 0; pointer-events: none; }
+#boot .b-title { color: var(--px-light); font-size: 14px; letter-spacing: .3em; }
+#boot .b-bar { width: 220px; height: 10px; border: 1px solid var(--px-gray); padding: 1px; }
+#boot .b-fill { height: 100%; width: 0; background: var(--accent); animation: load 1.4s steps(20) forwards; }
+@keyframes load { to { width: 100%; } }
+#boot .b-log { color: var(--px-gray); font-size: 11px; letter-spacing: .15em; height: 14px; }
+
+/* ============ 顶部索引条（固定） ============ */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 30;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px clamp(20px, 6vw, 64px);
+  font-family: var(--font-pixel); font-size: 12px; letter-spacing: .15em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--hairline);
+  background: linear-gradient(#0a0a0aea, transparent);
+}
+.topbar .brand { color: var(--fg); }
+.topbar .brand .px { color: var(--accent); }
+
+/* ============ Hero ============ */
+.hero {
+  position: relative; min-height: 100svh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 120px clamp(20px, 6vw, 64px) 80px; overflow: hidden;
+}
+/* 12 栏发丝线背景（项目原结构） */
+.grid-lines {
+  position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background-image: linear-gradient(to right, var(--hairline) 1px, transparent 1px);
+  background-size: calc(100% / 12) 100%;
+}
+/* 莫比乌斯环 — 用 canvas 像素粒子模拟（灰阶，保留项目签名元素） */
+#ring { position: absolute; inset: 0; pointer-events: none; image-rendering: pixelated; }
+
+/* 右上元数据（像素块） */
+.meta-top {
+  position: absolute; top: 132px; right: clamp(20px, 6vw, 64px);
+  z-index: 5; text-align: right;
+  font-family: var(--font-pixel); font-size: 12px; letter-spacing: .2em;
+  color: var(--muted);
+}
+.meta-top .season { color: var(--px-light); margin-bottom: 10px; }
+.recruit {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--accent); border: 1px solid #d4a57455; padding: 5px 12px;
+}
+.recruit .dot {
+  width: 8px; height: 8px; background: var(--accent); border-radius: 0;
+  animation: pulse 1.4s steps(2) infinite;
+}
+@keyframes pulse { 50% { opacity: .25; } }
+
+/* 主内容容器 */
+.content {
+  position: relative; z-index: 5; max-width: 1600px; width: 100%;
+  margin: 0 auto; pointer-events: none;
+}
+.content a, .content button { pointer-events: auto; }
+
+.tagline {
+  font-family: var(--font-pixel); font-size: 13px; letter-spacing: .25em;
+  color: var(--muted); margin-bottom: 28px;
+  border-left: 2px solid var(--accent); padding-left: 14px;
+}
+.title {
+  font-family: var(--font-serif); font-weight: 600;
+  font-size: clamp(42px, 9vw, 132px); line-height: 1.06; letter-spacing: -.01em;
+  color: var(--fg);
+}
+.title .accent { color: var(--accent); }
+.title .bracket {
+  font-family: var(--font-pixel); font-size: .28em; color: var(--px-gray);
+  vertical-align: super; margin-right: .15em;
+}
+.intro {
+  margin-top: 40px; max-width: 52ch; font-size: clamp(14px, 1.2vw, 17px);
+  line-height: 1.9; color: var(--muted);
+}
+.intro b { color: var(--fg); font-weight: 500; }
+
+/* 像素按钮 — 你喜欢的硬阴影 + 按压位移（复刻 demo 的 hero-tag 语言） */
+.actions { margin-top: 44px; display: flex; gap: 16px; flex-wrap: wrap; }
+.btn-pixel {
+  font-family: var(--font-pixel); font-size: 12px; letter-spacing: .18em;
+  padding: 15px 28px; border: 1px solid var(--px-light);
+  background: var(--px-light); color: #000;
+  box-shadow: 4px 4px 0 var(--px-gray);
+  cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 12px;
+  transition: transform .1s steps(2), box-shadow .1s steps(2), background .15s, color .15s;
+}
+.btn-pixel:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--px-gray); }
+.btn-pixel:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--px-gray); }
+.btn-pixel.outline {
+  background: transparent; color: var(--px-light);
+  border-color: var(--px-gray); box-shadow: 4px 4px 0 #ffffff14;
+}
+.btn-pixel.outline:hover { background: var(--px-light); color: #000; border-color: var(--px-light); }
+
+/* 底部强调发丝线 + 像素角标 */
+.footer-bar {
+  position: relative; z-index: 5; max-width: 1600px; margin: 64px auto 0;
+  border-bottom: 1px solid var(--accent); width: 40%;
+  transform-origin: left;
+}
+.footnote {
+  position: relative; z-index: 5; max-width: 1600px; margin: 28px auto 0;
+  font-family: var(--font-pixel); font-size: 11px; letter-spacing: .15em;
+  color: var(--px-gray);
+}
+
+/* 入场动画 — steps() 模拟像素擦除 */
+.reveal { opacity: 0; }
+.play .reveal { animation: wipe .6s steps(8) forwards; }
+.play .reveal.d1 { animation-delay: .1s; }
+.play .reveal.d2 { animation-delay: .22s; }
+.play .reveal.d3 { animation-delay: .36s; }
+.play .reveal.d4 { animation-delay: .5s; }
+.play .reveal.d5 { animation-delay: .64s; }
+@keyframes wipe { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* 移动端 */
+@media (max-width: 760px) {
+  .meta-top { top: 110px; }
+  #ring { opacity: .5; }
+}
+</style>
+</head>
+<body>
+
+<div class="scanlines"></div>
+
+<!-- Boot 启动序列 -->
+<div id="boot">
+  <div class="b-title">COMPUTER ASSOCIATION · OS</div>
+  <div class="b-bar"><div class="b-fill"></div></div>
+  <div class="b-log" id="bootLog">booting…</div>
+</div>
+
+<header class="topbar">
+  <div class="brand">Fztbu<span class="px">CS</span> · COMMUNITY</div>
+  <div>[ 00 ] — INDEX</div>
+</header>
+
+<section class="hero" id="hero">
+  <div class="grid-lines"></div>
+  <canvas id="ring"></canvas>
+
+  <div class="meta-top">
+    <div class="season">2026 / AUTUMN</div>
+    <div class="recruit"><span class="dot"></span>RECRUITING</div>
+  </div>
+
+  <div class="content" id="content">
+    <div class="tagline reveal d1">A COMMUNITY OF CODE, CURIOSITY &amp; CRAFT</div>
+
+    <h1 class="title reveal d2">
+      <span class="bracket">[</span><span class="accent">探索</span>技术<span class="bracket">]</span><br>
+      的无限可能
+    </h1>
+
+    <p class="intro reveal d3">
+      我们是校园中最纯粹的<span class="bracket" style="font-size:.6em"></span><b>技术社区</b>。
+      在这里，代码不只是工具，<b>而是表达创意、解决问题、连接未来的语言。</b>
+    </p>
+
+    <div class="actions reveal d4">
+      <a class="btn-pixel" href="#">立即加入 <span>→</span></a>
+      <a class="btn-pixel outline" href="#">了解更多 <span>→</span></a>
+    </div>
+
+    <div class="footer-bar reveal d5"></div>
+    <div class="footnote reveal d5">STATUS / 招募中 · EST. 2017 · UPTIME 8 YEARS</div>
+  </div>
+</section>
+
+<script>
+/* ---------- Boot 序列 ---------- */
+const boot = document.getElementById('boot');
+const bootLog = document.getElementById('bootLog');
+const logs = ['booting…','loading modules','mounting mobius-ring','ready'];
+let li = 0;
+const logTimer = setInterval(() => {
+  li = Math.min(li + 1, logs.length - 1);
+  bootLog.textContent = logs[li];
+}, 360);
+setTimeout(() => {
+  clearInterval(logTimer);
+  boot.classList.add('done');
+  document.getElementById('content').parentElement.classList.add('play');
+  // 直接给 content 加 play
+  document.getElementById('hero').classList.add('play');
+}, 1500);
+
+/* ---------- 莫比乌斯环（像素粒子模拟，灰阶保留环签名） ---------- */
+const cv = document.getElementById('ring');
+const ctx = cv.getContext('2d');
+let W, H, cx, cy, particles = [];
+function resize() {
+  W = cv.width = cv.clientWidth; H = cv.height = cv.clientHeight;
+  cx = W * (W > 760 ? 0.9 : 0.5); cy = H * 0.5;
+  const R = Math.min(W, H) * (W > 760 ? 0.64 : 0.52);
+  const N = 680;
+  particles = Array.from({ length: N }, (_, i) => {
+    const a = (i / N) * Math.PI * 2;
+    return {
+      a, R: R * (0.82 + Math.random() * 0.18),
+      spd: 0.0016 + Math.random() * 0.0022,
+      s: Math.random() < .8 ? 1 : 2,
+      amber: Math.random() < .12,
+    };
+  });
+}
+resize();
+addEventListener('resize', resize);
+
+let mx = -999, my = -999;
+addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; });
+
+(function loop() {
+  ctx.clearRect(0, 0, W, H);
+  for (const p of particles) {
+    p.a += p.spd;
+    let x = cx + Math.cos(p.a) * p.R;
+    let y = cy + Math.sin(p.a * 1.3) * p.R * 0.52; // 椭圆压扁模拟环透视
+    // 鼠标排斥
+    const dx = x - mx, dy = y - my, dist = Math.hypot(dx, dy);
+    if (dist < 120) { x += (dx / dist) * (120 - dist) * 0.4; y += (dy / dist) * (120 - dist) * 0.4; }
+    ctx.fillStyle = p.amber ? 'rgba(212,165,116,.9)' : 'rgba(247,247,247,.5)';
+    ctx.fillRect(x | 0, y | 0, p.s, p.s);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
