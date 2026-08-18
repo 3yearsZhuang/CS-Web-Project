@@ -2,6 +2,8 @@ name: E2E (full stack)
 
 # ER-14（方案C）：E2E 需完整环境（前端 BFF + 后端 + DB），成本较高，
 # 不进常规 PR。改为 nightly 全量跑 + 保留 workflow_dispatch 手动触发。
+# 2026-08-19 起新增 push:main 触发（门槛#3「E2E 发布前必过」闭环）：
+# 合并到默认分支即跑全栈 E2E，保证 main 始终处于「可发布绿」状态。
 # CI 经根仓 docker-compose 起后端栈（db/redis/backend），前端 dev server
 # 由 Playwright webServer 在 runner 上拉起，BFF 转发到 127.0.0.1:8000。
 
@@ -9,6 +11,11 @@ on:
   schedule:
     # 每日 02:00 北京时间（UTC 18:00 前一日）跑全量 E2E
     - cron: '0 18 * * *'
+  push:
+    # 门槛#3（E2E 发布前必过）闭环：合并到 main 即跑全栈 E2E，
+    # 保证默认分支始终处于「可发布绿」状态（发布即来自 main）。
+    # 仍保留 nightly（schedule）与手动（workflow_dispatch）触发。
+    branches: [main]
   workflow_dispatch:
     inputs:
       ref:
