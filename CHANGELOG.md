@@ -11,6 +11,25 @@
 
 > 进行中 / 下一波次变更累积区；发版时由 `scripts/tag_and_release.sh` 自动转为具体版本号 + 日期。已闭环项不在此滞留（见 `docs/项目待办事项-优先级重排.md`）。
 
+### Added
+
+- **工作台 Schema 配置驱动卡（Phase A 内核）**：新增 `src/modules/workbench/schema/`（`widget-schema.ts` 类型+校验器 / `use-schema-data.ts` 三源数据 hook / `use-schema-widgets.ts` 配置集合 / `schema-widget-renderer.tsx` 渲染器），六种卡型（count/list/progress/countdown/note/link）全部复用 WorkbenchCard 外壳；成员粘贴 JSON 声明（`wb_schema_widgets`）即可自建简单卡，零代码。能力边界：流式/状态机/音频/加密/复杂图形类卡仍走手写组件。api 数据源白名单（`/api/workbench/**`+`/api/tools/**` 前缀）防契约漂移。`widget-registry.ts` 注册内置 `schema-widget` 卡；i18n 补 `schemaWidget`/`schemaEmpty`/`schemaEmptyHint`；`BACKUP_KEYS` 纳入 `wb_schema_widgets`。设计文档见 `docs/workbench-schema-widget-design.md`（Phase A 已实现）。
+
+### Changed
+
+- **工作台卡片统一外壳（WorkbenchCard）**：新增 `src/modules/workbench/workbench-card.tsx`（DnaCard corner + meta-mono 标题头 + 右上操作区 + loading/empty/error 三态），收敛 7 个注册 widget 的重复样板（today-tasks / quick-notes / exam-countdown / github-heatmap / llm-widget / pomodoro）；greeting-bar（顶部全宽状态条）与 workbench 布局设置面板保留定制结构。
+
+### Fixed
+
+- **工作台数据备份遗漏 + 拖拽手柄移动端失效 + 热力图标题错显示**：① `BACKUP_KEYS` 补 `wb_github_username`/`wb_widget_prefs`（导出/清空后恢复不再丢 GitHub 绑定与布局偏好）；② 拖拽手柄 `opacity-0 group-hover` → `opacity-50` 常显 + `touch-none`，触屏可按住拖拽排序；③ `widget-registry.ts` 中 `github-heatmap` 的 `titleKey` 误写 `'examCountdown'`（卡片标题错显示「考试倒计时」）→ 改为 `'githubHeatmap'`，i18n 补 `githubHeatmap`/`heatmapNoData`；硬编码「绑定」→ `t('heatmapBind')`。
+
+### Changed
+
+- **Phase 2 / D5 文档治理（RootDoc-Deploy §八 CI 分工）**：ER-09 文档死链审计已由根仓 `.github/workflows/ci.yml` 的 `Docs dead links (ER-09)` 步骤（`scripts/check/check_dead_links.py --base . --docs docs`）覆盖，更新分工表 Jenkinsfile 行备注与「能力缺口」说明，标记缺口已闭合（与 Jenkinsfile 双保险）。
+- **Phase 2 / D3 文档治理（公共组件调研报告 §2.1）**：澄清前端组件权威清单以 `src/components/README.md` 为准，报告 §2.1 保留本报告视角的补充分类（含各组件变体与 `use*`/`*Provider` 细节）并加指针链接，消除双源维护漂移。（注：方案原计划"§2.1 与 RootDoc-FEArch §2.1 重复"前提不成立——后者为方法论、不含组件清单，故不删除详细清单。）
+- **Phase 2 / 前端依赖治理（package.json）**：`pino-pretty`（仅 dev 日志美化，`src/shared/logger.ts` 以 `NODE_ENV !== 'production'` 门控、生产走 NDJSON）从 `dependencies` 移入 `devDependencies`，缩小生产依赖面；`tw-animate-css` 经核实被 `src/app/globals.css:27` `@import` 引用，**保留**（方案原"未引用"前提不成立）。
+- **Phase 2 / 脚本治理（S1+S2，修复 c146d38 重命名回归）**：① 三个 db 脚本（update/healthcheck/export_db_to_desktop）`$SCRIPT_DIR/..` → `../..`，修复 2026-08-17 从 `scripts/` 挪入 `scripts/db/`（纯改名、未同步相对路径）导致的失效（根 `.env` / 根 `docker-compose.yml` 恢复正确指向）；同步修正脚本头用法注释与 `RootDoc-Deploy.md` 残留的移动前路径。② S2 新增 `scripts/db/lib/health-probe.sh`（`probe_backend_health` / `probe_frontend_health`），`update.sh`（轮询）与 `healthcheck.sh`（单次）收敛为 source 调用，消除两条 `docker compose exec` 探测命令重复；`update.sh` 补 `HEALTH_CONNECT_TIMEOUT=3` 保持原内联连接超时语义。③ S1 决策：`backup_db.sh` 复用不可行（其加载 BE 仓 `.env` 且自带保留期清理会在桌面误删旧备份），`export_db_to_desktop.sh` 保留自身 `pg_dump`（参数与 `backup_db.sh` 一致），仅修真 bug。
+
 ## [1.0.0.七夕] - 2026-08-19
 
 > **1.0.0 正式版 · 代号「七夕」（2026-08-19）** —— 首个稳定发布版本。六道 1.0.0 发布门槛全部明确并闭环：#1 契约门禁 + 管理员强制 2FA + ER-01（已闭环）、#2 管理员审计不丢（R17 闭环）、#3 端到端验收闭环（E2E 发布前必过，根仓 `e2e.yml` 加 `push:main` 保证 `main` 始终「可发布绿」）、#4 多实例幂等（arq cron 单点调度）、#6 D10 功能边界（Wiki/活动评价入 1.0、DM/相册延后）。门槛#5 外部监控有意延后（见下方 Known Limitations，风险接受）。四源核心版本号统一升 `1.0.0`（`make check-version` 通过），并引入**发布代号**机制：本版代号 `七夕`（七夕节当日发布），展示版 `1.0.0.七夕`。发布工具链见 `scripts/tag_and_release.sh`（F-9）。
