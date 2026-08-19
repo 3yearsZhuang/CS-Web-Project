@@ -18,6 +18,7 @@
 - **工作台 Schema 卡 Phase B（简易表单，零代码建卡）**：新增 `schema/schema-card-form.tsx` 内嵌于布局设置面板——标题/类型/数据源（local key 自动补 `wb_` / api url）三要素即可建卡，list 类型可选逗号分隔字段 key；提交经校验器、错误就地展示；面板内可管理（删除）已建卡。i18n 补表单与六类型标签词条（zh+en+类型声明）。普通成员不再需要手写 JSON。
 - **工作台任务与便签合并卡**：`today-tasks` + `quick-notes` 合并为 `tasks-and-notes`（`widgets/tasks-and-notes.tsx`），今日待办 + 快捷便签双区共存（各自持久化 `wb_tasks`/`wb_notes`，零数据迁移），新增「便签转今日任务」（✓ 按钮）；删除两个旧组件文件；i18n 补 `tasksAndNotes`/`noteToTask`。
 - **精简方案 §6 决策·活动设置面板接入（admin-events-settings）**：将此前从未接入的活动模块设置面板挂载到 `admin-events-panel.tsx`（工具栏新增 Settings 按钮，内联可折叠展开，复用 `adminEvents` i18n namespace 与后端 `/api/admin/events/settings` 接口），恢复管理端活动参数配置能力（标题/描述/日期等上限与默认容量批量保存）。ts-check 10 基线零新增。
+- **学习助手 Trajectory 事件日志（融合点 2，吸收 DSH「有迹可循」）**：新增 `chat_events` 表（conversation_id / user_id / seq / event_type / payload JSONB / created_at，`(conversation_id, seq)` 唯一约束），`/auxilio/chat` 事件循环将对话全事件流（delta / tool_call / tool_result / done / error）append-only 落库（best-effort 失败不影响对话，仿 `llm_usage_logs` 模式），支持回放与调试；`chat_messages` 保留为对外快照。Alembic 迁移 `d4e5f6a7b8c9`（upgrade/downgrade 验证通过；规则模式 roundtrip：delta+done 落库、seq 连续）。不新增 API 路由（契约门禁零漂移）。文档 `BackDoc-01-Arch.md` §9.2 / §六同步。
 
 ### Changed
 
@@ -42,6 +43,7 @@
 
 - **工作台数据备份遗漏 + 拖拽手柄移动端失效 + 热力图标题错显示**：① `BACKUP_KEYS` 补 `wb_github_username`/`wb_widget_prefs`（导出/清空后恢复不再丢 GitHub 绑定与布局偏好）；② 拖拽手柄 `opacity-0 group-hover` → `opacity-50` 常显 + `touch-none`，触屏可按住拖拽排序；③ `widget-registry.ts` 中 `github-heatmap` 的 `titleKey` 误写 `'examCountdown'`（卡片标题错显示「考试倒计时」）→ 改为 `'githubHeatmap'`，i18n 补 `githubHeatmap`/`heatmapNoData`；硬编码「绑定」→ `t('heatmapBind')`。
 - **GitHub 贡献热力图不可用（优雅降级）**：根因是后端无 token 匿名抓 `github.com/users/{username}/contributions` HTML，网络受限/反爬时无缓存即抛 500 → 卡片永远空白。修复：① `contribution_service.py` 抓取超时 20s→8s，无缓存抓取失败返回结构化 `unreachable: true` 而非抛 500；② `workbench.py` 端点识别 `unreachable` → 返回 `ok:false + error:github_unreachable`；③ 前端 `github-heatmap.tsx` 新增 `unreachable` 状态，`error` 三态展示「无法连接 GitHub，请检查网络后重试」+ 重试按钮（替代空白卡）；i18n 补 `heatmapUnreachable`/`heatmapRetry`。注：稳定真实数据仍需 token 化（`GITHUB_TOKEN`，未实施）。
+- **布局面板/排序模式 FORMATTING_ERROR（`{days}` 插值词条误用）**：`llm-usage` 的 `titleKey` 误用带插值参数的 `llmUsageTitle`（`'LLM 用量 · 近 {days} 天'`），`t(w.titleKey)` 无参调用即报 `FORMATTING_ERROR`。修复：新增无参词条 `llmUsageTitleShort`（`'LLM 用量'`），registry `titleKey` 改用它；并在 `WorkbenchWidget.titleKey` 注释明确「必须是无插值参数的纯标题词条」防再犯。
 
 ## [1.0.0.七夕] - 2026-08-19
 
