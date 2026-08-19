@@ -28,6 +28,7 @@
 - **Phase 3 / B3 分页响应模型（total_pages 算法统一）**：新增 `app/schemas/pagination.py` 的 `compute_total_pages(total, size)`（`max(1, ceil(total/size))`，`size<=0` 守卫防除零），`PaginatedResponse` 内部改用它，并统一 `user_service.py`（原 `(total+page_size-1)//page_size`，0 数据时 0）与 `admin_events.py`（原 `1 if total>0 else 0`，0 数据时 0）两处手算 → 消除 0 vs 1 边界漂移（0 数据统一为 1 页）；顺带把 `user_service.py` 列表查询收敛为 B2 的 `paginate()`（闭环 B2 最后残留）。响应模型结构（`EventListOut`/`AdminUserListOut` 保持 page/page_size 形态）不变，**无 API 契约变更、前端无需改动**。
 - **Phase 3 / B1 事务统一——有意延后（2026-08-19 决策）**：142 处 `db.commit()`（37 文件）中仅 72 处方法末提交可安全迁移，**70 处中途提交**依赖早期提交可见性（如 auth_service 提交后查 totp/发 token）、19 处条件提交（`if commit:`）、24 个方法多次提交、27 处 try/except 窗口——装饰器统一会改变中途提交的事务边界语义，零功能收益、回归风险高。与门槛#5「有意延后」同款处置：触发条件为「新代码强制 `@transactional`」或「单独排期逐方法迁移 + 配测试」（记录于 `docs/项目精简方案.md` §4.1 B1 行）。至此**项目精简方案全案收口**：Phase 1 ✅ / Phase 2 ✅ / Phase 3（B3/B4 ✅、B5 核实无需动作 ✅、B1 决策延后 ⏸）。
 - **精简方案 §6 决策·API 参考接生成器（D1）**：`docs/api-reference.md`（437 行手写、头部谎称"由 0.9.8 冻结契约自动生成"但全仓无生成器，必然漂移）压缩为入口页；主体改为 `docs/api-reference.html`（ReDoc 交互查看器，由 `openapi.baseline.json` 经新增 `make gen-api-docs`（`@redocly/cli`，npx 免装依赖）真实生成，永不漂移）；`docs/README.md` 索引改指向 html；契约变更流程（`contract-baseline` → `gen-api-docs`）写入入口页。死链检查 0 错误。
+- **精简方案 C2·e2e.yml 重复检查去重**：删除 `e2e.yml` 与根仓 `ci.yml` 重复的版本四源同步（ER-33）与文档死链（ER-09）两步（已确认 `ci.yml` 在 `push [main, master]` + PR 全覆盖这三项门禁含契约）；`e2e.yml` 回归纯 E2E（push:main + nightly + 手动），职责清晰、减少冗余运行。
 
 ### Fixed
 
