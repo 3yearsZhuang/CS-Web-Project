@@ -11,6 +11,10 @@
 
 > 进行中 / 下一波次变更累积区；发版时由 `scripts/tag_and_release.sh` 自动转为具体版本号 + 日期。已闭环项不在此滞留（见 `docs/项目待办事项-优先级重排.md`）。
 
+### Added
+
+- **学习助手 Agent 预设（融合点 3，吸收 DSH「Agent 预设」）**：`auxilio_agent.py` 新增 `AgentPreset` 声明式注册表（`AGENT_PRESETS`：`general` 通用答疑全量工具 / `exam_sprint` 考试冲刺（3 工具 + temperature 0.3）/ `resource_finder` 资源检索（2 工具 + temperature 0.5））——每预设 = 系统提示词模板（`PRESET_TEMPLATES`，占位符经 `build_system_prompt` 填充、用户字段仍走 ER-19 包裹）+ 工具子集 + 模型参数。`run_chat(preset_id=...)` 显式指定，缺省按用户首条消息关键词启发式匹配（`match_preset`，考试/资源/通用，有序优先），无效 id 视同未指定。`llm_client.stream_chat` 新增可选 `temperature` 透传（OpenAI/Anthropic 双协议，None 不传保持默认）。验证：注册表完整性 / 启发式匹配 / 显式优先 / 模板渲染 / run_chat 工具子集 + temperature 透传全部断言通过；ER-18 回归 1 passed。**前端与 API 契约零改动**（预设解析在服务层）。文档 `BackDoc-01-Arch.md` §六「Agent 预设」+ `BackDoc-Conv.md` §14.2 同步。
+
 ### Fixed
 
 - **发布脚本 `tag_and_release.sh` 中文 codename 崩溃修复**：根因是第 71 行 `perl -i -pe 's/.../"$VERSION"  if $. == 3;'`——替换串以 `"` 结尾后紧跟 `if` 修饰符，perl 把 `"  if $. == 3;` 误认为替换串延续，报 `Substitution replacement not terminated`（与中文 codename 无关，此前误判）。修复：统一改用 `s{}{}` 花括号分隔 + 前置 `if ($. == N)` 条件（兼容引号结尾替换串）；顺带把 codename 部分 perl 从双引号包裹（`$1` 会被 shell 提前展开为空）改为单引号拼接。模拟仓库三场景验证通过（中文 codename / 首次添加 codename / 无 codename 清空）。
