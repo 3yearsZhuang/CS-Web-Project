@@ -13,8 +13,10 @@
 
 ### Added
 
+- **演示模式（后端未连接降级演示）**：后端不可达（自动降级）或手动开启（`?demo=1` / 登录页「进入演示模式」入口）时，BFF 层按内置 mock 路由表返回示例数据，覆盖 17 条路由——auth 登录闭环（login-email/me/profile）、公告、活动（列表/详情/我的报名）、社区（分类/标签/帖子/成员）、加入申请（mine/提交）、通知未读数、公开主页；未覆盖端点（admin 后台 / tools 工具 / SSE 流式）返回 `DEMO_NOT_IMPLEMENTED` 占位。全局 `[ DEMO ]` 横幅明确标识来源（手动/自动）并提供退出/重试连接；`GET /api/demo/status` 供前端查询状态；自动降级带 30s TTL 惰性重探测 + 3s fetch 超时，后端恢复自动回到真实模式。实现：`src/shared/demo/`（`demo-mode.ts` 判定+mock 表、`mock-data/` 各模块）、`src/shared/constants/demo.ts`（cookie/参数常量，服务端与客户端同源）、`src/components/demo/`（`demo-mode-init.tsx` URL 开关、`demo-banner.tsx` 横幅）、`src/app/api/demo/status/route.ts`。mock 字段对齐翻译函数契约（后端 TZModel 系 camelCase / 纯 BaseModel 系 snake_case）。验证：ts-check 10 基线零新增、vitest 234 passed。演进方案 3（demo Routes 伪后端）列入待办 P2-8。
 - **工作台 Schema 配置驱动卡（Phase A 内核）**：新增 `src/modules/workbench/schema/`（`widget-schema.ts` 类型+校验器 / `use-schema-data.ts` 三源数据 hook / `use-schema-widgets.ts` 配置集合 / `schema-widget-renderer.tsx` 渲染器），六种卡型（count/list/progress/countdown/note/link）全部复用 WorkbenchCard 外壳；成员粘贴 JSON 声明（`wb_schema_widgets`）即可自建简单卡，零代码。能力边界：流式/状态机/音频/加密/复杂图形类卡仍走手写组件。api 数据源白名单（`/api/workbench/**`+`/api/tools/**` 前缀）防契约漂移。`widget-registry.ts` 注册内置 `schema-widget` 卡；i18n 补 `schemaWidget`/`schemaEmpty`/`schemaEmptyHint`；`BACKUP_KEYS` 纳入 `wb_schema_widgets`。设计文档见 `docs/workbench-schema-widget-design.md`（Phase A 已实现）。
 - **工作台 Schema 卡 Phase B（简易表单，零代码建卡）**：新增 `schema/schema-card-form.tsx` 内嵌于布局设置面板——标题/类型/数据源（local key 自动补 `wb_` / api url）三要素即可建卡，list 类型可选逗号分隔字段 key；提交经校验器、错误就地展示；面板内可管理（删除）已建卡。i18n 补表单与六类型标签词条（zh+en+类型声明）。普通成员不再需要手写 JSON。
+- **工作台任务与便签合并卡**：`today-tasks` + `quick-notes` 合并为 `tasks-and-notes`（`widgets/tasks-and-notes.tsx`），今日待办 + 快捷便签双区共存（各自持久化 `wb_tasks`/`wb_notes`，零数据迁移），新增「便签转今日任务」（✓ 按钮）；删除两个旧组件文件；i18n 补 `tasksAndNotes`/`noteToTask`。
 - **精简方案 §6 决策·活动设置面板接入（admin-events-settings）**：将此前从未接入的活动模块设置面板挂载到 `admin-events-panel.tsx`（工具栏新增 Settings 按钮，内联可折叠展开，复用 `adminEvents` i18n namespace 与后端 `/api/admin/events/settings` 接口），恢复管理端活动参数配置能力（标题/描述/日期等上限与默认容量批量保存）。ts-check 10 基线零新增。
 
 ### Changed
