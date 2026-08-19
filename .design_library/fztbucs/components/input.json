@@ -7,7 +7,8 @@
   "semanticTypeCandidates": ["input", "textarea", "select"],
   "variantDimensions": {
     "as": ["input", "textarea", "select"],
-    "state": ["default", "error", "disabled"]
+    "state": ["default", "error", "disabled"],
+    "pixelStyle": ["none", "pixel"]
   },
   "representativeVariants": [
     { "as": "input", "state": "default" },
@@ -33,6 +34,13 @@
     "colors": {
       "field": "var(--background) background, var(--foreground) text, var(--input) border",
       "error": "var(--destructive) text"
+    },
+    "pixelVariant": {
+      "scope": "focus ring only (metadata layer)",
+      "font": "label/meta uses var(--font-pixel) when pixelStyle=pixel",
+      "shadow": "focus state uses var(--sh-px) 2px 2px 0 #000 instead of blur ring",
+      "radius": "0 (squared) when pixel",
+      "degrade": "without --font-pixel, label falls back to var(--font-mono)"
     }
   },
   "usageHints": {
@@ -40,6 +48,11 @@
     "accessibility": "Associated label via meta-mono; error text below field",
     "doNot": "Do not remove label for complex forms"
   },
-  "doNotInvent": ["No floating label", "No helper text slot beyond error"],
+  "doNotInvent": ["No floating label", "No helper text slot beyond error", "No blur focus ring when pixelStyle=pixel"],
+  "pixelLayer": {
+    "enabled": true,
+    "scope": "focus ring + meta label only",
+    "note": "Pixel fusion only touches the input's focus ring (hard offset shadow) and the meta-mono label (Fusion Pixel). Field body stays editorial. No separate .input-pixel class needed."
+  },
   "unknowns": ["Exact INPUT_CLASS padding values are encoded in the frontend utility file"]
 }

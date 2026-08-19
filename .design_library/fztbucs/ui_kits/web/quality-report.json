@@ -2,8 +2,20 @@
   "schemaVersion": 1,
   "screensGenerated": 3,
   "coreComponentsUsed": ["button", "card", "avatar", "input", "navbar", "toast"],
-  "supportComponentsUsed": [],
+  "supportComponentsUsed": ["btn-pixel", "dna-card", "idx-rail", "ghost-title"],
   "previewClassReuseRate": 0.85,
+  "pixelFusionLayer": {
+    "enabled": true,
+    "model": "two-layer (editorial base + pixel additive metadata layer)",
+    "classesRendered": [".btn-pixel", ".dna-card", ".idx-rail", ".ghost-title"],
+    "degradeSafe": true,
+    "referenceDemos": [
+      "demos/kimi-pixel-style-demo.html",
+      "demos/homepage-pixel-rework-demo-v3.html",
+      "demos/cards-pixel-options.html",
+      "demos/workbench-pixel-options.html"
+    ]
+  },
   "hasProductContext": true,
   "inventedComponents": [],
   "renderedFromEvidence": [],

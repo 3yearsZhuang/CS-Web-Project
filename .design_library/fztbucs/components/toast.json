@@ -7,7 +7,8 @@
   "semanticTypeCandidates": ["toast", "notification"],
   "variantDimensions": {
     "variant": ["info", "success", "error"],
-    "state": ["default", "dismissed"]
+    "state": ["default", "dismissed"],
+    "pixelStyle": ["none", "pixel"]
   },
   "representativeVariants": [
     { "variant": "info", "state": "default" },
@@ -33,6 +34,12 @@
       "info": "var(--card) background, var(--primary) left border",
       "success": "var(--card) background, var(--chart-3) left border",
       "error": "var(--card) background, var(--destructive) left border"
+    },
+    "pixelVariant": {
+      "scope": "left accent border + numerals only",
+      "border": "var(--sh-px) hard 2px accent edge when pixelStyle=pixel",
+      "numeral": "variant tag uses var(--font-pixel)",
+      "degrade": "without --font-pixel, tag falls back to var(--font-mono)"
     }
   },
   "usageHints": {
@@ -40,6 +47,11 @@
     "accessibility": "Use role=status/alert; include close button with aria-label",
     "doNot": "Do not stack more than 3 toasts; avoid persistent toasts without dismissal"
   },
-  "doNotInvent": ["No progress toast variant", "No action buttons inside toast"],
+  "doNotInvent": ["No progress toast variant", "No action buttons inside toast", "No blur shadow when pixelStyle=pixel"],
+  "pixelLayer": {
+    "enabled": true,
+    "scope": "left accent edge + variant tag only",
+    "note": "Pixel fusion only swaps the toast's left accent border to a hard offset shadow (var(--sh-px)) and the variant tag to Fusion Pixel. Body stays editorial."
+  },
   "unknowns": []
 }

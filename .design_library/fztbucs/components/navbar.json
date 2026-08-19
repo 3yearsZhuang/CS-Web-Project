@@ -7,7 +7,8 @@
   "semanticTypeCandidates": ["navigation", "header"],
   "variantDimensions": {
     "theme": ["light", "dark"],
-    "state": ["default", "scrolled"]
+    "state": ["default", "scrolled"],
+    "pixelStyle": ["none", "pixel"]
   },
   "representativeVariants": [
     { "theme": "light", "state": "default" },
@@ -32,6 +33,12 @@
       "light": "var(--background) background, var(--foreground) text",
       "dark": "var(--foreground) background, var(--background) text",
       "link-hover": "var(--primary) text"
+    },
+    "pixelVariant": {
+      "scope": "brand wordmark + link numerals only",
+      "brand": "uses .ghost-title (Fusion Pixel stroke) when pixelStyle=pixel",
+      "links": "link numerals/index use var(--font-pixel)",
+      "degrade": "without --font-pixel, brand falls back to var(--font-serif)"
     }
   },
   "usageHints": {
@@ -40,5 +47,10 @@
     "doNot": "Do not use more than 6 primary links; avoid dropdown-only navigation"
   },
   "doNotInvent": ["No hamburger menu without mobile evidence", "No search bar unless evidenced"],
+  "pixelLayer": {
+    "enabled": true,
+    "scope": "brand wordmark + link index only",
+    "note": "Pixel fusion only touches the navbar's brand wordmark (.ghost-title) and link numerals (Fusion Pixel). Layout and theme logic stay editorial. No separate .navbar-pixel class."
+  },
   "unknowns": ["Exact mobile breakpoint behavior"]
 }

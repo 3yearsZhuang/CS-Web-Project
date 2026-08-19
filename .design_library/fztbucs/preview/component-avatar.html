@@ -24,6 +24,8 @@
   .avatar-sm .avatar-fallback { font-size: 10px; }
   .avatar-md .avatar-fallback { font-size: 14px; }
   .avatar-lg .avatar-fallback { font-size: 22px; }
+  /* ── 像素融合增量层 (Pixel Fusion) ── */
+  .avatar-fallback--pixel { font-family: var(--font-pixel); letter-spacing: 0.02em; }
   /* @component-css-end */
 </style>
 </head>
@@ -40,6 +42,13 @@
     <span class="avatar avatar-sm avatar-fallback avatar-bordered" role="img" aria-label="张明" data-evidence-sample="sm-fallback">张</span>
     <span class="avatar avatar-md avatar-fallback avatar-bordered" role="img" aria-label="李华" data-evidence-sample="md-fallback">李</span>
     <span class="avatar avatar-lg avatar-fallback avatar-bordered" role="img" aria-label="王芳" data-evidence-sample="lg-fallback">王</span>
+  </div>
+  <hr class="divider">
+  <div class="row">
+    <span class="label">Pixel</span>
+    <span class="avatar avatar-sm avatar-fallback avatar-bordered avatar-fallback--pixel" role="img" aria-label="张明" data-evidence-sample="sm-fallback-pixel">张</span>
+    <span class="avatar avatar-md avatar-fallback avatar-bordered avatar-fallback--pixel" role="img" aria-label="李华" data-evidence-sample="md-fallback-pixel">李</span>
+    <span class="avatar avatar-lg avatar-fallback avatar-bordered avatar-fallback--pixel" role="img" aria-label="王芳" data-evidence-sample="lg-fallback-pixel">王</span>
   </div>
 </body>
 </html>

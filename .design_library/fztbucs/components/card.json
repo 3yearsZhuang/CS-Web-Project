@@ -7,11 +7,13 @@
   "semanticTypeCandidates": ["card"],
   "variantDimensions": {
     "state": ["default", "hover"],
-    "density": ["default", "minimal"]
+    "density": ["default", "minimal"],
+    "pixelStyle": ["none", "pixel"]
   },
   "representativeVariants": [
     { "state": "default", "density": "default" },
-    { "state": "hover", "density": "minimal" }
+    { "state": "hover", "density": "minimal" },
+    { "state": "default", "density": "default", "pixelStyle": "pixel" }
   ],
   "anatomy": {
     "parts": [
@@ -31,6 +33,13 @@
     "colors": {
       "root": "var(--card) background, var(--card-foreground) text",
       "hover": "border transitions to var(--primary), subtle hover-overlay"
+    },
+    "pixelVariant": {
+      "class": ".dna-card (with .dna-card__idx / .dna-card__title / .dna-card__body)",
+      "font": "Fusion Pixel 11px index, serif title (350), sans 13px body",
+      "shadow": "var(--sh-px) 2px 2px 0 #000 hard offset; hover translates (2px,2px) shadow→0",
+      "radius": "0 (squared)",
+      "degrade": "without --font-pixel, index falls back to var(--font-mono), still readable"
     }
   },
   "usageHints": {
@@ -38,6 +47,11 @@
     "accessibility": "Use semantic headings inside card header",
     "doNot": "Do not nest interactive cards without clear focus target"
   },
-  "doNotInvent": ["No elevated shadow by default", "No rounded style"],
+  "doNotInvent": ["No elevated blur shadow by default", "No rounded style"],
+  "pixelLayer": {
+    "enabled": true,
+    "class": ".dna-card",
+    "note": "DNA card is the card's pixel-fusion variant (pixelStyle: pixel). Same squared editorial frame but with hard offset shadow + Fusion Pixel index slot. Base card stays shadow-less; only the pixel variant uses var(--sh-px)."
+  },
   "unknowns": []
 }

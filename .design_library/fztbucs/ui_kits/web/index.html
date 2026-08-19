@@ -353,6 +353,28 @@ const Dashboard = ({ addToast }) => (
         </article>
       ))}
     </div>
+    <section className="screen" style={{ borderTop: '2px solid var(--color-border)', paddingTop: 16 }}>
+      <h2 className="page-title" style={{ fontSize: 20 }}>像素融合增量层 (Pixel Fusion)</h2>
+      <p className="meta-mono" style={{ color: 'var(--color-muted-foreground)' }}>编辑式骨架不动，仅在元数据层注入像素语言。未加载 Fusion Pixel 字体时回退等宽栈。</p>
+      <div className="ghost-title" style={{ fontSize: 40 }}>FZTBUCS</div>
+      <div className="uikit-responsive-grid" style={{ marginTop: 16 }}>
+        <article data-component="dna-card" className="dna-card">
+          <span className="dna-card__idx">IDX · 001</span>
+          <h3 className="dna-card__title">DNA 融合卡</h3>
+          <div className="dna-card__body">硬阴影边框 + Fusion Pixel 编号角标，正文仍为编辑式骨架。</div>
+        </article>
+        <aside data-component="idx-rail" className="idx-rail">
+          <span className="idx-rail__item idx-rail__item--active">01 活动</span>
+          <span className="idx-rail__item">02 成员</span>
+          <span className="idx-rail__item">03 设置</span>
+        </aside>
+      </div>
+      <div className="uikit-toolbar" style={{ marginTop: 16 }}>
+        <button className="btn-pixel btn-pixel--primary">提交</button>
+        <button className="btn-pixel btn-pixel--sm">详情</button>
+        <button className="btn-pixel" disabled>已禁用</button>
+      </div>
+    </section>
   </div>
 );
 

@@ -25,6 +25,9 @@
   .toast-close { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; background: transparent; border: none; color: var(--color-muted-foreground); cursor: pointer; border-radius: 0; transition: background .15s, color .15s; }
   .toast-close:hover { background: var(--color-muted); color: var(--color-foreground); }
   .toast-close:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 2px; }
+  /* ── 像素融合增量层 (Pixel Fusion) ── */
+  .toast-pixel { border: 1px solid var(--c-pixel-ink); box-shadow: var(--sh-px); }
+  .toast-pixel .toast-tag { font-family: var(--font-pixel); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-pixel-accent); }
   /* @component-css-end */
 </style>
 </head>
@@ -72,6 +75,16 @@
       <span class="toast-message">网络异常</span>
       <button class="toast-close" aria-label="关闭"><svg width="16" height="16"><use href="#icon-x"/></svg></button>
     </div>
+  </div>
+</div>
+<hr class="divider">
+<div class="row">
+  <span class="label">Pixel</span>
+  <div class="toast toast-pixel" role="status">
+    <svg class="toast-icon" width="16" height="16"><use href="#icon-info"/></svg>
+    <span class="toast-tag">INFO</span>
+    <span class="toast-message">保存成功</span>
+    <button class="toast-close" aria-label="关闭"><svg width="16" height="16"><use href="#icon-x"/></svg></button>
   </div>
 </div>
 </body>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卡片改造方案对照 Demo · 方向/活动/流程 × 方案 A/B/C</title>
+<style>
+/* ============================================================
+   缝合像素字体（与 Kimi 同款，OFL 许可，CDN 直链）
+   ============================================================ */
+@font-face {
+  font-family: 'Fusion Pixel 12px Mono zh_hans';
+  src: url('https://fusion-pixel-font.takwolf.com/fusion-pixel-12px-monospaced-zh_hans.otf.woff2') format('woff2');
+  font-display: swap;
+}
+
+:root {
+  --bg: #0a0a0a;
+  --fg: #f5f1ea;
+  --muted: #8a857e;
+  --dim: #57534e;
+  --accent: #d4a574;
+  --hairline: rgba(255,255,255,.08);
+  --surface: #131313;
+  --card-border: #262626;
+  --font-pixel: 'Fusion Pixel 12px Mono zh_hans', ui-monospace, monospace;
+  --font-serif: 'Noto Serif SC', 'Songti SC', Georgia, serif;
+  --font-sans: 'Noto Sans SC', system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-sans);
+  overflow-x: hidden; -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--accent); color: #000; }
+
+/* ---------- 顶部索引条 ---------- */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 30;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px clamp(20px, 6vw, 64px);
+  font-family: var(--font-pixel); font-size: 12px; letter-spacing: .15em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--hairline);
+  background: linear-gradient(#0a0a0aea, transparent);
+}
+.topbar .brand { color: var(--fg); }
+.topbar .brand .px { color: var(--accent); }
+.topbar nav { display: flex; gap: 20px; }
+.topbar a { color: var(--muted); text-decoration: none; transition: color .2s; }
+.topbar a:hover { color: var(--fg); }
+
+/* ---------- 页头 ---------- */
+header.lead {
+  padding: 120px clamp(20px, 6vw, 64px) 40px;
+  border-bottom: 1px solid var(--hairline);
+}
+.lead-kicker { font-family: var(--font-pixel); font-size: 12px; color: var(--accent); letter-spacing: .3em; margin-bottom: 20px; }
+.lead h1 {
+  font-family: var(--font-serif); font-weight: 400;
+  font-size: clamp(28px, 4.6vw, 52px); line-height: 1.35; color: var(--fg);
+}
+.lead h1 em { font-style: normal; color: var(--accent); }
+.lead p { margin-top: 18px; font-size: 13px; line-height: 2; color: var(--muted); max-width: 72ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.legend .lg {
+  font-family: var(--font-pixel); font-size: 11px; letter-spacing: .12em;
+  padding: 6px 12px; border: 1px solid var(--hairline); color: var(--muted);
+}
+.legend .lg b { color: var(--accent); font-weight: 400; }
+
+/* ---------- 通用区块骨架 ---------- */
+section.opt { padding: 72px clamp(20px, 6vw, 64px); border-bottom: 1px solid var(--hairline); }
+.opt-head { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; margin-bottom: 12px; }
+.opt-head .no { font-family: var(--font-pixel); font-size: 13px; color: var(--accent); letter-spacing: .2em; }
+.opt-head h2 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(22px, 3vw, 34px); }
+.opt-desc { font-size: 13px; line-height: 1.9; color: var(--muted); max-width: 86ch; margin-bottom: 34px; }
+.points { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 14px; font-family: var(--font-pixel); font-size: 11px; color: var(--dim); letter-spacing: .08em; }
+
+.block-label {
+  font-family: var(--font-pixel); font-size: 11px; letter-spacing: .25em;
+  color: var(--dim); text-transform: uppercase;
+  margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 1px dashed var(--hairline);
+}
+.block-label b { color: var(--muted); font-weight: 400; }
+
+/* ---------- 卡片通用结构（A/B/C 共享 DOM，仅作用域 CSS 不同） ---------- */
+.card { position: relative; }
+.card .corner { display: none; }   /* 默认隐藏，A/B 显示 */
+.card .num { font-family: var(--font-serif); } /* 大衬线编号 */
+.card .title { font-family: var(--font-serif); color: var(--fg); font-weight: 400; }
+.card .desc { color: var(--muted); }
+.card .meta-line { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.card .tag { color: var(--accent); }
+.card .name-en, .card .date { color: var(--dim); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips span {
+  font-family: var(--font-pixel); font-size: 10px; letter-spacing: .1em;
+  padding: 3px 8px; border: 1px solid var(--hairline); color: var(--muted);
+}
+.px { font-family: var(--font-pixel); }
+
+/* 悬停态演示 — 强制显示 hover 效果（第二张卡片） */
+.hover-demo { transform: translate(-3px,-3px) !important; }
+.opt-a .hover-demo { box-shadow: 5px 5px 0 rgba(212,165,116,.18) !important; border-color: rgba(212,165,116,.4) !important; }
+.opt-b .hover-demo { box-shadow: 7px 7px 0 rgba(212,165,116,.25) !important; }
+.opt-c .hover-demo { box-shadow: 5px 5px 0 rgba(255,255,255,.06) !important; }
+.hover-tag {
+  position: absolute; top: 10px; left: 12px; z-index: 3;
+  font-family: var(--font-pixel); font-size: 9px; letter-spacing: .2em;
+  color: var(--accent); border: 1px solid var(--accent); padding: 2px 6px;
+  opacity: .9; pointer-events: none;
+}
+
+/* ============================================================
+   现状 CURRENT（当前生产样式，基准参照）
+   ============================================================ */
+section.cur { padding: 72px clamp(20px, 6vw, 64px); border-bottom: 1px solid var(--hairline); }
+.cur .dir-card {
+  border: 1px solid var(--hairline); padding: 20px 24px;
+  max-width: 560px;
+}
+.cur .dir-card .top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+.cur .dir-card .top .num { font-size: 40px; line-height: 1; }
+.cur .dir-card .top .name-en { font-family: var(--font-pixel); font-size: 11px; color: var(--dim); }
+.cur .dir-card h3 { font-size: 20px; margin-bottom: 8px; }
+.cur .dir-card .tag { font-family: var(--font-pixel); font-size: 11px; color: var(--accent); margin-bottom: 10px; }
+.cur .dir-card .desc { font-size: 13px; line-height: 1.7; margin-bottom: 14px; }
+.cur .step { display: grid; grid-template-columns: 1fr 1fr 3fr; gap: 18px; padding: 24px 0; border-bottom: 1px solid var(--hairline); align-items: start; }
+.cur .step .idx { font-family: var(--font-serif); font-size: 56px; line-height: 1; }
+.cur .step .dur { font-family: var(--font-pixel); font-size: 11px; color: var(--accent); }
+.cur .step .dur .lb { color: var(--dim); margin-bottom: 6px; }
+.cur .step h4 { font-family: var(--font-serif); font-size: 22px; font-weight: 400; margin-bottom: 8px; }
+.cur .step p { font-size: 13px; line-height: 1.7; color: var(--muted); margin-bottom: 10px; }
+
+/* ============================================================
+   方案 A — 像素卡片语言（平衡增量）
+   ============================================================ */
+.opt-a .dir-card, .opt-a .ev-card {
+  border: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--fg) 3%, transparent);
+  padding: 28px 24px 24px;
+  transition: transform .15s steps(3), box-shadow .15s steps(3), border-color .2s ease;
+}
+.opt-a .dir-card:hover, .opt-a .ev-card:hover {
+  transform: translate(-3px,-3px);
+  box-shadow: 5px 5px 0 rgba(212,165,116,.18);
+  border-color: rgba(212,165,116,.4);
+}
+/* 融合示范同款像素角框 — 12px 方块 + 硬偏移阴影 */
+.opt-a .dir-card::before, .opt-a .dir-card::after,
+.opt-a .ev-card::before, .opt-a .ev-card::after {
+  content: ''; position: absolute; width: 12px; height: 12px; pointer-events: none;
+}
+.opt-a .dir-card::before, .opt-a .ev-card::before {
+  top: -1px; left: -1px;
+  box-shadow: 0 0 0 1px var(--accent), 4px 4px 0 -2px var(--accent);
+}
+.opt-a .dir-card::after, .opt-a .ev-card::after {
+  bottom: -1px; right: -1px;
+  box-shadow: 0 0 0 1px var(--accent), -4px -4px 0 -2px var(--accent);
+}
+/* DNA 卡同款右上角像素编号 */
+.opt-a .corner {
+  display: block; position: absolute; top: 14px; right: 16px;
+  font-family: var(--font-pixel); font-size: 11px; color: var(--dim);
+}
+.opt-a .num { font-size: clamp(28px, 4vw, 44px); line-height: 1; margin-bottom: 18px; color: var(--fg); }
+.opt-a .title { font-size: clamp(18px, 2vw, 22px); margin-bottom: 10px; }
+.opt-a .meta-line { margin-bottom: 12px; font-family: var(--font-pixel); font-size: 11px; letter-spacing: .1em; }
+.opt-a .desc { font-size: 13px; line-height: 1.7; margin-bottom: 14px; }
+.opt-a .chips { margin-top: 14px; }
+
+/* 方案A 流程行 — 融合示范 fusion-steps */
+.opt-a .step {
+  display: flex; gap: 20px; align-items: baseline;
+  padding: 20px 0; border-bottom: 1px solid var(--hairline);
+}
+.opt-a .step .idx {
+  font-family: var(--font-pixel); font-size: 12px; color: var(--accent);
+  min-width: 44px; letter-spacing: .1em;
+}
+.opt-a .step .s-body { flex: 1; }
+.opt-a .step .s-name { font-family: var(--font-serif); font-size: 18px; font-weight: 400; margin-bottom: 6px; }
+.opt-a .step .s-desc { font-size: 13px; line-height: 1.7; color: var(--muted); margin-bottom: 10px; max-width: 60ch; }
+.opt-a .step .s-dur { font-family: var(--font-pixel); font-size: 11px; color: var(--dim); white-space: nowrap; }
+
+/* ============================================================
+   方案 B — 更贴原版 DNA 卡片（紧凑 DNA 卡 + 默认硬阴影）
+   ============================================================ */
+.opt-b .dir-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.opt-b .dir-card, .opt-b .ev-card {
+  background: var(--surface);
+  border: 1px solid var(--card-border);
+  padding: 26px 24px 24px;
+  box-shadow: 4px 4px 0 rgba(255,255,255,.06);   /* 默认即带硬阴影 */
+  transition: transform .15s steps(3), box-shadow .15s steps(3);
+}
+.opt-b .dir-card:hover, .opt-b .ev-card:hover {
+  transform: translate(-3px,-3px);
+  box-shadow: 7px 7px 0 rgba(212,165,116,.25);
+}
+.opt-b .corner {
+  display: block; position: absolute; top: 14px; right: 16px;
+  font-family: var(--font-pixel); font-size: 11px; color: var(--dim);
+}
+.opt-b .num { display: none; }  /* 大衬线编号退场，编号归右上角像素角标 */
+.opt-b .title { font-size: 17px; margin-bottom: 12px; color: #e7e5e4; }
+.opt-b .meta-line { margin-bottom: 10px; font-family: var(--font-pixel); font-size: 11px; letter-spacing: .1em; }
+.opt-b .desc { font-size: 12px; line-height: 1.9; margin-bottom: 14px; }
+.opt-b .chips span { border-color: var(--card-border); color: var(--dim); }
+.opt-b .ev-card .date { color: var(--dim); }
+
+/* 方案B 流程行 — 完整照搬融合示范 fusion-steps */
+.opt-b .step {
+  display: flex; gap: 20px; align-items: baseline;
+  padding: 20px 0; border-bottom: 1px solid var(--hairline);
+}
+.opt-b .step .idx {
+  font-family: var(--font-pixel); font-size: 12px; color: var(--accent);
+  min-width: 44px; letter-spacing: .1em;
+}
+.opt-b .step .s-body { flex: 1; }
+.opt-b .step .s-name { font-family: var(--font-serif); font-size: 17px; font-weight: 400; margin-bottom: 6px; }
+.opt-b .step .s-desc { font-size: 12px; line-height: 1.9; color: var(--muted); margin-bottom: 10px; max-width: 60ch; }
+.opt-b .step .s-dur { font-family: var(--font-pixel); font-size: 11px; color: var(--dim); white-space: nowrap; }
+
+/* ============================================================
+   方案 C — 轻量点缀（保留现状布局，仅加硬阴影悬停 + 角括号）
+   ============================================================ */
+.opt-c .dir-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+.opt-c .dir-card, .opt-c .ev-card {
+  border: 1px solid var(--hairline);   /* 无底色 */
+  padding: 20px 24px;
+  transition: transform .15s steps(3), box-shadow .15s steps(3);
+}
+.opt-c .dir-card:hover, .opt-c .ev-card:hover {
+  transform: translate(-3px,-3px);
+  box-shadow: 5px 5px 0 rgba(255,255,255,.06);
+}
+.opt-c .dir-card::before, .opt-c .dir-card::after,
+.opt-c .ev-card::before, .opt-c .ev-card::after {
+  content: ''; position: absolute; width: 12px; height: 12px; pointer-events: none;
+}
+.opt-c .dir-card::before, .opt-c .ev-card::before {
+  top: -1px; left: -1px;
+  box-shadow: 0 0 0 1px var(--accent), 4px 4px 0 -2px var(--accent);
+}
+.opt-c .dir-card::after, .opt-c .ev-card::after {
+  bottom: -1px; right: -1px;
+  box-shadow: 0 0 0 1px var(--accent), -4px -4px 0 -2px var(--accent);
+}
+.opt-c .corner { display: none; }  /* 不加角标编号 */
+.opt-c .num { font-size: clamp(28px, 4vw, 44px); line-height: 1; margin-bottom: 18px; }
+.opt-c .title { font-size: clamp(18px, 2vw, 22px); margin-bottom: 10px; }
+.opt-c .meta-line { margin-bottom: 12px; font-family: var(--font-pixel); font-size: 11px; letter-spacing: .1em; }
+.opt-c .desc { font-size: 13px; line-height: 1.7; margin-bottom: 14px; }
+
+/* 方案C 流程行 — 保留现状栅格（大衬线编号 + 时长列） */
+.opt-c .step {
+  display: grid; grid-template-columns: auto 1fr; gap: 12px 28px;
+  padding: 26px 0; border-bottom: 1px solid var(--hairline); align-items: start;
+}
+.opt-c .step .idx { font-family: var(--font-serif); font-size: clamp(40px, 6vw, 72px); line-height: 1; grid-row: span 2; color: var(--fg); }
+.opt-c .step .s-dur { font-family: var(--font-pixel); font-size: 11px; color: var(--accent); grid-column: 2; }
+.opt-c .step .s-body { grid-column: 2; }
+.opt-c .step .s-name { font-family: var(--font-serif); font-size: 22px; font-weight: 400; margin-bottom: 8px; }
+.opt-c .step .s-desc { font-size: 13px; line-height: 1.7; color: var(--muted); margin-bottom: 10px; max-width: 60ch; }
+
+/* ---------- Footer ---------- */
+footer {
+  padding: 44px clamp(20px, 6vw, 64px); border-top: 1px solid var(--hairline);
+  font-family: var(--font-pixel); font-size: 11px; line-height: 2; color: var(--dim);
+}
+footer b { color: var(--muted); font-weight: 400; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">FZTBCS · <span class="px">CARD STYLE LAB</span></div>
+  <nav>
+    <a href="#cur">现状</a>
+    <a href="#opt-a">方案A</a>
+    <a href="#opt-b">方案B</a>
+    <a href="#opt-c">方案C</a>
+  </nav>
+</header>
+
+<header class="lead">
+  <p class="lead-kicker">CARD FUSION · 3 OPTIONS</p>
+  <h1>方向 / 活动 / 流程卡片，<em>三种像素融合深度</em>对照</h1>
+  <p>同一批真实卡片（/about 方向区、/events 活动时间轴、/about 流程区），三种改造深度仅通过 CSS 作用域差异呈现 —— 结构 DOM 完全一致，便于直接对比。每区第二张卡片已强制显示 <b class="px">HOVER</b> 悬停态。</p>
+  <div class="legend">
+    <span class="lg"><b>A</b> 像素卡片语言 · 平衡增量</span>
+    <span class="lg"><b>B</b> 更贴原版 DNA 卡 · 激进</span>
+    <span class="lg"><b>C</b> 轻量点缀 · 最小 diff</span>
+  </div>
+</header>
+
+<!-- ============ 现状 CURRENT ============ -->
+<section class="cur" id="cur">
+  <div class="opt-head">
+    <span class="no">[BASE]</span>
+    <h2>现状 Current</h2>
+  </div>
+  <p class="opt-desc">当前生产样式基准：卡片仅 hover 换边框+底色（无抬升无阴影），编号为大衬线，无像素角框。以下仅取一张方向卡与一条流程行作参照。</p>
+
+  <div class="block-label">方向卡片 · <b>DIRECTIONS</b></div>
+  <div class="dir-card">
+    <div class="top">
+      <span class="num">01</span>
+      <span class="name-en">Web Development</span>
+    </div>
+    <h3>Web 开发</h3>
+    <div class="tag">Frontend &amp; Backend</div>
+    <p class="desc">从静态页面到全栈应用，掌握现代 Web 开发完整链路：设计、构建、部署、运维。</p>
+    <div class="chips"><span>React / Next.js</span><span>Vue / Nuxt</span><span>Node.js / Bun</span><span>PostgreSQL / Supabase</span></div>
+  </div>
+
+  <div class="block-label">流程行 · <b>PROCESS</b></div>
+  <div class="step">
+    <div class="idx">01</div>
+    <div class="dur"><div class="lb">Duration</div>5 min</div>
+    <div>
+      <h4>注册账号</h4>
+      <p>在协会官网注册一个账号，验证邮箱后即可登录。</p>
+      <div class="chips"><span>Email Verify</span><span>Set Password</span><span>Profile</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 方案 A ============ -->
+<section class="opt opt-a" id="opt-a">
+  <div class="opt-head">
+    <span class="no">[A]</span>
+    <h2>像素卡片语言（平衡增量）</h2>
+  </div>
+  <p class="opt-desc">在现有编辑式布局上加「像素语言」：卡片表面微底色 + 悬停硬阴影抬升（steps 跳变）+ 融合示范同款 12px 像素角括号（琥珀硬偏移阴影）+ 右上角像素编号；流程行改为融合示范式「像素琥珀序号 + 衬线名称 + 右对齐像素时长」。保留大衬线编号与整体布局。</p>
+  <div class="points">
+    <span>▸ 表面微底色 color-mix 3%</span>
+    <span>▸ 悬停硬阴影 5px 5px 0 琥珀</span>
+    <span>▸ 四角 12px 像素角括号</span>
+    <span>▸ 右上角像素编号</span>
+    <span>▸ 流程行 fusion-steps 化</span>
+    <span>▸ 保留大衬线编号</span>
+  </div>
+
+  <div class="block-label">方向卡片 · <b>DIRECTIONS</b></div>
+  <div class="dir-grid"></div>
+
+  <div class="block-label">活动卡片 · <b>EVENTS</b></div>
+  <div class="ev-list"></div>
+
+  <div class="block-label">流程行 · <b>PROCESS</b></div>
+  <div class="steps"></div>
+</section>
+
+<!-- ============ 方案 B ============ -->
+<section class="opt opt-b" id="opt-b">
+  <div class="opt-head">
+    <span class="no">[B]</span>
+    <h2>更贴原版 DNA 卡（激进）</h2>
+  </div>
+  <p class="opt-desc">方向/活动卡片整体改成「风格四要素拆解」同款紧凑 DNA 卡：表面深底 + 边框 + 右上角小编号（大衬线编号退场）+ 默认即带硬阴影、悬停抬升更明显；元数据全像素化、衬线只留给标题；流程行完整照搬融合示范 fusion-steps 三列式。</p>
+  <div class="points">
+    <span>▸ 深色表面底 #131313</span>
+    <span>▸ 默认硬阴影 4px 4px 0</span>
+    <span>▸ 悬停硬阴影 7px 7px 0</span>
+    <span>▸ 编号归右上角像素角标</span>
+    <span>▸ 元数据全像素化</span>
+    <span>▸ 标题收窄 17px 衬线</span>
+  </div>
+
+  <div class="block-label">方向卡片 · <b>DIRECTIONS</b></div>
+  <div class="dir-grid"></div>
+
+  <div class="block-label">活动卡片 · <b>EVENTS</b></div>
+  <div class="ev-list"></div>
+
+  <div class="block-label">流程行 · <b>PROCESS</b></div>
+  <div class="steps"></div>
+</section>
+
+<!-- ============ 方案 C ============ -->
+<section class="opt opt-c" id="opt-c">
+  <div class="opt-head">
+    <span class="no">[C]</span>
+    <h2>轻量点缀（最小 diff）</h2>
+  </div>
+  <p class="opt-desc">保持现状布局与底色，仅加两件事：悬停硬阴影抬升 + 像素角括号。不加表面底色、不加角标编号、流程行保留现状栅格（大衬线编号 + 时长列）。</p>
+  <div class="points">
+    <span>▸ 悬停硬阴影 5px 5px 0</span>
+    <span>▸ 四角 12px 像素角括号</span>
+    <span>▸ 不动底色 / 编号 / 流程行</span>
+  </div>
+
+  <div class="block-label">方向卡片 · <b>DIRECTIONS</b></div>
+  <div class="dir-grid"></div>
+
+  <div class="block-label">活动卡片 · <b>EVENTS</b></div>
+  <div class="ev-list"></div>
+
+  <div class="block-label">流程行 · <b>PROCESS</b></div>
+  <div class="steps"></div>
+</section>
+
+<footer>
+  <b>CARD STYLE LAB · DEMO ONLY</b> — 同一 DOM、纯 CSS 作用域差异。像素字体：Fusion Pixel Font（OFL-1.1，TakWolf）。
+  数据取自 /about 与 /events 真实文案（方向卡 / 活动卡 / 流程行）。第二张卡片为强制 HOVER 态。
+</footer>
+
+<script>
+/* ============ 数据（生产真实文案） ============ */
+const DIRS = [
+  { num: '01', name: 'Web 开发', nameEn: 'Web Development', tag: 'Frontend & Backend', desc: '从静态页面到全栈应用，掌握现代 Web 开发完整链路：设计、构建、部署、运维。', chips: ['React / Next.js', 'Vue / Nuxt', 'Node.js / Bun', 'PostgreSQL / Supabase'] },
+  { num: '04', name: '系统与安全', nameEn: 'Systems & Security', tag: 'OS / Security', desc: '深入操作系统内核，学习网络安全攻防，参与 CTF 竞赛。', chips: ['Linux Kernel', 'Rust / C', 'Pwn / Reverse', 'CTF / Pentest'] },
+];
+
+const EVENTS = [
+  { date: '// 2026-05-24', pinned: true, title: '月度黑客马拉松 — 24h Build Sprint', desc: '与队友一起在 24 小时内从零构建一个可运行的产品原型，现场演示并互相评审。', chips: ['Hackathon', 'Team'] },
+  { date: '// 2026-06-14', pinned: false, title: '算法周赛 · Codeforces 同步场', desc: '周末晚间同步 Codeforces Div.2 比赛，赛后讲解题解与常见套路。', chips: ['ICPC', 'Weekly'] },
+];
+
+const STEPS = [
+  { num: '01', name: '注册账号', dur: '~5 MIN', desc: '在协会官网注册一个账号，验证邮箱后即可登录。', chips: ['Email Verify', 'Set Password', 'Profile'] },
+  { num: '02', name: '填写报名表', dur: '~15 MIN', desc: '填写简单的报名表，包括你的兴趣方向、技术背景与想加入的理由。', chips: ['Interest', 'Background', 'Statement'] },
+  { num: '03', name: '线上交流', dur: '~20 MIN', desc: '与各组负责人进行简短的线上交流，互相了解，看是否契合。', chips: ['1:1 Chat', 'No Tech Test'] },
+  { num: '04', name: '正式加入', dur: '~1 DAY', desc: '通过后即可加入协会，参与各组活动、项目与周会。', chips: ['Join Lab', 'Meet Peers'] },
+];
+
+/* ============ 渲染 ============ */
+function dirCard(d, i) {
+  return `<article class="card dir-card${i === 1 ? ' hover-demo' : ''}">
+    ${i === 1 ? '<span class="hover-tag">HOVER</span>' : ''}
+    <span class="corner">${d.num}</span>
+    <div class="num">${d.num}</div>
+    <h3 class="title">${d.name}</h3>
+    <div class="meta-line"><span class="tag">${d.tag}</span><span class="name-en">${d.nameEn}</span></div>
+    <p class="desc">${d.desc}</p>
+    <div class="chips">${d.chips.map((c) => `<span>${c}</span>`).join('')}</div>
+  </article>`;
+}
+
+function evCard(e, i) {
+  return `<article class="card ev-card${i === 1 ? ' hover-demo' : ''}">
+    ${i === 1 ? '<span class="hover-tag">HOVER</span>' : ''}
+    <span class="corner">0${i + 1}</span>
+    <div class="meta-line"><span class="date">${e.date}</span>${e.pinned ? '<span class="tag">[PINNED]</span>' : ''}</div>
+    <h3 class="title">${e.title}</h3>
+    <p class="desc">${e.desc}</p>
+    <div class="chips">${e.chips.map((c) => `<span>${c}</span>`).join('')}</div>
+  </article>`;
+}
+
+function stepRow(s) {
+  return `<div class="step">
+    <span class="idx">${s.num}</span>
+    <span class="s-dur">${s.dur}</span>
+    <div class="s-body">
+      <h4 class="s-name">${s.name}</h4>
+      <p class="s-desc">${s.desc}</p>
+      <div class="chips">${s.chips.map((c) => `<span>${c}</span>`).join('')}</div>
+    </div>
+  </div>`;
+}
+
+document.querySelectorAll('section.opt').forEach((sec) => {
+  sec.querySelector('.dir-grid').innerHTML = DIRS.map(dirCard).join('');
+  sec.querySelector('.ev-list').innerHTML = EVENTS.map(evCard).join('');
+  sec.querySelector('.steps').innerHTML = STEPS.map(stepRow).join('');
+});
+</script>
+</body>
+</html>

@@ -25,6 +25,7 @@ _or_ production code, depending on the need.
 - resolved component sources — create-library uses `preview/component-{slug}.html` first, `components/{slug}.json` for intent/variants, and `components/_evidence/{slug}.json` as fallback evidence
 - `preview/` — small HTML cards illustrating the foundations and components
 - `ui_kits/{type}/` — full click-thru recreation (use as reference for layout, density, patterns)
+- `demos/` — four Pixel-Fusion reference files (kimi benchmark / homepage v3 / cards / workbench); the source of truth for the pixel additive layer
 - `library-consumption.json` — recommended downstream read order
 
 ## Essentials at a glance
@@ -36,3 +37,13 @@ _or_ production code, depending on the need.
 - **Shadows are whisper-quiet:** only two layers exist — popover `0 4px 24px rgba(0,0,0,0.04)` and modal `0 8px 40px rgba(0,0,0,0.08)`. No heavy elevation at rest.
 - **Spacing and motion are measured:** base radius is `4px` for input fields, motion uses `cubic-bezier(0.16, 1, 0.3, 1)` with a `800ms` cinematic duration for hero reveals.
 - **Voice is Chinese-first, technical, and restrained:** prefer exact editorial labels, avoid emoji in product UI, and reserve serif italics for occasional keyword emphasis.
+
+## Pixel Fusion (additive metadata layer)
+
+fztbucs uses a **two-layer** model: the Editorial Tech Minimalism base is unchanged; the pixel language is an **additive layer** that injects only at the metadata level. These are separate concerns — never merge them into a single "pixel" style.
+
+- **Keep the editorial body; pixelate the metadata.** Body copy stays Fraunces/Noto Sans SC. Only markers, numerals, tags, and structural chrome switch to the pixel skin (`.btn-pixel`, `.dna-card`, `.idx-rail`, `.ghost-title`, `.lst-dna`).
+- **Token prefix is `--pixel-*`:** `--font-pixel` (Fusion Pixel 12px, falls back to `--font-mono`), `--sh-px` (2px 2px 0 #000 hard offset shadow, no blur), `--c-pixel-ink/paper/accent`, `--px-gap` (4px grid), `--dur-step` (0.6s for `steps()` animation).
+- **Hard shadow, not blur:** pixel components use `box-shadow: var(--sh-px)`; hover translates `(2px,2px)` and collapses the shadow to `0 0 0 #000`. No soft elevation on pixel parts.
+- **Graceful degrade:** when `--font-pixel` (Fusion Pixel) is not loaded, all pixel classes fall back to `--font-mono` and remain fully readable on the editorial background. Respect `prefers-reduced-motion` — disable `.px-step-in` and `steps()` transitions.
+- **Reference demos:** `demos/kimi-pixel-style-demo.html` (benchmark), `demos/homepage-pixel-rework-demo-v3.html`, `demos/cards-pixel-options.html`, `demos/workbench-pixel-options.html`. Token values are authoritative there.

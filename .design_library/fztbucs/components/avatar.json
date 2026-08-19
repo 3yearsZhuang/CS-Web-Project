@@ -7,7 +7,8 @@
   "semanticTypeCandidates": ["avatar"],
   "variantDimensions": {
     "size": ["sm", "md", "lg"],
-    "state": ["default", "fallback"]
+    "state": ["default", "fallback"],
+    "pixelStyle": ["none", "pixel"]
   },
   "representativeVariants": [
     { "size": "sm", "state": "default" },
@@ -36,6 +37,11 @@
       "sm": "24px",
       "md": "40px",
       "lg": "64px"
+    },
+    "pixelVariant": {
+      "scope": "fallback initials only",
+      "font": "fallback initials use var(--font-pixel) when pixelStyle=pixel",
+      "degrade": "without --font-pixel, initials fall back to var(--font-sans) uppercase"
     }
   },
   "usageHints": {
@@ -43,6 +49,11 @@
     "accessibility": "Include alt text on image; fallback must present initials",
     "doNot": "Do not use avatar alone as the only user identifier in dense lists"
   },
-  "doNotInvent": ["No status indicator dot", "No square avatar variant"],
+  "doNotInvent": ["No status indicator dot", "No square avatar variant", "No hard-shadow frame on avatar"],
+  "pixelLayer": {
+    "enabled": true,
+    "scope": "fallback initials only",
+    "note": "Pixel fusion only swaps the avatar's fallback initials to Fusion Pixel. The circular frame and sizes stay editorial. No .avatar-pixel class."
+  },
   "unknowns": []
 }

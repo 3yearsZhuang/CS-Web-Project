@@ -8,7 +8,8 @@
   "variantDimensions": {
     "variant": ["primary", "outline", "danger"],
     "size": ["md", "sm"],
-    "state": ["default", "hover", "disabled", "loading"]
+    "state": ["default", "hover", "disabled", "loading"],
+    "pixelStyle": ["none", "pixel"]
   },
   "representativeVariants": [
     { "variant": "primary", "size": "md", "state": "default" },
@@ -17,7 +18,8 @@
     { "variant": "outline", "size": "sm", "state": "default" },
     { "variant": "danger", "size": "md", "state": "default" },
     { "variant": "primary", "size": "md", "state": "disabled" },
-    { "variant": "primary", "size": "md", "state": "loading" }
+    { "variant": "primary", "size": "md", "state": "loading" },
+    { "variant": "primary", "size": "md", "state": "default", "pixelStyle": "pixel" }
   ],
   "anatomy": {
     "parts": [
@@ -38,6 +40,13 @@
       "primary": "var(--primary) background, var(--primary-foreground) text",
       "outline": "transparent background, var(--foreground) text, var(--border) border",
       "danger": "var(--destructive) background, var(--destructive-foreground) text"
+    },
+    "pixelVariant": {
+      "class": ".btn-pixel (with .btn-pixel--primary / .btn-pixel--sm)",
+      "font": "var(--font-pixel) Fusion Pixel 12px, tracking 0.08em, uppercase",
+      "shadow": "var(--sh-px) 2px 2px 0 #000 hard offset; hover translates (2px,2px) shadow→0",
+      "radius": "0 (squared, matches editorial)",
+      "degrade": "without --font-pixel, falls back to var(--font-mono), still readable"
     }
   },
   "usageHints": {
@@ -45,6 +54,11 @@
     "accessibility": "Focus-visible outline via --primary; disabled state uses opacity 0.3",
     "doNot": "Do not use danger variant for non-destructive actions; avoid mixing multiple primary buttons in one form"
   },
-  "doNotInvent": ["No ghost variant", "No icon-only variant", "No rounded radius"],
+  "doNotInvent": ["No ghost variant", "No icon-only variant", "No rounded radius", "No non-pixel hard-shadow on editorial base buttons"],
+  "pixelLayer": {
+    "enabled": true,
+    "class": ".btn-pixel",
+    "note": "Pixel fusion is an additive metadata-layer variant (pixelStyle: pixel). It reuses the editorial squared radius but swaps to Fusion Pixel type + hard offset shadow. Both base and pixel variants coexist."
+  },
   "unknowns": []
 }

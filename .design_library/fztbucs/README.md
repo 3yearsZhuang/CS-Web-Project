@@ -5,6 +5,26 @@ The system is purpose-built for content-forward web interfaces that need the war
 
 > *"编辑式技术极简 (Editorial Tech Minimalism) — 浅色模式强调色：深蓝 #1e40af；深色模式强调色：琥珀金 #d4a574"* — source comment in `colors_and_type.css`
 
+## Design layers (two-layer model)
+
+fztbucs ships a **two-layer** design model. The base layer is unchanged Editorial Tech Minimalism; the pixel language is an **additive metadata layer** that never mutates the editorial skeleton.
+
+| Layer | Role | Tokens / classes |
+|---|---|---|
+| **Base — Editorial Tech Minimalism** | Skeleton: serif display, hairline borders, light/dark dual theme, section markers, restrained motion | `--font-serif`, `.display-serif`, `.section-marker`, `--primary` (navy/amber), `radius: 0` |
+| **Incremental — Pixel Fusion** (`--pixel-*`) | Metadata-only pixel injection: Fusion Pixel type, hard offset shadows, DNA cards, index rail, stepped `steps()` animation | `--font-pixel`, `--sh-px`, `--c-pixel-ink` / `--c-pixel-paper` / `--c-pixel-accent`, `.btn-pixel`, `.dna-card`, `.idx-rail`, `.ghost-title`, `.lst-dna` |
+
+**Principle (from the demos):** keep the editorial body skin; inject pixel language *only* at the metadata layer. Body copy stays editorial sans/serif; only markers, numbers, tags, and structural chrome pick up the pixel skin. Pixel components degrade gracefully — without `--font-pixel` loaded they fall back to the mono stack, and `.btn-pixel` / `.dna-card` remain readable on the editorial background.
+
+## Pixel fusion demos
+
+The `demos/` folder holds the four canonical Pixel-Fusion reference files (the source of truth for the incremental layer):
+
+- `demos/kimi-pixel-style-demo.html` — **benchmark**: Kimi pixel × editorial baseline, the reference for token values.
+- `demos/homepage-pixel-rework-demo-v3.html` — homepage metadata-layer rework (final): DNA hero, index rail, stepped reveal.
+- `demos/cards-pixel-options.html` — card system, three options (DNA / ghost / framed).
+- `demos/workbench-pixel-options.html` — workbench, three options (rail / grid / split).
+
 ## Source
 
 - **Structured spec:** `.design_library/fztbucs/css.json`, `colors_and_type.css`, and `components/*.json`

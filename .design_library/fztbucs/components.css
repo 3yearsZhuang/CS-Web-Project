@@ -101,3 +101,59 @@
   .toast-close { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; background: transparent; border: none; color: var(--color-muted-foreground); cursor: pointer; border-radius: 0; transition: background .15s, color .15s; }
   .toast-close:hover { background: var(--color-muted); color: var(--color-foreground); }
   .toast-close:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 2px; }
+
+/* ─────────────────────────────────────────────────────────────
+ * 像素融合增量层 (Pixel Fusion) — 同步自 preview/component-*.html 的
+ * @component-css-start/end 提取区。在编辑式技术极简基础上，仅注入元数据层。
+ * 未加载 --font-pixel 时回退 --font-mono；像素组件在编辑式背景上仍可读。
+ * ───────────────────────────────────────────────────────────── */
+
+/* 像素按钮 */
+.btn-pixel { display: inline-flex; align-items: center; gap: var(--px-gap); padding: 0.5rem 1rem; background: var(--c-pixel-paper); color: var(--c-pixel-ink); border: 1px solid var(--c-pixel-ink); box-shadow: var(--sh-px); font-family: var(--font-pixel); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; transition: transform .12s steps(2), box-shadow .12s steps(2); }
+.btn-pixel:hover, .btn-pixel:active { transform: translate(2px, 2px); box-shadow: 0 0 0 #000; }
+.btn-pixel:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+.btn-pixel--primary { background: var(--c-pixel-accent); color: var(--color-primary-foreground); border-color: var(--c-pixel-ink); }
+.btn-pixel--sm { padding: 0.25rem 0.6rem; font-size: 11px; }
+
+/* DNA 卡 */
+.dna-card { position: relative; background: var(--c-pixel-paper); border: 1px solid var(--c-pixel-ink); box-shadow: var(--sh-px); padding: 1rem; transition: transform .15s steps(3), box-shadow .15s steps(3); }
+.dna-card:hover { transform: translate(2px, 2px); box-shadow: 0 0 0 #000; }
+.dna-card__idx { font-family: var(--font-pixel); font-size: 11px; letter-spacing: 0.1em; color: var(--c-pixel-accent); text-transform: uppercase; }
+.dna-card__title { font-family: var(--font-serif); font-weight: 350; font-size: 1.1rem; margin-top: 0.5rem; color: var(--color-foreground); }
+.dna-card__body { font-family: var(--font-family-sans); font-size: 13px; line-height: 1.6; color: var(--color-muted-foreground); margin-top: 0.5rem; }
+
+/* 索引铁路 */
+.idx-rail { display: flex; flex-direction: column; gap: var(--px-gap); border-left: 2px solid var(--c-pixel-ink); padding-left: 0.75rem; }
+.idx-rail__item { font-family: var(--font-pixel); font-size: 11px; letter-spacing: 0.08em; color: var(--color-muted-foreground); text-transform: uppercase; }
+.idx-rail__item--active { color: var(--c-pixel-accent); }
+
+/* 幽灵标题 */
+.ghost-title { font-family: var(--font-pixel); font-size: clamp(2rem, 6vw, 4rem); line-height: 1; color: transparent; -webkit-text-stroke: 1px var(--c-pixel-ink); text-stroke: 1px var(--c-pixel-ink); letter-spacing: 0.02em; text-transform: uppercase; }
+
+/* DNA 列表 */
+.lst-dna { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--px-gap); }
+.lst-dna__item { font-family: var(--font-family-sans); font-size: 13px; border: 1px solid var(--c-pixel-ink); padding: 0.5rem 0.75rem; background: var(--c-pixel-paper); display: flex; align-items: center; gap: 0.5rem; }
+.lst-dna__num { font-family: var(--font-pixel); font-size: 11px; color: var(--c-pixel-accent); letter-spacing: 0.08em; }
+
+/* 输入像素聚焦 */
+.field-pixel { border-radius: 0; }
+.field-pixel:focus-visible { outline: none; box-shadow: var(--sh-px); border-color: var(--c-pixel-ink); }
+.field-label--pixel { font-family: var(--font-pixel); letter-spacing: 0.08em; }
+
+/* 导航像素 */
+.navbar-brand--pixel { font-family: var(--font-pixel); letter-spacing: 0.02em; }
+.navbar-link--pixel { font-family: var(--font-pixel); letter-spacing: 0.05em; }
+
+/* 头像像素回退 */
+.avatar-fallback--pixel { font-family: var(--font-pixel); letter-spacing: 0.02em; }
+
+/* Toast 像素 */
+.toast-pixel { border: 1px solid var(--c-pixel-ink); box-shadow: var(--sh-px); }
+.toast-pixel .toast-tag { font-family: var(--font-pixel); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-pixel-accent); }
+
+/* 像素阶跃揭示 */
+@keyframes px-step-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.px-step-in { animation: px-step-in var(--dur-step) steps(4) forwards; opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .px-step-in, .btn-pixel, .dna-card { animation: none !important; opacity: 1 !important; transform: none !important; transition: none !important; }
+}

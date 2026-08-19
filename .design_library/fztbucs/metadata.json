@@ -1,5 +1,23 @@
 {
   "id": "BR-FMMUIJZ6JWL",
   "name": "fztbucs",
-  "version": 1
+  "version": 2,
+  "designModel": "two-layer: editorial-tech-minimalism (base) + pixel-fusion (additive metadata layer)",
+  "pixelFusionTokens": [
+    "--font-pixel",
+    "--sh-px",
+    "--c-pixel-ink",
+    "--c-pixel-paper",
+    "--c-pixel-accent",
+    "--px-gap",
+    "--dur-step"
+  ],
+  "pixelFusionClasses": [
+    ".btn-pixel",
+    ".dna-card",
+    ".idx-rail",
+    ".ghost-title",
+    ".lst-dna",
+    ".px-step-in"
+  ]
 }

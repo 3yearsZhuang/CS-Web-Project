@@ -25,6 +25,10 @@
     .field.error { border-color: var(--color-destructive); }
     .field:disabled { opacity: 0.5; cursor: not-allowed; }
     .field-error { font-family: var(--font-family-mono); font-size: 11px; color: var(--color-destructive); }
+    /* ── 像素融合增量层 (Pixel Fusion) ── */
+    .field-pixel { border-radius: 0; }
+    .field-pixel:focus-visible { outline: none; box-shadow: var(--sh-px); border-color: var(--c-pixel-ink); }
+    .field-label--pixel { font-family: var(--font-pixel); letter-spacing: 0.08em; }
     /* @component-css-end */
   </style>
 </head>
@@ -64,6 +68,16 @@
               <option>团队</option>
               <option>企业</option>
             </select>
+          </div>
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="story">
+        <div class="story-label">Pixel</div>
+        <div class="rail">
+          <div class="field-wrapper">
+            <label class="field-label field-label--pixel" for="input-pixel">邮箱</label>
+            <input id="input-pixel" class="field field-pixel" type="text" placeholder="name@example.com">
           </div>
         </div>
       </div>

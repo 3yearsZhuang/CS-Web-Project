@@ -5,6 +5,26 @@
 
 > *"编辑式技术极简 (Editorial Tech Minimalism) — 浅色模式强调色：深蓝 #1e40af；深色模式强调色：琥珀金 #d4a574"* — 出自 `colors_and_type.css` 的源注释
 
+## 设计分层（双层模型）
+
+fztbucs 采用**双层**设计模型：基础层为不变的编辑式技术极简，像素语言是**注入元数据层的增量**，绝不动编辑式骨架。
+
+| 层 | 角色 | 令牌 / 类 |
+|---|---|---|
+| **基础 — 编辑式技术极简** | 骨架：衬线大标题、发丝线、浅/深双主题、章节标记、克制动效 | `--font-serif`、`.display-serif`、`.section-marker`、`--primary`（深蓝/琥珀）、`radius: 0` |
+| **增量 — 像素融合**（`--pixel-*`） | 仅注入元数据层：Fusion Pixel 字体、硬阴影、DNA 卡、索引铁路、阶跃 `steps()` 动画 | `--font-pixel`、`--sh-px`、`--c-pixel-ink` / `--c-pixel-paper` / `--c-pixel-accent`、`.btn-pixel`、`.dna-card`、`.idx-rail`、`.ghost-title`、`.lst-dna` |
+
+**原则（来自 demos）**：保留编辑式正文外观；仅在元数据层注入像素语言。正文保持编辑式无衬线/衬线；只有标记、编号、标签与结构性外壳切换为像素皮肤。像素组件优雅降级——未加载 `--font-pixel` 时回退等宽栈，`.btn-pixel` / `.dna-card` 在编辑式背景上仍可读。
+
+## 像素融合演示
+
+`demos/` 目录存放四个权威的像素融合参考文件（增量层的真相源）：
+
+- `demos/kimi-pixel-style-demo.html` — **基准**：Kimi 像素 × 编辑式基线，令牌取值参考。
+- `demos/homepage-pixel-rework-demo-v3.html` — 首页元数据层改造（终稿）：DNA 主视觉、索引铁路、阶跃揭示。
+- `demos/cards-pixel-options.html` — 卡片系统三方案（DNA / ghost / framed）。
+- `demos/workbench-pixel-options.html` — 工作台三方案（rail / grid / split）。
+
 ## 来源
 
 - **结构化规范：** `.design_library/fztbucs/css.json`、`colors_and_type.css` 以及 `components/*.json`

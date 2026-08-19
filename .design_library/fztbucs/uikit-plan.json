@@ -41,7 +41,48 @@
       "priority": 6
     }
   ],
-  "supportEvidenceComponents": [],
+  "supportEvidenceComponents": [
+    {
+      "slug": "btn-pixel",
+      "reason": "pixel-fusion additive layer for button; Fusion Pixel + hard shadow",
+      "variantOf": "button",
+      "pixelStyle": "pixel"
+    },
+    {
+      "slug": "dna-card",
+      "reason": "pixel-fusion additive layer for card; hard-shadow frame + Fusion Pixel index slot",
+      "variantOf": "card",
+      "pixelStyle": "pixel"
+    },
+    {
+      "slug": "idx-rail",
+      "reason": "pixel index rail (metadata chrome); not a standalone slot component",
+      "pixelStyle": "pixel"
+    },
+    {
+      "slug": "ghost-title",
+      "reason": "pixel stroked display type (metadata chrome)",
+      "pixelStyle": "pixel"
+    },
+    {
+      "slug": "lst-dna",
+      "reason": "pixel numbered list (metadata chrome)",
+      "pixelStyle": "pixel"
+    }
+  ],
+  "pixelFusion": {
+    "model": "two-layer",
+    "base": "editorial-tech-minimalism (unchanged skeleton: serif display, hairline, light/dark, section markers)",
+    "incrementalLayer": "pixel-fusion — metadata-only injection (Fusion Pixel type, hard offset shadow, DNA cards, index rail, stepped steps() animation)",
+    "principle": "keep editorial body skin; inject pixel language only at metadata layer; graceful degrade when --font-pixel absent",
+    "tokens": ["--font-pixel", "--sh-px", "--c-pixel-ink", "--c-pixel-paper", "--c-pixel-accent", "--px-gap", "--dur-step"],
+    "referenceDemos": [
+      "demos/kimi-pixel-style-demo.html",
+      "demos/homepage-pixel-rework-demo-v3.html",
+      "demos/cards-pixel-options.html",
+      "demos/workbench-pixel-options.html"
+    ]
+  },
   "allowedComponents": [
     "button",
     "card",
