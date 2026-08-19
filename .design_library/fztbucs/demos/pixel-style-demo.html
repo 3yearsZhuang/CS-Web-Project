@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>风格融合 Demo · Kimi 像素复古 × FztbuCS 编辑式极简</title>
+<title>风格融合 Demo · 像素复古 × FztbuCS 编辑式极简</title>
 <style>
 /* ============================================================
    缝合像素字体（Fusion Pixel 12px Monospaced zh_hans）
-   — 与 careers.kimi.com 同款，OFL 开源许可，CDN 直链
+   — 与 reference-site.example 同款，OFL 开源许可，CDN 直链
    ============================================================ */
 @font-face {
   font-family: 'Fusion Pixel 12px Mono zh_hans';
@@ -16,7 +16,7 @@
 }
 
 :root {
-  /* Kimi 招聘站灰阶色板（从其 CSS 提取的高频色） */
+  /* 参考站点灰阶色板（从其 CSS 提取的高频色） */
   --px-black: #000;
   --px-surface: #151515;
   --px-card: #292929;
@@ -72,7 +72,7 @@ body {
 }
 #stars { position: absolute; inset: 0; image-rendering: pixelated; }
 
-/* 月亮 — 纯 CSS 径向渐变模拟 Kimi 的 bg-hero.png 月球摄影 */
+/* 月亮 — 纯 CSS 径向渐变模拟 参考站点的 bg-hero.png 月球摄影 */
 .moon {
   position: absolute;
   top: 50%; right: 6vw; transform: translateY(-54%);
@@ -284,18 +284,18 @@ body {
   </nav>
 </header>
 
-<!-- ============ 1 · Kimi 风格复刻 Hero ============ -->
+<!-- ============ 1 · 风格复刻 Hero ============ -->
 <section class="hero" id="hero">
   <canvas id="stars"></canvas>
   <div class="moon"></div>
   <div class="vertical-text">加入我们 · JOIN US</div>
 
   <div class="hero-copy">
-    <p class="hero-kicker">MOONSHOT STYLE REPLICA <span class="blink">▌</span></p>
-    <h1 class="hero-title" id="heroTitle">月之暗面，把光带进来</h1>
+    <p class="hero-kicker">STYLE REPLICA <span class="blink">▌</span></p>
+    <h1 class="hero-title" id="heroTitle">暗夜，把光带进来</h1>
     <p class="hero-sub">
       纯黑底 + 灰阶单色 + 像素等宽字体 + 月球意象 + 滑动叙事。
-      本节 1:1 复刻 careers.kimi.com 的视觉语言，作为融合基准。
+      本节 1:1 复刻 reference-site.example 的视觉语言，作为融合基准。
     </p>
     <a class="hero-tag" href="#dna">BUILD YOUR OWN STYLE →</a>
   </div>
@@ -343,7 +343,7 @@ body {
     <div class="dna-card">
       <span class="no">[C]</span>
       <h3>月球与暗夜意象</h3>
-      <p>Hero 为一轮高对比月球摄影悬浮于纯黑，呼应「月之暗面」品牌叙事；元素少、留白大、视线聚焦。</p>
+      <p>Hero 为一轮高对比月球摄影悬浮于纯黑，呼应参考站点的视觉叙事；元素少、留白大、视线聚焦。</p>
       <div class="dna-demo"><span class="px-moon-mini"></span><span class="px-frame">把光带进来</span></div>
     </div>
     <div class="dna-card">
@@ -393,7 +393,7 @@ body {
   <h2 class="section-title">元素 → 项目落点对照</h2>
   <table class="map-table">
     <thead>
-      <tr><th>Kimi 元素</th><th>项目落点</th><th>改造范围</th><th>成本</th></tr>
+      <tr><th>参考元素</th><th>项目落点</th><th>改造范围</th><th>成本</th></tr>
     </thead>
     <tbody>
       <tr>
@@ -448,7 +448,7 @@ body {
 </footer>
 
 <script>
-/* 星空 — 像素点闪烁（复刻 Kimi 暗夜氛围，纯 canvas 无依赖） */
+/* 星空 — 像素点闪烁（复刻 暗夜氛围，纯 canvas 无依赖） */
 const cv = document.getElementById('stars');
 const ctx = cv.getContext('2d');
 let stars = [];

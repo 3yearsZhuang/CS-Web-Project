@@ -58,7 +58,7 @@ Auxilio 为内置学习助手 Agent；其 LLM 能力通过以下可选变量开�
 |------|------|------|--------|
 | `LLM_PROVIDER` | LLM 供应商：`openai`（OpenAI 兼容协议）/ `anthropic` / `none`（禁用→规则模式） | 否 | `none` |
 | `LLM_API_KEY` | 供应商 API Key（仅存 `.env`，不落库/日志/前端） | 否（开启 LLM 时必填） | 空 |
-| `LLM_BASE_URL` | OpenAI 兼容自定义网关（DeepSeek / 通义 / Kimi / 本地 vLLM） | 否 | 空 |
+| `LLM_BASE_URL` | OpenAI 兼容自定义网关（Ollama、vLLM 等本地/第三方网关） | 否 | 空 |
 | `LLM_MODEL` | 模型名（如 `gpt-4o-mini`） | 否 | `gpt-4o-mini` |
 | `LLM_TIMEOUT` | 单次调用超时（秒） | 否 | `60` |
 | `LLM_MAX_TOKENS` | 单次回复最大 token | 否 | `1024` |
@@ -137,15 +137,15 @@ make down         # 停止
 ## 六·A、开发库 → 生产库迁移（PG → PG）
 
 > 本项目唯一数据源是后端 PostgreSQL（前端为纯 BFF，无本地库），因此"环境间迁移"本质是 **PostgreSQL → PostgreSQL 的库迁移**，不是 SQLite→PG（历史 SQLite→PG 映射脚本 `migrate-sqlite-to-pg.mjs` 已删除，不适用）。
-> 备份/恢复统一用 `CS-Web-Backend/tools/scripts/backup_db.sh`；导出到桌面用根级 `scripts/export_db_to_desktop.sh`。
+> 备份/恢复统一用 `CS-Web-Backend/tools/scripts/backup_db.sh`；导出到桌面用根级 `scripts/db/export_db_to_desktop.sh`。
 
 ### 1. 导出（开发环境）
 
 ```bash
 # 根级脚本：导出开发库到 ~/Desktop（默认）
-./scripts/export_db_to_desktop.sh
+./scripts/db/export_db_to_desktop.sh
 # 或指定目录
-./scripts/export_db_to_desktop.sh /path/to/out
+./scripts/db/export_db_to_desktop.sh /path/to/out
 
 # 也可用后端脚本直接备份（容器内 db 服务名可直连时）
 ./CS-Web-Backend/tools/scripts/backup_db.sh /path/to/backup
@@ -339,10 +339,10 @@ OTEL_SERVICE_NAME=cs-web-backend
 | 系统 | 角色 | 触发 | 独有 / 差异能力 | 备注 |
 |------|------|------|----------------|------|
 | GitHub Actions `ci.yml` | **主验证门禁（活化）** | `push` / `pull_request` → `main` / `master`，外加 `workflow_dispatch` | 安全静态扫描 `scan_security.py`（G1）、PR diff 覆盖率门禁 `diff_coverage.py`（ER-45）、制品上传 | 功能最全，是合入门禁的权威 |
-| Jenkinsfile | **等价备用验证（自托管）** | 由 Jenkins 控制器按需触发 | 文档死链审计 `scripts/check_dead_links.py`（ER-09） | 当前**不含部署 / 发布阶段**，仅为验证对等体；ER-09 目前仅此套覆盖 |
+| Jenkinsfile | **等价备用验证（自托管）** | 由 Jenkins 控制器按需触发 | 文档死链审计 `scripts/check_dead_links.py`（ER-09） | 当前**不含部署 / 发布阶段**，仅为验证对等体；ER-09 死链审计与根仓 `ci.yml` 双覆盖 |
 
 > 两套都只做「验证」，均不含部署 / 发布阶段（部署见本文 §四 容器化部署）。
-> 能力缺口：ER-09 文档死链审计目前仅 Jenkinsfile 覆盖；若希望 GitHub Actions 也覆盖，需将 `check_dead_links.py` 阶段补入 `ci.yml`（建议登记待办）。
+> 能力缺口已闭合：ER-09 文档死链审计最初仅 Jenkinsfile 覆盖，现根仓 `.github/workflows/ci.yml` 已新增 `Docs dead links (ER-09)` 步骤（`scripts/check/check_dead_links.py --base . --docs docs`），与 Jenkinsfile 形成双保险；CI 分工见上表。
 > 契约冻结：基线 `openapi.baseline.json` 只在根仓；`Jenkinsfile` 用 `../openapi.baseline.json`、根 `make contract-check` 均正确指向。ci.yml 原契约步因 submodule CI 拿不到根仓基线而必红，已于 2026-08-17 移除（与 ER-04 同源问题），契约门禁由 Jenkinsfile + 根 Makefile 承担。
 
 ---

@@ -3,11 +3,11 @@
 # update.sh —— 根级：轻量更新部署服务
 #
 # 用法：
-#   ./scripts/update.sh              # 自动检测变更的服务并更新
-#   ./scripts/update.sh --all        # 强制重建全部服务（不含 db/redis/caddy）
-#   ./scripts/update.sh backend      # 仅更新指定服务（backend / frontend / all）
-#   ./scripts/update.sh --no-pull    # 跳过 git pull，仅用当前代码重建
-#   ./scripts/update.sh --no-cache   # 强制无缓存构建（慢，仅排查问题时用）
+#   ./scripts/db/update.sh            # 自动检测变更的服务并更新
+#   ./scripts/db/update.sh --all      # 强制重建全部服务（不含 db/redis/caddy）
+#   ./scripts/db/update.sh backend    # 仅更新指定服务（backend / frontend / all）
+#   ./scripts/db/update.sh --no-pull  # 跳过 git pull，仅用当前代码重建
+#   ./scripts/db/update.sh --no-cache # 强制无缓存构建（慢，仅排查问题时用）
 #
 # 说明：
 #   - 基于根 docker-compose.yml，只重建有代码变更的服务，利用 Docker 层缓存加速。
@@ -24,10 +24,15 @@ set -euo pipefail
 
 # ---- 配置 ----
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMPOSE_FILE="$PROJECT_ROOT/docker-compose.yml"
 HEALTH_TIMEOUT=60    # 健康检查轮询超时（秒）
 HEALTH_INTERVAL=2    # 轮询间隔（秒）
+HEALTH_CONNECT_TIMEOUT=3   # 单次探测连接超时（秒，与历史内联命令一致）
+
+# ---- 共享健康探测（lib/health-probe.sh）----
+# shellcheck source=lib/health-probe.sh
+source "$SCRIPT_DIR/lib/health-probe.sh"
 
 # ---- 颜色输出 ----
 RED='\033[0;31m'
@@ -54,7 +59,7 @@ while [[ $# -gt 0 ]]; do
     backend|Backend|BACKEND)     TARGET="backend"; shift ;;
     frontend|Frontend|FRONTEND)  TARGET="frontend"; shift ;;
     -h|--help)
-      echo "用法: ./scripts/update.sh [--all | backend | frontend] [--no-pull] [--no-cache]"
+      echo "用法: ./scripts/db/update.sh [--all | backend | frontend] [--no-pull] [--no-cache]"
       echo ""
       echo "选项:"
       echo "  (无参数)    自动检测变更的服务并更新"
@@ -174,14 +179,13 @@ docker compose -f "$COMPOSE_FILE" up -d $BUILD_SERVICES
 
 # ---- 健康检查 ----
 check_health() {
-  local service="$1"
-  local check_cmd="$2"
-  local label="$3"
+  local probe_fn="$1"
+  local label="$2"
   local elapsed=0
 
   echo -n "  等待 ${label} 就绪"
   while [[ $elapsed -lt $HEALTH_TIMEOUT ]]; do
-    if docker compose -f "$COMPOSE_FILE" exec -T "$service" $check_cmd >/dev/null 2>&1; then
+    if "$probe_fn" "$COMPOSE_FILE" "$HEALTH_CONNECT_TIMEOUT" >/dev/null 2>&1; then
       echo ""
       ok "${label} 健康"
       return 0
@@ -197,17 +201,15 @@ check_health() {
 
 info "健康检查..."
 
-# 后端 /health（容器内 curl）
+# 后端 /health（容器内探测，见 lib/health-probe.sh）
 if echo "$BUILD_SERVICES" | grep -qw "backend"; then
-  check_health "backend" \
-    "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).status==200 else 1)\"" \
+  check_health probe_backend_health \
     "后端" || warn "后端健康检查未通过，请检查日志: docker compose logs backend"
 fi
 
-# 前端 /api/health（容器内 curl，转发到后端 /health）
+# 前端 /api/health（容器内探测，转发到后端 /health）
 if echo "$BUILD_SERVICES" | grep -qw "cs-website"; then
-  check_health "cs-website" \
-    "sh -c 'curl -sf http://127.0.0.1:2333/api/health >/dev/null'" \
+  check_health probe_frontend_health \
     "前端" || warn "前端健康检查未通过，请检查日志: docker compose logs cs-website"
 fi
 
