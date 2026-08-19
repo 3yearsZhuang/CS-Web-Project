@@ -4,3 +4,6 @@
 [submodule "CS-Web-Frontend"]
 	path = CS-Web-Frontend
 	url = git@github.com:3yearsZhuang/CS-Web-Frontend.git
+[submodule "CS-Mobile"]
+	path = CS-Mobile
+	url = git@github.com:3yearsZhuang/CS-Mobile.git

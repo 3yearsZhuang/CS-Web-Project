@@ -11,6 +11,9 @@
 #   make up           全栈 Docker 部署（db+backend+redis+worker+frontend；前端绑定 127.0.0.1:2333）
 #   make down / logs / ps / rebuild
 #   make check        跑全部自检（契约+文档+前端边界+版本），亦可 make check-contract / check-docs / check-fe-boundary / check-version-group 单跑
+#   make mobile-install  安装 CS-Mobile 移动端依赖（uni-app 单码双端）
+#   make mobile-dev      微信小程序开发（HBuilderX/CLI 亦可；APK 用 HBuilderX 云打包）
+#   make mobile-build    构建微信小程序 → CS-Mobile/dist/build/mp-weixin
 #
 # 前置：根目录已 git init 并将前后端作为 submodule 收敛（方案②）。
 #
@@ -27,7 +30,7 @@ BACKEND_PY := $(CURDIR)/CS-Web-Backend/.venv/bin/python
 BACKEND_PORT := 9000
 FRONTEND_PORT := 2333
 
-.PHONY: dev-up dev-backend dev-frontend dev-logs dev-down restart-frontend setup up down logs ps rebuild status contract-baseline contract-check check-version check check-contract check-docs check-fe-boundary check-version-group check-gitignore-sync deps-export clean-artifacts
+.PHONY: dev-up dev-backend dev-frontend dev-logs dev-down restart-frontend setup up down logs ps rebuild status contract-baseline contract-check check-version check check-contract check-docs check-fe-boundary check-version-group check-gitignore-sync deps-export clean-artifacts mobile-install mobile-dev mobile-build
 
 # 本地开发统一用后台进程托管（不依赖 tmux，开箱即用）。
 # 前后端各自 nohup 后台运行，PID 写入 .dev.pid，日志落盘 .dev-*.log。
@@ -116,6 +119,20 @@ rebuild:
 status:
 	git submodule status
 	git status --short
+
+# ---- 移动端（CS-Mobile，uni-app 单码双端）----
+# 微信小程序：CLI 可直接 dev/build（产物 dist/build/mp-weixin，微信开发者工具导入）。
+# Android APK：HBuilderX「发行 → 原生 App 云打包」或 build:custom（需打包证书，未纳入根 Makefile）。
+mobile-install:
+	cd CS-Mobile && pnpm install
+	@echo ">>> CS-Mobile 依赖已安装（node_modules）"
+
+mobile-dev:
+	cd CS-Mobile && pnpm run dev:mp-weixin
+
+mobile-build:
+	cd CS-Mobile && pnpm run build:mp-weixin
+	@echo ">>> 小程序产物：CS-Mobile/dist/build/mp-weixin（微信开发者工具导入）"
 
 # ---- 自检聚合入口（按功能分组）----
 # make check              跑全部自检（契约 + 文档 + 前端边界 + 版本 + gitignore）

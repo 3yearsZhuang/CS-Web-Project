@@ -14,6 +14,7 @@
 FztbuCS-Project/
 ├── CS-Web-Backend/        # 子仓库(submodule)：FastAPI 后端（REST API + PostgreSQL + Alembic）
 ├── CS-Web-Frontend/       # 子仓库(submodule)：Next.js 前端（UI + BFF 薄转发）
+├── CS-Mobile/             # 子仓库(submodule)：uni-app 移动端（单码双端：Android APK + 微信小程序，Vue3+Vite+TS）
 ├── docker-compose.yml     # 根级全栈编排（db + backend + redis + worker + frontend）
 ├── .env.example           # 全栈环境变量模板
 ├── Makefile               # 统一命令入口
@@ -99,8 +100,9 @@ make down         # 停止
 | 后端 | `pyproject.toml` → `version` | `CS-Web-Backend/pyproject.toml` |
 | 后端 | `__version__` | `CS-Web-Backend/app/__init__.py` |
 | 后端 | `uv.lock` 依赖锁定版本 | `CS-Web-Backend/uv.lock` |
+| 移动端 | `package.json` → `version` + `manifest.json` → `versionName` | `CS-Mobile/package.json` / `CS-Mobile/src/manifest.json` |
 
-- 改版本号**四处同步**：前端 `package.json` + 后端 `pyproject.toml` + 后端 `app/__init__.py.__version__` + 后端 `uv.lock`（依赖锁定随版本一起更新）。
+- 改版本号**四处同步**：前端 `package.json` + 后端 `pyproject.toml` + 后端 `app/__init__.py.__version__` + 后端 `uv.lock`（依赖锁定随版本一起更新）；**移动端 CS-Mobile 为第五处**：`package.json.version` 与 `src/manifest.json.versionName/versionCode` 同步更新。
 - 变更记录（唯一权威）：[`CHANGELOG.md`](CHANGELOG.md)，按 Keep a Changelog 维护，全量记录各版本显著变更（0.9.8 含工作台 / Auxilio 等新增能力；2026-08-17 起并入原 `docs/项目演变历史.md`）。
 - 当前语义版本线：`0.9.x`（尚未进入 1.0.0）。
 
@@ -108,6 +110,7 @@ make down         # 停止
 
 - 前端是**纯 BFF 薄转发**：`src/app/api/**/route.ts` 仅转发到后端 `/api/v1/**`，无本地业务数据库。
 - 后端是**唯一业务/数据 owner**：FastAPI + PostgreSQL（Alembic 管理 schema），JWT 双 token 认证。
+- 移动端（CS-Mobile）是 **uni-app 单码双端**：一套 Vue3/TS 代码编译为 Android APK 与微信小程序，经统一 ApiClient 直连后端 `/api/v1`（Bearer 注入 + 401 静默刷新，不经过 BFF）。
 
 ### 常见问答（FAQ）
 
@@ -118,7 +121,7 @@ A：容器内 8000，本地 9000，见上表。两者都对。
 A：本地用 `make dev-up`（9000）；直接 `python run.py` 默认是 8000。确认用的是 Makefile 还是裸跑。
 
 **Q：版本号在哪改？**
-A：四处同步（见上表），缺一不可，否则 CI/CHANGELOG 对不上。
+A：四处同步（见上表），缺一不可，否则 CI/CHANGELOG 对不上；移动端 CS-Mobile 另需同步 `package.json.version` 与 `manifest.json.versionName/versionCode`（第五处）。
 
 **Q：前端能直连数据库吗？**
 A：不能。前端仅 BFF 转发，业务数据全在后端 PG。
@@ -382,6 +385,13 @@ git submodule update --remote --merge
 
 # 子仓库内的改动请进入各自目录操作并独立提交/推送
 cd CS-Web-Backend && git pull && git push
+
+# CS-Mobile 移动端子仓库（uni-app 单码双端）用法：
+cd CS-Mobile
+pnpm install        # 安装依赖（首次）
+pnpm run dev:mp-weixin    # 微信小程序开发（HBuilderX/CLI 亦可）
+pnpm run build:mp-weixin  # 小程序构建 → dist/build/mp-weixin
+# Android APK：HBuilderX「发行 → 原生 App 云打包」或 build:custom（需打包证书）
 ```
 
 ## 贡献指南
