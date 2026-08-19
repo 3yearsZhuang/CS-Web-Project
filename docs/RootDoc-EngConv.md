@@ -22,16 +22,11 @@
 
 ### 三端业务模块命名（2026-08-19 确立，P2-9）
 
-**原则**：三端业务模块名 = API 资源名（`openapi.baseline.json` 中 `/api/v1` 路径第一段，复数）——前端/移动端 `src/modules/<资源>/`、后端 `app/api/v1/<资源>.py`（tools 子域收 `api/v1/tools/` 包）。
+**正文权威**：[`模块命名映射表.md`](模块命名映射表.md)（唯一权威：三端模块 ↔ 契约资源映射、门禁、违约点红线、变更记录）——本小节仅保留速查，避免双源漂移。
 
-| 端 | 目录/文件 | 示例 |
-|---|---|---|
-| 前端 | `src/modules/<资源>/{types,ui,hooks}` | `src/modules/users/ui/hooks/use-profile.ts` |
-| 移动端 | `src/modules/<资源>/{pages,api,components,types}` | `src/modules/auth/pages/login/index.vue` |
-| 后端 | `app/api/v1/<资源>.py` + `app/services/<域>/` 包 | `app/api/v1/tools/exam.py`、`app/services/community/community_post.py` |
-
+**速查**：三端业务模块名 = API 资源名（`openapi.baseline.json` 中 `/api/v1` 路径第一段，复数）——前端/移动端 `src/modules/<资源>/`、后端 `app/api/v1/<资源>.py`（tools 子域收 `api/v1/tools/` 包）；业务组件进所属模块 `ui/` + `ui/hooks/`，公共层只留跨 ≥2 域复用件。
 **门禁**：`make check-module-naming`（`scripts/check/check_module_naming.py`）强制三端模块名 ⊆ 契约资源名，已接入根 CI PR 门禁（P2-9，2026-08-19）。
-**新增业务模块流程**：先定 API 资源名（走 `make contract-baseline` 入契约）→ 三端目录同名 → `check-module-naming` 校验通过。
+**新增业务模块流程**：先定 API 资源名（走 `make contract-baseline` 入契约）→ 三端目录同名 → `check-module-naming` 校验通过 → 映射表登记。
 
 ---
 
