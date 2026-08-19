@@ -15,6 +15,7 @@
 
 - **工作台 Schema 配置驱动卡（Phase A 内核）**：新增 `src/modules/workbench/schema/`（`widget-schema.ts` 类型+校验器 / `use-schema-data.ts` 三源数据 hook / `use-schema-widgets.ts` 配置集合 / `schema-widget-renderer.tsx` 渲染器），六种卡型（count/list/progress/countdown/note/link）全部复用 WorkbenchCard 外壳；成员粘贴 JSON 声明（`wb_schema_widgets`）即可自建简单卡，零代码。能力边界：流式/状态机/音频/加密/复杂图形类卡仍走手写组件。api 数据源白名单（`/api/workbench/**`+`/api/tools/**` 前缀）防契约漂移。`widget-registry.ts` 注册内置 `schema-widget` 卡；i18n 补 `schemaWidget`/`schemaEmpty`/`schemaEmptyHint`；`BACKUP_KEYS` 纳入 `wb_schema_widgets`。设计文档见 `docs/workbench-schema-widget-design.md`（Phase A 已实现）。
 - **工作台 Schema 卡 Phase B（简易表单，零代码建卡）**：新增 `schema/schema-card-form.tsx` 内嵌于布局设置面板——标题/类型/数据源（local key 自动补 `wb_` / api url）三要素即可建卡，list 类型可选逗号分隔字段 key；提交经校验器、错误就地展示；面板内可管理（删除）已建卡。i18n 补表单与六类型标签词条（zh+en+类型声明）。普通成员不再需要手写 JSON。
+- **精简方案 §6 决策·活动设置面板接入（admin-events-settings）**：将此前从未接入的活动模块设置面板挂载到 `admin-events-panel.tsx`（工具栏新增 Settings 按钮，内联可折叠展开，复用 `adminEvents` i18n namespace 与后端 `/api/admin/events/settings` 接口），恢复管理端活动参数配置能力（标题/描述/日期等上限与默认容量批量保存）。ts-check 10 基线零新增。
 
 ### Changed
 
@@ -26,6 +27,7 @@
 - **Phase 3 / B4 时区统一（utcnow → now_utc）**：`datetime.utcnow()` 4 处（`app/api/v1/auxilio.py:88,119` / `app/services/auxilio_agent.py:151` / `app/services/contribution_service.py:79`）全部收敛为 `app/core/timezone.py` 的 `now_utc()`（aware UTC），消除对集中工具与「禁止 utcnow」约定的绕过；顺带修复两处潜伏 naive/aware 比较 TypeError（`auxilio_agent.py` 的 `end_time - now`、`contribution_service.py` 的 `now - fetched_at`——DB 列实为 TIMESTAMPTZ 返回 aware）。对齐 3 个模型列声明为 `DateTime(timezone=True)`（`Exam.start_time/end_time`、`ContributionCache.fetched_at`，与迁移/CLAUDE.md 约定一致，无 schema 变更）。
 - **Phase 3 / B3 分页响应模型（total_pages 算法统一）**：新增 `app/schemas/pagination.py` 的 `compute_total_pages(total, size)`（`max(1, ceil(total/size))`，`size<=0` 守卫防除零），`PaginatedResponse` 内部改用它，并统一 `user_service.py`（原 `(total+page_size-1)//page_size`，0 数据时 0）与 `admin_events.py`（原 `1 if total>0 else 0`，0 数据时 0）两处手算 → 消除 0 vs 1 边界漂移（0 数据统一为 1 页）；顺带把 `user_service.py` 列表查询收敛为 B2 的 `paginate()`（闭环 B2 最后残留）。响应模型结构（`EventListOut`/`AdminUserListOut` 保持 page/page_size 形态）不变，**无 API 契约变更、前端无需改动**。
 - **Phase 3 / B1 事务统一——有意延后（2026-08-19 决策）**：142 处 `db.commit()`（37 文件）中仅 72 处方法末提交可安全迁移，**70 处中途提交**依赖早期提交可见性（如 auth_service 提交后查 totp/发 token）、19 处条件提交（`if commit:`）、24 个方法多次提交、27 处 try/except 窗口——装饰器统一会改变中途提交的事务边界语义，零功能收益、回归风险高。与门槛#5「有意延后」同款处置：触发条件为「新代码强制 `@transactional`」或「单独排期逐方法迁移 + 配测试」（记录于 `docs/项目精简方案.md` §4.1 B1 行）。至此**项目精简方案全案收口**：Phase 1 ✅ / Phase 2 ✅ / Phase 3（B3/B4 ✅、B5 核实无需动作 ✅、B1 决策延后 ⏸）。
+- **精简方案 §6 决策·API 参考接生成器（D1）**：`docs/api-reference.md`（437 行手写、头部谎称"由 0.9.8 冻结契约自动生成"但全仓无生成器，必然漂移）压缩为入口页；主体改为 `docs/api-reference.html`（ReDoc 交互查看器，由 `openapi.baseline.json` 经新增 `make gen-api-docs`（`@redocly/cli`，npx 免装依赖）真实生成，永不漂移）；`docs/README.md` 索引改指向 html；契约变更流程（`contract-baseline` → `gen-api-docs`）写入入口页。死链检查 0 错误。
 
 ### Fixed
 

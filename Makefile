@@ -149,6 +149,9 @@ contract-baseline:
 # 比对当前契约与基线（CI 门禁，差异即失败）：
 contract-check:
 	cd CS-Web-Backend && (.venv/bin/python tools/scripts/contract/export_openapi.py --check ../openapi.baseline.json || python tools/scripts/contract/export_openapi.py --check ../openapi.baseline.json)
+# 生成 API 参考文档（ReDoc 查看器，D1：由基线真实生成，勿手改；需网络拉取 npx 包）：
+gen-api-docs:
+	npx -y @redocly/cli@latest build-docs openapi.baseline.json -o docs/api-reference.html
 
 # ---- 文档死链审计（ER-09）----
 # 可复现的 PR 门禁：扫描 docs/ 与根级 *.md，断文件链接即失败。
