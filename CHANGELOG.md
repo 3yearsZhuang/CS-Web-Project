@@ -15,6 +15,10 @@
 
 - **发布脚本 `tag_and_release.sh` 中文 codename 崩溃修复**：根因是第 71 行 `perl -i -pe 's/.../"$VERSION"  if $. == 3;'`——替换串以 `"` 结尾后紧跟 `if` 修饰符，perl 把 `"  if $. == 3;` 误认为替换串延续，报 `Substitution replacement not terminated`（与中文 codename 无关，此前误判）。修复：统一改用 `s{}{}` 花括号分隔 + 前置 `if ($. == N)` 条件（兼容引号结尾替换串）；顺带把 codename 部分 perl 从双引号包裹（`$1` 会被 shell 提前展开为空）改为单引号拼接。模拟仓库三场景验证通过（中文 codename / 首次添加 codename / 无 codename 清空）。
 
+### Changed
+
+- **三端模块化规范化重构（P2-9，D 方向首波收口，2026-08-19）**：① 前端 hooks 归位 `ui/hooks/`（admin/community/auth 三域 15 个 `use-*.ts`，符合 modules/README 既有约定）+ 模块复数化改名（`user→users`、`announcement→announcements`、`notification→notifications`，对齐冻结契约与 BFF 路由，消除单数/复数双轨制）+ profile 域归位（5 业务组件 + `useProfile` 自 `app/profile` 与 `users` 域迁入 `modules/profile/`）；② 后端 services 真包化（16 个平铺 service 收编 5 个域包 `auth/community/event/user/rbac`，消灭空壳包，`app.services.X → app.services.<域>.X` 全量更新）+ `api/v1/tools/` 子域收包（exam/resource/task/points/component_registry/feature_visibility，路由前缀不变，`contract-check` 契约零漂移）；③ 移动端资源域骨架（`src/modules/{auth,profile}` + `src/shared/` 集中层，弃用系统设计 M1–M6 用例域草案并文档标注）；④ 规范化固化：`scripts/check/check_module_naming.py` 门禁（三端模块名 ⊆ 契约资源名）接入根 CI（`make check-module-naming`），`docs/RootDoc-EngConv.md` 新增「三端业务模块命名」规范。违约点（FEArch §6.3 改名/新建目录 ×2、AGENTS.md services/api 命名 ×2）均经用户逐项授权；E 域注册表治理 / 微服务 / 独立 SDK 列入 P2-9 远期。
+
 ## [1.0.1.七夕] - 2026-08-19
 
 > **1.0.1 正式版 · 代号「七夕」（2026-08-19）** —— 工作台体验大改版。核心：① 工作台卡片体系重构（WorkbenchCard 统一外壳 + 7 widget 收敛样板 + 任务与便签合并卡 + Schema 配置驱动卡 Phase A/B 含实时预览管理卡）；② 拖拽排序根治（排序模式统一尺寸拖拽，消除变尺寸网格畸变 + 手柄重叠）；③ 三处缺陷修复（备份遗漏 / GitHub 热力图优雅降级 / titleKey 插值 FORMATTING_ERROR）；④ 其余：演示模式（后端未连接降级）、学习助手工具声明式注册表 + Trajectory 事件日志（DSH 融合点 1/2）、项目精简方案全案收口（Phase 1/2/3）、F2 Modal 收敛等。四源核心版本号统一升 `1.0.1`，展示版 `1.0.1.七夕`。

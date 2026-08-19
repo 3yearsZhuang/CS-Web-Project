@@ -30,7 +30,7 @@ BACKEND_PY := $(CURDIR)/CS-Web-Backend/.venv/bin/python
 BACKEND_PORT := 9000
 FRONTEND_PORT := 2333
 
-.PHONY: dev-up dev-backend dev-frontend dev-logs dev-down restart-frontend setup up down logs ps rebuild status contract-baseline contract-check check-version check check-contract check-docs check-fe-boundary check-version-group check-gitignore-sync deps-export clean-artifacts mobile-install mobile-dev mobile-build
+.PHONY: dev-up dev-backend dev-frontend dev-logs dev-down restart-frontend setup up down logs ps rebuild status contract-baseline contract-check check-version check check-contract check-docs check-fe-boundary check-version-group check-module-naming check-gitignore-sync deps-export clean-artifacts mobile-install mobile-dev mobile-build
 
 # 本地开发统一用后台进程托管（不依赖 tmux，开箱即用）。
 # 前后端各自 nohup 后台运行，PID 写入 .dev.pid，日志落盘 .dev-*.log。
@@ -142,7 +142,7 @@ mobile-build:
 # make check-version-group 仅版本四源一致
 # make check-gitignore-sync 仅 .gitignore 公共段一致性
 # 下列原子目标（contract-baseline 等）保留为别名，CI / 旧习惯仍可调用。
-check: check-contract check-docs check-fe-boundary check-version-group check-gitignore-sync
+check: check-contract check-docs check-fe-boundary check-version-group check-module-naming check-gitignore-sync
 	@echo ">>> 全部自检通过 ✅"
 
 # 契约类（G3：API 契约冻结）
@@ -156,6 +156,10 @@ check-fe-boundary: check-bff-boundary
 
 # 版本类（ER-33：版本四源一致）
 check-version-group: check-version
+
+# 模块命名类（P2-9：三端模块名对齐 API 契约，2026-08-19 引入）
+check-module-naming:
+	python3 scripts/check/check_module_naming.py
 
 # ---- API 契约冻结（G3）----
 # 生成基线（评审通过后执行，会覆盖仓库根 openapi.baseline.json）：

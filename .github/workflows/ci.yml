@@ -52,3 +52,7 @@ jobs:
 
       - name: Docs dead links (ER-09)
         run: python3 scripts/check/check_dead_links.py --base . --docs docs
+
+      - name: Module naming sync (P2-9, 2026-08-19)
+        # 三端模块名（前端/移动端 src/modules、后端 api/v1）须 ⊆ 契约资源名；新业务模块先入契约。
+        run: python3 scripts/check/check_module_naming.py
