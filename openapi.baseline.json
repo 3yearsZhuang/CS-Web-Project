@@ -1008,6 +1008,17 @@
             "minItems": 1,
             "title": "Messages",
             "type": "array"
+          },
+          "preset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preset Id"
           }
         },
         "required": [
@@ -4610,7 +4621,7 @@
   "info": {
     "description": "企业级FastAPI框架，包含RBAC权限管理系统",
     "title": "FastAPI RBAC Framework",
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -8907,6 +8918,53 @@
           }
         ],
         "summary": "List Conversations",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      }
+    },
+    "/api/v1/auxilio/conversations/{conversation_id}/events": {
+      "get": {
+        "description": "Trajectory 事件回放（融合点 2 的消费端）：按 seq 返回会话全事件流。",
+        "operationId": "list_events_api_v1_auxilio_conversations__conversation_id__events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "List Events",
         "tags": [
           "学习助手",
           "学习助手"
