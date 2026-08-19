@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>像素虚影换行错位 · 三方案预览</title>
+<style>
+  @font-face {
+    font-family: 'FusionPixel';
+    src: url('fusion-pixel-zh_hans.woff2') format('woff2');
+    font-display: swap;
+  }
+  :root {
+    --bg: #fdf5f7;
+    --ink: #2C2C2A;
+    --muted: #5F5E5A;
+    --line: #D3D1C7;
+    --accent: #A32D2D;
+    --serif: Georgia, "Songti SC", "Noto Serif SC", serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, system-ui, "Segoe UI", "PingFang SC", sans-serif;
+    line-height: 1.6;
+  }
+  header { padding: 24px 24px 4px; }
+  header h1 { font-size: 18px; margin: 0 0 6px; font-weight: 600; }
+  header p { margin: 0; font-size: 13px; color: var(--muted); max-width: 720px; }
+  .controls { display: flex; gap: 10px; padding: 16px 24px; align-items: center; flex-wrap: wrap; }
+  .controls .lbl { font-size: 13px; color: var(--muted); }
+  button {
+    font: inherit; font-size: 13px; padding: 7px 14px; border-radius: 8px;
+    border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer;
+  }
+  button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 0 24px 48px; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+  .card h2 { font-size: 14px; margin: 0 0 2px; font-weight: 600; }
+  .card .rule { font-size: 12px; color: var(--muted); margin: 0 0 10px; }
+  .stage { position: relative; margin-top: 10px; min-height: 130px; border: 1px dashed var(--line); border-radius: 8px; padding: 16px; }
+  .real {
+    position: relative; z-index: 1;
+    font-family: var(--serif); font-size: 38px; line-height: 1.2; color: var(--ink);
+    word-break: break-word;
+  }
+  .echo {
+    position: absolute; top: 16px; left: 16px; z-index: 0;
+    transform: translate(8px, 12px);
+    font-family: 'FusionPixel', monospace; font-size: 1em; line-height: inherit;
+    letter-spacing: 0.02em; color: var(--muted); opacity: 0.22;
+    pointer-events: none; user-select: none; white-space: nowrap;
+  }
+  /* 各方案规则 */
+  .stage.bug .echo { white-space: nowrap; }
+  .stage.a   .echo { white-space: normal; }
+  .stage.c   .echo { font-family: var(--serif); opacity: 0.18; } /* 同字体 → 断点对齐，弱化像素字形 */
+  .stage.b   .echo.hidden { display: none; }
+  .b-state { font-size: 12px; color: var(--accent); margin-top: 8px; min-height: 16px; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 6px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>像素虚影换行错位 · 三方案预览</h1>
+    <p>同一组标题在「短（单行）/ 长（换行）」两种状态下，分别呈现 <b>现状 bug</b> 与 <b>A / B / C</b> 三种修法。像素字体为项目同款 Fusion Pixel。切换下方按钮观察对比，重点看长标题下虚影与衬线标题的对齐关系。</p>
+  </header>
+
+  <div class="controls">
+    <span class="lbl">标题状态：</span>
+    <button id="btnShort" onclick="setLength('short')">短标题（单行）</button>
+    <button id="btnLong" class="active" onclick="setLength('long')">长标题（换行）</button>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>现状 · Bug</h2>
+      <p class="rule">echo 用 <code>white-space:nowrap</code> → 永远单行</p>
+      <div class="stage bug">
+        <div class="real"></div>
+        <div class="echo" aria-hidden="true"></div>
+      </div>
+      <p class="note">衬线标题换行后，第二行背后无虚影 → 错位。</p>
+    </div>
+
+    <div class="card">
+      <h2>A · 跟随换行</h2>
+      <p class="rule">echo 改 <code>white-space:normal</code>，覆盖全部行</p>
+      <div class="stage a">
+        <div class="real"></div>
+        <div class="echo" aria-hidden="true"></div>
+      </div>
+      <p class="note">虚影也换行，但像素字体与衬线断点不同 → 逐行水平参差。</p>
+    </div>
+
+    <div class="card">
+      <h2>B · 多行自动隐藏</h2>
+      <p class="rule">JS 测量是否换行，换行即关虚影</p>
+      <div class="stage b">
+        <div class="real"></div>
+        <div class="echo" aria-hidden="true"></div>
+      </div>
+      <div class="b-state"></div>
+      <p class="note">仅单行标题显示虚影；多行 / 折叠顶栏一律隐藏，零错位。</p>
+    </div>
+
+    <div class="card">
+      <h2>C · 同断点</h2>
+      <p class="rule">echo 改同字体同流 → 断点 100% 对齐</p>
+      <div class="stage c">
+        <div class="real"></div>
+        <div class="echo" aria-hidden="true"></div>
+      </div>
+      <p class="note">虚影与真标题同字体 → 完全对齐；代价是弱化像素字形，变为位移回声。</p>
+    </div>
+  </div>
+
+  <script>
+    const SHORT = '社区招募';
+    const LONG = '社区创作激励计划正式开启啦';
+    const stages = Array.from(document.querySelectorAll('.stage'));
+
+    function paint(text) {
+      stages.forEach(stage => {
+        const real = stage.querySelector('.real');
+        const echo = stage.querySelector('.echo');
+        real.textContent = text;
+        echo.textContent = text;
+        if (stage.classList.contains('b')) updateB(stage);
+      });
+    }
+
+    function updateB(stage) {
+      const real = stage.querySelector('.real');
+      const echo = stage.querySelector('.echo');
+      const state = stage.querySelector('.b-state');
+      const cs = getComputedStyle(real);
+      const lh = parseFloat(cs.lineHeight) || 1;
+      const wrapped = real.scrollHeight > lh + 2;
+      echo.classList.toggle('hidden', wrapped);
+      if (state) state.textContent = wrapped ? '当前：换行 → 虚影已隐藏' : '当前：单行 → 虚影显示';
+    }
+
+    function setLength(kind) {
+      document.getElementById('btnShort').classList.toggle('active', kind === 'short');
+      document.getElementById('btnLong').classList.toggle('active', kind === 'long');
+      paint(kind === 'short' ? SHORT : LONG);
+    }
+
+    // 初次渲染 + 窗口变化时重算 B 的换行判定
+    setLength('long');
+    window.addEventListener('resize', () => {
+      const b = document.querySelector('.stage.b');
+      if (b) updateB(b);
+    });
+  </script>
+</body>
+</html>

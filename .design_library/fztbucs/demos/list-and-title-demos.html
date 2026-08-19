@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>像素融合 · 列表 & 标题虚影 Demo</title>
+
+<!-- 衬线/等宽字体（经 Google CDN，与项目一致：Fraunces + Noto Serif SC / JetBrains Mono + Noto Sans SC） -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..500&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300..600&family=Noto+Serif+SC:wght@300..500&display=swap" rel="stylesheet" />
+
+<style>
+  /* ============================================================
+     设计令牌 — 与 src/app/globals.css 双主题严格对齐
+     （浅色=深蓝 #1e40af 强调；深色=琥珀金 #d4a574 强调）
+     ============================================================ */
+  :root {
+    --background: #fdf5f7;
+    --foreground: #1e1233;
+    --card: #ffffff;
+    --primary: #1e40af;
+    --primary-foreground: #ffffff;
+    --muted-foreground: #6b5572;
+    --border: rgba(30, 18, 51, 0.08);
+    --font-serif: 'Fraunces', 'Noto Serif SC', 'Songti SC', serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --font-pixel: 'FusionPixel', 'JetBrains Mono', ui-monospace, monospace;
+    --ease-ark: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .dark {
+    --background: #000000;
+    --foreground: #f5f5f4;
+    --card: #0a0a0a;
+    --primary: #d4a574;
+    --primary-foreground: #000000;
+    --muted-foreground: #8a8a85;
+    --border: rgba(255, 255, 255, 0.06);
+  }
+
+  @font-face {
+    font-family: 'FusionPixel';
+    src: url('./fusion-pixel-zh_hans.woff2') format('woff2');
+    font-display: swap;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { transition: background-color .3s ease, color .3s ease; }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-mono);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--primary); color: var(--primary-foreground); }
+
+  /* ---------- 通用工具 ---------- */
+  .display-serif {
+    font-family: var(--font-serif);
+    font-weight: 350;
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+  }
+  .meta-mono {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+  .section-marker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--primary);
+    text-transform: uppercase;
+  }
+
+  /* ---------- 顶栏主题切换 ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--background) 70%, transparent);
+    backdrop-filter: blur(12px);
+  }
+  .topbar .brand { font-family: var(--font-pixel); font-size: 13px; letter-spacing: .12em; color: var(--foreground); }
+  .topbar .brand b { color: var(--primary); }
+  .theme-toggle {
+    font-family: var(--font-pixel); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase;
+    padding: 8px 14px; border: 1px solid var(--border); background: transparent;
+    color: var(--foreground); cursor: pointer; transition: border-color .2s, color .2s;
+  }
+  .theme-toggle:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* ---------- 布局 ---------- */
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px 120px; }
+  .hero { padding: 80px 0 40px; border-bottom: 1px solid var(--border); }
+  .hero h1 { font-size: clamp(40px, 8vw, 96px); color: var(--foreground); }
+  .hero h1 span { color: var(--primary); }
+  .hero p { max-width: 640px; margin-top: 18px; color: var(--muted-foreground); font-size: 14px; line-height: 1.9; }
+
+  .block { padding: 64px 0 8px; }
+  .block-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 8px; }
+  .block-head h2 { font-family: var(--font-serif); font-weight: 350; font-size: clamp(26px, 4vw, 44px); color: var(--foreground); }
+  .block-desc { color: var(--muted-foreground); font-size: 13px; max-width: 720px; margin: 0 0 36px; line-height: 1.9; }
+
+  .demo-card {
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--foreground) 4%, var(--background));
+    padding: 32px 28px;
+    margin-bottom: 28px;
+  }
+  .demo-card > .tag { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .demo-card > .tag .num { font-family: var(--font-pixel); font-size: 11px; color: var(--primary); }
+  .demo-card > .tag .name { font-family: var(--font-serif); font-style: italic; font-size: 18px; color: var(--foreground); }
+  .demo-card > .note { font-size: 12px; color: var(--muted-foreground); margin: 4px 0 22px; line-height: 1.8; }
+
+  /* ============================================================
+     一、列表（列表行）— 三种符合像素融合语言的方案
+     设计约束：像素只注入元数据层与交互；标题仍用衬线；
+     盒装卡用 DNA 卡，列表行保持 border-b / 紧凑密度（不套 DnaCard）。
+     ============================================================ */
+
+  /* ---- 方案 A · 索引铁路（Index Railway）----
+     纯编辑式索引：左侧像素编号 + 贯穿发丝铁路线 + 衬线标题 + 像素元数据行。
+     无盒装、无浮起，hover 仅标题/编号转主色 + 箭头右移。 */
+  .lst-rail { list-style: none; position: relative; }
+  .lst-rail li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 52px 1fr auto;
+    gap: 22px;
+    align-items: baseline;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .lst-rail li::before {
+    content: ''; position: absolute; left: 25px; top: 0; bottom: 0;
+    width: 1px; background: color-mix(in srgb, var(--foreground) 14%, var(--background));
+  }
+  .lst-rail .idx {
+    position: relative; z-index: 1;
+    font-family: var(--font-pixel); font-size: 11px; letter-spacing: .1em;
+    color: var(--muted-foreground);
+    background: var(--background); padding: 2px 0;
+    transition: color .2s;
+  }
+  .lst-rail .body { min-width: 0; }
+  .lst-rail .ttl {
+    font-family: var(--font-serif); font-weight: 350;
+    font-size: clamp(18px, 2.4vw, 26px); color: var(--foreground);
+    line-height: 1.2; transition: color .2s;
+  }
+  .lst-rail .mt {
+    font-family: var(--font-pixel); font-size: 11px; letter-spacing: .1em;
+    color: var(--muted-foreground); margin-top: 8px;
+    display: flex; gap: 16px; flex-wrap: wrap;
+  }
+  .lst-rail .mt .k { color: var(--primary); }
+  .lst-rail .arw { font-family: var(--font-mono); font-size: 16px; color: var(--muted-foreground); transition: transform .25s var(--ease-ark), color .2s; }
+  .lst-rail li:hover .ttl, .lst-rail li:hover .idx { color: var(--primary); }
+  .lst-rail li:hover .arw { color: var(--primary); transform: translateX(5px); }
+
+  /* ---- 方案 B · DNA 行卡（DNA Row-Card）----
+     把 DNA 卡语言压扁成「横向行卡」：左侧主色硬边条 + 右上角像素编号 +
+     硬阴影 hover 抬升（与 DnaCard 同款 steps(3) 跳变）。列表密度 + 像素交互兼得。 */
+  .lst-dna { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+  .lst-dna li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 18px;
+    align-items: center;
+    padding: 20px 24px 20px 28px;
+    background: color-mix(in srgb, var(--foreground) 8%, var(--background));
+    border: 1px solid color-mix(in srgb, var(--foreground) 14%, var(--background));
+    box-shadow: 4px 4px 0 color-mix(in srgb, var(--foreground) 10%, transparent);
+    transition: transform .15s steps(3), box-shadow .15s steps(3), border-color .2s;
+  }
+  .lst-dna li::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--primary);
+  }
+  .lst-dna .corner {
+    position: absolute; top: 12px; right: 14px;
+    font-family: var(--font-pixel); font-size: 11px; letter-spacing: .1em;
+    color: var(--muted-foreground); transition: color .2s;
+  }
+  .lst-dna .ttl { font-family: var(--font-serif); font-weight: 350; font-size: clamp(17px, 2.2vw, 23px); color: var(--foreground); line-height: 1.25; }
+  .lst-dna .mt { font-family: var(--font-pixel); font-size: 11px; letter-spacing: .1em; color: var(--muted-foreground); margin-top: 8px; display: flex; gap: 16px; flex-wrap: wrap; }
+  .lst-dna .mt .k { color: var(--primary); }
+  .lst-dna .arw { font-family: var(--font-mono); font-size: 16px; color: var(--muted-foreground); transition: transform .2s var(--ease-ark), color .2s; }
+  .lst-dna li:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 7px 7px 0 color-mix(in srgb, var(--primary) 30%, transparent);
+    border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+  .lst-dna li:hover .corner { color: var(--primary); }
+  .lst-dna li:hover .ttl { color: var(--primary); }
+  .lst-dna li:hover .arw { color: var(--primary); transform: translateX(5px); }
+
+  /* ---- 方案 C · 像素终端（Pixel Terminal）----
+     最激进的像素方案：列表即「日志/终端」表面，全像素字体 + 状态点 + 游标，
+     hover 整行反色（foreground 底 / background 字）。适合数据/日志型列表。 */
+  .lst-term {
+    list-style: none;
+    font-family: var(--font-pixel);
+    background: color-mix(in srgb, var(--foreground) 4%, var(--background));
+    border: 1px solid var(--border);
+  }
+  .lst-term-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    font-size: 11px; letter-spacing: .14em; color: var(--muted-foreground); text-transform: uppercase;
+  }
+  .lst-term-head .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); display: inline-block; margin-right: 8px; vertical-align: middle; }
+  .lst-term li {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: baseline;
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    font-size: 13px; letter-spacing: .04em; color: var(--foreground);
+    transition: background .12s steps(2), color .12s;
+  }
+  .lst-term li:last-child { border-bottom: 0; }
+  .lst-term .prompt { color: var(--muted-foreground); }
+  .lst-term .cursor { color: var(--primary); }
+  .lst-term .meta { color: var(--muted-foreground); font-size: 11px; }
+  .lst-term li:hover { background: var(--foreground); color: var(--background); }
+  .lst-term li:hover .prompt, .lst-term li:hover .meta { color: color-mix(in srgb, var(--background) 72%, transparent); }
+  .lst-term li:hover .cursor { color: var(--primary-foreground); }
+
+  /* ============================================================
+     二、标题底部虚影（Title Bottom-Ghost）— 可行性评估 + 三组方案
+     ============================================================ */
+  .eval {
+    border-left: 2px solid var(--primary);
+    padding: 4px 0 4px 20px; margin-bottom: 36px;
+    color: var(--muted-foreground); font-size: 13px; line-height: 1.95; max-width: 760px;
+  }
+  .eval b { color: var(--foreground); }
+  .eval .ok { color: var(--primary); }
+
+  /* 标题虚影通用壳 */
+  .ghost-wrap { position: relative; display: inline-block; padding-bottom: 18px; }
+  .ghost-real {
+    position: relative; z-index: 3;
+    font-family: var(--font-serif); font-weight: 350;
+    font-size: clamp(40px, 8vw, 88px); line-height: 1.0; letter-spacing: -0.015em;
+    color: var(--foreground);
+  }
+  .ghost-wrap::after, .ghost-wrap .g1, .ghost-wrap .g2, .ghost-wrap .g3 {
+    pointer-events: none; user-select: none;
+  }
+
+  /* ---- 方案 A · 像素错位虚影（Pixel Offset Echo）----
+     真实标题用衬线，背后叠一份「像素字体」的相同文本，向右下硬偏移，
+     低透明度。衬线×像素的错位 = 最贴切的「融合」表达。 */
+  .t-a::after {
+    content: attr(data-text);
+    position: absolute; left: 0; top: 0; z-index: 1;
+    transform: translate(7px, 11px);
+    font-family: var(--font-pixel);
+    font-size: clamp(40px, 8vw, 88px); line-height: 1.0; letter-spacing: .02em;
+    color: var(--muted-foreground); opacity: .42;
+  }
+
+  /* ---- 方案 B · 衬线叠影（Serif Echo）----
+     背后叠一份同族衬线、略放大、向下微偏移、极低透明度（≈0.12），
+     纯编辑式「景深回声」，最克制、最安全。 */
+  .t-b::after {
+    content: attr(data-text);
+    position: absolute; left: 0; top: 0; z-index: 1;
+    transform: translateY(9px) scale(1.03);
+    transform-origin: top left;
+    font-family: var(--font-serif); font-weight: 350;
+    font-size: clamp(40px, 8vw, 88px); line-height: 1.0; letter-spacing: -0.015em;
+    color: var(--foreground); opacity: .12;
+  }
+
+  /* ---- 方案 C · 硬边双影（Hard Stepped Pixel）----
+     背后叠 3 份像素文本，按 2px 步进硬偏移、主色递减透明度，
+     形成复古游戏标题式的「硬像素投影」。 */
+  .t-c span { font-family: var(--font-pixel); font-size: clamp(40px, 8vw, 88px); line-height: 1.0; }
+  .t-c .g1 { position: absolute; left: 2px; top: 2px; z-index: 1; color: color-mix(in srgb, var(--primary) 26%, transparent); }
+  .t-c .g2 { position: absolute; left: 4px; top: 4px; z-index: 1; color: color-mix(in srgb, var(--primary) 18%, transparent); }
+  .t-c .g3 { position: absolute; left: 6px; top: 6px; z-index: 1; color: color-mix(in srgb, var(--primary) 11%, transparent); }
+  .t-c .ghost-real { z-index: 5; }
+
+  .eval-list { list-style: none; margin-top: 16px; }
+  .eval-list li { font-size: 12px; color: var(--muted-foreground); padding-left: 18px; position: relative; margin-bottom: 6px; }
+  .eval-list li::before { content: '//'; position: absolute; left: 0; color: var(--primary); }
+
+  .foot { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); }
+  .foot p { font-size: 11px; color: var(--muted-foreground); line-height: 1.9; }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">FZTBU·CS <b>//</b> 像素融合 · 列表 &amp; 标题虚影</div>
+    <button class="theme-toggle" id="themeBtn">◐ 切换主题</button>
+  </div>
+
+  <div class="wrap">
+    <header class="hero">
+      <div class="section-marker">[ 00 ] DEMO</div>
+      <h1 class="display-serif">列表与<span>标题虚影</span></h1>
+      <p>在「像素融合（Pixel Fusion / Kimi 风格）」设计语言下，探索两类尚未落地的表达：① 符合新语言的<b>列表（列表行）</b>处理；② 标题是否也能做成<b>底部虚影</b>形式。所有令牌与 DNA 卡/像素按钮同源，浅色/深色双主题自适应。</p>
+    </header>
+
+    <!-- ===================== 一、列表 ===================== -->
+    <section class="block" id="lists">
+      <div class="block-head">
+        <div class="section-marker">[ 01 ]</div>
+        <h2 class="display-serif">列表 · 三组方案</h2>
+      </div>
+      <p class="block-desc">设计语言边界：像素只注入<b>元数据层与交互</b>（标签/编号/角标/按钮/硬阴影），衬线标题与正文栈保持不变；盒装卡走 DNA 卡，<b>列表行</b>保持 border-b 分隔 + 紧凑密度（不套 DnaCard，避免撑大行高）。以下三档由「极简编辑」到「激进像素」。</p>
+
+      <!-- A -->
+      <div class="demo-card">
+        <div class="tag"><span class="num">A</span><span class="name">索引铁路 · Index Railway</span></div>
+        <div class="note">纯编辑式索引：左侧像素编号 + 贯穿发丝铁路线 + 衬线标题 + 像素元数据行。无盒装、无浮起，hover 仅标题/编号转主色、箭头右移。最克制，与既有章节/时间轴语言同源。</div>
+        <ul class="lst-rail">
+          <li>
+            <span class="idx">// 01</span>
+            <div class="body">
+              <div class="ttl">开源社区贡献指南</div>
+              <div class="mt"><span class="k">COMMUNITY</span><span>2026.03.12</span><span>12 篇</span></div>
+            </div>
+            <span class="arw">→</span>
+          </li>
+          <li>
+            <span class="idx">// 02</span>
+            <div class="body">
+              <div class="ttl">前端工程化白皮书</div>
+              <div class="mt"><span class="k">DOCS</span><span>2026.02.28</span><span>PINNED</span></div>
+            </div>
+            <span class="arw">→</span>
+          </li>
+          <li>
+            <span class="idx">// 03</span>
+            <div class="body">
+              <div class="ttl">算法竞赛训练营复盘</div>
+              <div class="mt"><span class="k">EVENTS</span><span>2026.01.09</span><span>ARCHIVED</span></div>
+            </div>
+            <span class="arw">→</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- B -->
+      <div class="demo-card">
+        <div class="tag"><span class="num">B</span><span class="name">DNA 行卡 · DNA Row-Card</span></div>
+        <div class="note">把 DNA 卡语言压扁为「横向行卡」：左侧主色硬边条 + 右上角像素编号 + 硬阴影 hover 抬升（与 DnaCard 同款 steps(3) 跳变）。保留列表密度，同时获得像素交互。</div>
+        <ul class="lst-dna">
+          <li>
+            <span class="corner">01</span>
+            <div class="body">
+              <div class="ttl">像素融合层设计规范</div>
+              <div class="mt"><span class="k">DESIGN</span><span>FrontDoc-UID §15</span><span>UPDATED</span></div>
+            </div>
+            <span class="arw">→</span>
+          </li>
+          <li>
+            <span class="corner">02</span>
+            <div class="body">
+              <div class="ttl">悬浮折叠胶囊组件</div>
+              <div class="mt"><span class="k">COMPONENT</span><span>FloatingCapsule</span><span>PINNED</span></div>
+            </div>
+            <span class="arw">→</span>
+          </li>
+          <li>
+            <span class="corner">03</span>
+            <div class="body">
+              <div class="ttl">活动页同屏双视图</div>
+              <div class="mt"><span class="k">EVENTS</span><span>Timeline+Calendar</span><span>ARCHIVED</span></div>
+            </div>
+            <span class="arw">→</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- C -->
+      <div class="demo-card">
+        <div class="tag"><span class="num">C</span><span class="name">像素终端 · Pixel Terminal</span></div>
+        <div class="note">最激进的像素方案：列表即「日志/终端」表面，全像素字体 + 状态点 + 游标，hover 整行反色（foreground 底 / background 字）。适合数据/日志型列表；标题也走像素（作为可选的数据表面，不与正文衬线冲突）。</div>
+        <div class="lst-term">
+          <div class="lst-term-head"><span><span class="dot"></span>// EVENTS.LOG</span><span>3 RECORDS</span></div>
+          <ul style="list-style:none">
+            <li><span class="prompt">$</span><span><span class="cursor">▌</span> 黑客马拉松 2026 春季赛</span><span class="meta">2026.04.18 · ONGOING</span></li>
+            <li><span class="prompt">$</span><span><span class="cursor">▌</span> 技术分享：从 0 到 1 的 Rust</span><span class="meta">2026.03.22 · ENDED</span></li>
+            <li><span class="prompt">$</span><span><span class="cursor">▌</span> 开源之夏选题发布会</span><span class="meta">2026.02.14 · PINNED</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 二、标题虚影 ===================== -->
+    <section class="block" id="titles">
+      <div class="block-head">
+        <div class="section-marker">[ 02 ]</div>
+        <h2 class="display-serif">标题底部虚影 · 评估</h2>
+      </div>
+
+      <div class="eval">
+        <p><b>结论：可行，且贴合像素语言。</b> 标题背后叠一份「虚影副本」是成熟的编辑式排印手法；在我们的设计体系里它天然对应<b>硬偏移复制</b>（而非模糊投影），与 DNA 卡硬阴影同源，<span class="ok">不触发 §0「不发光/不浮起」与 §11 禁止清单</span>——因为虚影是<b>排印层的文字副本</b>，不是盒装 box-shadow。</p>
+        <ul class="eval-list">
+          <li>令牌化：虚影色只用 <code>var(--muted-foreground)</code> / <code>var(--primary)</code> 低透明度，双主题自适应；绝不写死灰阶。</li>
+          <li>层级：虚影 <code>z-index</code> 低于真实标题、<code>pointer-events:none</code>、<code>aria-hidden</code>，纯装饰、不可选中、无障碍安全。</li>
+          <li>「底部」语义：虚影统一向下（并轻微向右）硬偏移，落在标题下方，符合「底部虚影」诉求。</li>
+          <li>风险与规避：大号虚影在移动端可能显脏 → 用 <code>clamp()</code> 控制字号、缩小偏移与透明度；折叠态 Hero 标题保持纯净，虚影仅用于展开态章节/页面主标题。</li>
+          <li>落地建议：封装为 <code>.ghost-title</code> 工具类 + 可选 <code>&lt;GhostTitle&gt;</code> 组件，经 <code>data-text</code> 单源驱动（方案 A/B），多步进用子 span（方案 C）。</li>
+        </ul>
+      </div>
+
+      <!-- A -->
+      <div class="demo-card">
+        <div class="tag"><span class="num">A</span><span class="name">像素错位虚影 · Pixel Offset Echo</span></div>
+        <div class="note">真实标题用衬线，背后叠一份像素字体的相同文本，向右下硬偏移、低透明度。衬线 × 像素的错位 = 最贴切的「融合」表达。</div>
+        <div class="ghost-wrap t-a" data-text="Events">
+          <span class="ghost-real display-serif">Events</span>
+        </div>
+      </div>
+
+      <!-- B -->
+      <div class="demo-card">
+        <div class="tag"><span class="num">B</span><span class="name">衬线叠影 · Serif Echo</span></div>
+        <div class="note">背后叠一份同族衬线、略放大、向下微偏移、极低透明度（≈0.12），纯编辑式「景深回声」。最克制、最安全，可无缝套用到所有章节标题。</div>
+        <div class="ghost-wrap t-b" data-text="关于我们">
+          <span class="ghost-real display-serif">关于我们</span>
+        </div>
+      </div>
+
+      <!-- C -->
+      <div class="demo-card">
+        <div class="tag"><span class="num">C</span><span class="name">硬边双影 · Hard Stepped Pixel</span></div>
+        <div class="note">背后叠 3 份像素文本，按 2px 步进硬偏移、主色递减透明度，形成复古游戏标题式的「硬像素投影」。像素身份最强，建议仅用于 Hero / 着陆主标题，避免正文章节滥用。</div>
+        <div class="ghost-wrap t-c" aria-label="Join Us">
+          <span class="g3" aria-hidden="true">Join Us</span>
+          <span class="g2" aria-hidden="true">Join Us</span>
+          <span class="g1" aria-hidden="true">Join Us</span>
+          <span class="ghost-real display-serif">Join Us</span>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <p>令牌与 DNA 卡/像素按钮同源（src/app/globals.css）。三档列表对应「极简编辑 → DNA 混合 → 激进像素」光谱；标题虚影三档对应「融合错位 → 克制回声 → 硬像素投影」光谱。选中任一方案后即可落地为共享工具类/组件。</p>
+    </footer>
+  </div>
+
+  <script>
+    const btn = document.getElementById('themeBtn');
+    const root = document.documentElement;
+    // 默认跟随系统，按钮手动切换
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      root.classList.add('dark');
+    }
+    btn.addEventListener('click', () => {
+      root.classList.toggle('dark');
+    });
+  </script>
+</body>
+</html>
