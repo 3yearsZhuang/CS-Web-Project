@@ -67,36 +67,40 @@ fi
 echo ">>> 核心版本: $VERSION   代号: ${CODENAME:-（无）}   展示版: $DISPLAY   ($DATE)"
 
 # --- 1. 四源核心版本同步 ---
+# 注意：s/// 替换串以引号结尾时，不能用 `s///...  if $. == N;` 后缀（perl 会把
+# `"  if $. == 3;` 误认为替换串延续 → "Substitution replacement not terminated"）。
+# 统一用 `s{}{}` 花括号分隔 + 前置 if 条件，兼容引号结尾的替换串。
 # pyproject.toml: [project] version
-perl -i -pe 's/^(version = )"[0-9].*?"$/$1"'"$VERSION"'"  if $. == 3;' "$PYPROJECT"
+perl -i -pe 'if ($. == 3) { s{^(version = )"[0-9].*?"$}{$1"'"$VERSION"'"} }' "$PYPROJECT"
 # app/__init__.py: __version__ = "..."
-perl -i -pe 's/^(__version__ = )"[0-9].*?"$/$1"'"$VERSION"'"/' "$INIT"
+perl -i -pe 's{^(__version__ = )"[0-9].*?"$}{$1"'"$VERSION"'"}' "$INIT"
 # package.json: "version": "..."
-perl -i -pe 's/^(\s*"version": )"[0-9].*?"(,?)$/$1"'"$VERSION"'"$2/' "$PKG"
+perl -i -pe 's{^(\s*"version": )"[0-9].*?"(,?)$}{$1"'"$VERSION"'"$2}' "$PKG"
 # uv.lock: cs-web-backend 包的 version（仅替换紧随 name = "cs-web-backend" 的那一行）
-perl -0777 -i -pe 's/(name = "cs-web-backend"\nversion = )"[0-9].*?"/${1}"'"$VERSION"'"/' "$UVLOCK"
+perl -0777 -i -pe 's{(name = "cs-web-backend"\nversion = )"[0-9].*?"}{${1}"'"$VERSION"'"}' "$UVLOCK"
 
 echo ">>> 已更新四源核心版本文件"
 
 # --- 2. codename 同步（package.json + __init__，两处须同时设置/清空）---
+# 注意：perl 脚本一律用单引号包裹 + 引号拼接传参（双引号包裹会让 $1 被 shell 提前展开为空）。
 # package.json: "codename": "..." 存在则替换，否则在 version 行后插入
 if grep -q '"codename"' "$PKG"; then
-  perl -i -pe "s/(\"codename\": )\"[^\"]*\"/\$1\"$CODENAME\"/" "$PKG"
+  perl -i -pe 's{("codename": )"[^"]*"}{$1"'"$CODENAME"'"}' "$PKG"
 else
-  perl -i -pe "s/(\"version\": \"[^\"]*\",)/\$1\n  \"codename\": \"$CODENAME\",/" "$PKG"
+  perl -i -pe 's{("version": "[^"]*",)}{$1\n  "codename": "'"$CODENAME"'",}' "$PKG"
 fi
 # app/__init__.py: __codename__ = "..." 存在则替换，否则在 __version__ 行后插入
 if grep -q '__codename__' "$INIT"; then
-  perl -i -pe 's/^(__codename__ = )"[^\"]*"/$1"'"$CODENAME"'"/' "$INIT"
+  perl -i -pe 's{^(__codename__ = )"[^"]*"}{$1"'"$CODENAME"'"}' "$INIT"
 else
-  perl -i -pe 's/^(__version__ = )"[^\"]*"/$1"'"$VERSION"'"\n__codename__ = "'"$CODENAME"'"/' "$INIT"
+  perl -i -pe 's{^(__version__ = )"[^"]*"}{$1"'"$VERSION"'"\n__codename__ = "'"$CODENAME"'"}' "$INIT"
 fi
 
 echo ">>> 已同步 codename -> '$CODENAME'"
 
 # --- 3. CHANGELOG 头重命名 ---
 if grep -q '^## \[Unreleased\]' "$CHANGELOG"; then
-  perl -i -pe "s/^## \[Unreleased\]\$/## [$DISPLAY] - $DATE/" "$CHANGELOG"
+  perl -i -pe 's{^## \[Unreleased\]$}{## ['"$DISPLAY"'] - '"$DATE"'}' "$CHANGELOG"
   echo ">>> CHANGELOG: [Unreleased] -> [$DISPLAY] - $DATE"
 else
   echo "!!! 警告：CHANGELOG 未找到 '## [Unreleased]' 头，跳过重命名（请手动处理）" >&2

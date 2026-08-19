@@ -7,6 +7,14 @@
 
 ---
 
+## [Unreleased]
+
+> 进行中 / 下一波次变更累积区；发版时由 `scripts/tag_and_release.sh` 自动转为具体版本号 + 日期。已闭环项不在此滞留（见 `docs/项目待办事项-优先级重排.md`）。
+
+### Fixed
+
+- **发布脚本 `tag_and_release.sh` 中文 codename 崩溃修复**：根因是第 71 行 `perl -i -pe 's/.../"$VERSION"  if $. == 3;'`——替换串以 `"` 结尾后紧跟 `if` 修饰符，perl 把 `"  if $. == 3;` 误认为替换串延续，报 `Substitution replacement not terminated`（与中文 codename 无关，此前误判）。修复：统一改用 `s{}{}` 花括号分隔 + 前置 `if ($. == N)` 条件（兼容引号结尾替换串）；顺带把 codename 部分 perl 从双引号包裹（`$1` 会被 shell 提前展开为空）改为单引号拼接。模拟仓库三场景验证通过（中文 codename / 首次添加 codename / 无 codename 清空）。
+
 ## [1.0.1.七夕] - 2026-08-19
 
 > **1.0.1 正式版 · 代号「七夕」（2026-08-19）** —— 工作台体验大改版。核心：① 工作台卡片体系重构（WorkbenchCard 统一外壳 + 7 widget 收敛样板 + 任务与便签合并卡 + Schema 配置驱动卡 Phase A/B 含实时预览管理卡）；② 拖拽排序根治（排序模式统一尺寸拖拽，消除变尺寸网格畸变 + 手柄重叠）；③ 三处缺陷修复（备份遗漏 / GitHub 热力图优雅降级 / titleKey 插值 FORMATTING_ERROR）；④ 其余：演示模式（后端未连接降级）、学习助手工具声明式注册表 + Trajectory 事件日志（DSH 融合点 1/2）、项目精简方案全案收口（Phase 1/2/3）、F2 Modal 收敛等。四源核心版本号统一升 `1.0.1`，展示版 `1.0.1.七夕`。
