@@ -2,7 +2,8 @@ name: Root CI (contract / version / docs)
 
 # 根仓 PR 级门禁（2026-08-19 补列，闭环「缺口②」残余项）：
 # 子仓库 CS-Web-Backend / CS-Web-Frontend 的 .github/workflows/ci.yml 已覆盖
-# lint / tsc / pytest / vitest / 覆盖率 / 依赖审计等 PR 门禁；但「API 契约冻结（G3/ER-04）」
+# lint / tsc / pytest / vitest / 覆盖率等代码级 PR 门禁（前端依赖审计在 FE 独立
+# .github/workflows/audit.yml；E2E 在根仓 e2e.yml）；但「API 契约冻结（G3/ER-04）」
 # 因 openapi.baseline.json 仅存于根仓、子模块 checkout 拿不到基线，此前只由 Jenkinsfile /
 # 根 `make contract-check` 覆盖，未进 GitHub Actions PR。本 workflow 在根仓视角同时握有
 # 基线 + 子模块代码，将契约冻结 + 版本四源一致 + 文档死链三项根级门禁补进 PR 必过。

@@ -30,6 +30,7 @@
 - **精简方案 §6 决策·API 参考接生成器（D1）**：`docs/api-reference.md`（437 行手写、头部谎称"由 0.9.8 冻结契约自动生成"但全仓无生成器，必然漂移）压缩为入口页；主体改为 `docs/api-reference.html`（ReDoc 交互查看器，由 `openapi.baseline.json` 经新增 `make gen-api-docs`（`@redocly/cli`，npx 免装依赖）真实生成，永不漂移）；`docs/README.md` 索引改指向 html；契约变更流程（`contract-baseline` → `gen-api-docs`）写入入口页。死链检查 0 错误。
 - **精简方案 C2·e2e.yml 重复检查去重**：删除 `e2e.yml` 与根仓 `ci.yml` 重复的版本四源同步（ER-33）与文档死链（ER-09）两步（已确认 `ci.yml` 在 `push [main, master]` + PR 全覆盖这三项门禁含契约）；`e2e.yml` 回归纯 E2E（push:main + nightly + 手动），职责清晰、减少冗余运行。
 - **精简方案 F2·Modal 遮罩/ESC 收敛**：`ModalShell`（`components/primitives`）新增 `size`（md/lg）与 `scrollable` 两个**向后兼容** prop；`event-modals.tsx` 创建/编辑活动模态框从手写遮罩（宽双列 + 内滚动，且此前**缺 ESC / 焦点陷阱 / 滚动锁定**）收敛为 `<ModalShell size="lg" scrollable>`，补齐键盘可达性；`submit-resource-modal.tsx` 保留手写（motion 入场动画 + display-serif/ArkDivider 装饰标题为资源站特色视觉，收敛必回归，记录决策）。user/role modals 此前已收敛。ts-check 10 基线零新增。
+- **精简方案 C3·子仓 CI 职责评估**：梳理 BE/FE 子仓 ci.yml、FE audit.yml、根仓 ci.yml/e2e.yml 与 Jenkinsfile——职责边界清晰、无实质重复（子仓=代码级门禁 / 根仓=基线级契约+版本+死链+全栈 E2E / FE audit.yml=依赖审计 / Jenkinsfile=自托管等价备用，死链与契约为其与 GH Actions 的有意双保险）；仅修正根仓 ci.yml 头部注释「依赖审计」归属（实为 FE 独立 audit.yml）。
 
 ### Fixed
 
