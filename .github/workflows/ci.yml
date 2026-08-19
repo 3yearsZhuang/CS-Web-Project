@@ -1,0 +1,53 @@
+name: Root CI (contract / version / docs)
+
+# 根仓 PR 级门禁（2026-08-19 补列，闭环「缺口②」残余项）：
+# 子仓库 CS-Web-Backend / CS-Web-Frontend 的 .github/workflows/ci.yml 已覆盖
+# lint / tsc / pytest / vitest / 覆盖率 / 依赖审计等 PR 门禁；但「API 契约冻结（G3/ER-04）」
+# 因 openapi.baseline.json 仅存于根仓、子模块 checkout 拿不到基线，此前只由 Jenkinsfile /
+# 根 `make contract-check` 覆盖，未进 GitHub Actions PR。本 workflow 在根仓视角同时握有
+# 基线 + 子模块代码，将契约冻结 + 版本四源一致 + 文档死链三项根级门禁补进 PR 必过。
+#
+# 注意：契约比对需 import 后端 app（app.openapi()，无需 DB），故安装后端 dev 依赖。
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  root-gates:
+    name: Contract freeze + Version sync + Docs links
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout root repo with submodules
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+          cache-dependency-path: 'CS-Web-Backend/requirements-dev.lock'
+
+      - name: Install backend dev dependencies
+        working-directory: CS-Web-Backend
+        run: python -m pip install --require-hashes -r requirements-dev.lock
+
+      - name: API contract freeze (G3 / ER-04)
+        # 比对当前 /api/v1 契约与根仓冻结基线；差异即失败（需评审并更新基线）。
+        run: make contract-check
+
+      - name: Version four-source sync (ER-33)
+        run: python3 scripts/check/check_version_sync.py
+
+      - name: Docs dead links (ER-09)
+        run: python3 scripts/check/check_dead_links.py --base . --docs docs

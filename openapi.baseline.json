@@ -915,7 +915,7 @@
         "title": "Body_upload_community_image_api_v1_community_upload_post",
         "type": "object"
       },
-      "Body_upload_resource_file_api_v1_tools_resource_upload_post": {
+      "Body_upload_resource_api_v1_tools_resources_upload_post": {
         "properties": {
           "file": {
             "contentMediaType": "application/octet-stream",
@@ -926,7 +926,7 @@
         "required": [
           "file"
         ],
-        "title": "Body_upload_resource_file_api_v1_tools_resource_upload_post",
+        "title": "Body_upload_resource_api_v1_tools_resources_upload_post",
         "type": "object"
       },
       "BroadcastRequest": {
@@ -1101,6 +1101,20 @@
         "title": "ComponentItemInput",
         "type": "object"
       },
+      "ComponentMigrationStatusInput": {
+        "description": "迁移状态更新输入：PATCH 单个 item 的 migrationStatus。",
+        "properties": {
+          "migrationStatus": {
+            "title": "Migrationstatus",
+            "type": "string"
+          }
+        },
+        "required": [
+          "migrationStatus"
+        ],
+        "title": "ComponentMigrationStatusInput",
+        "type": "object"
+      },
       "ComponentVariantInput": {
         "properties": {
           "color": {
@@ -1127,6 +1141,39 @@
           "state"
         ],
         "title": "ComponentVariantInput",
+        "type": "object"
+      },
+      "ComponentVariantPresetInput": {
+        "description": "变体矩阵预设输入：POST 应用一个预设批量翻转 is_enabled。",
+        "properties": {
+          "preset": {
+            "title": "Preset",
+            "type": "string"
+          }
+        },
+        "required": [
+          "preset"
+        ],
+        "title": "ComponentVariantPresetInput",
+        "type": "object"
+      },
+      "ComponentVariantToggleInput": {
+        "description": "变体开关输入：PATCH 单个变体的启用状态。",
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "variantId": {
+            "title": "Variantid",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "variantId",
+          "enabled"
+        ],
+        "title": "ComponentVariantToggleInput",
         "type": "object"
       },
       "CreateAuditLogRequest": {
@@ -4563,7 +4610,7 @@
   "info": {
     "description": "企业级FastAPI框架，包含RBAC权限管理系统",
     "title": "FastAPI RBAC Framework",
-    "version": "0.9.9"
+    "version": "1.0.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -13430,7 +13477,7 @@
         ],
         "summary": "Admin List Exams",
         "tags": [
-          "工具集"
+          "考试"
         ]
       },
       "post": {
@@ -13476,7 +13523,7 @@
         ],
         "summary": "Create Exam",
         "tags": [
-          "工具集"
+          "考试"
         ]
       }
     },
@@ -13523,7 +13570,7 @@
         ],
         "summary": "Delete Exam",
         "tags": [
-          "工具集"
+          "考试"
         ]
       },
       "put": {
@@ -13580,7 +13627,7 @@
         ],
         "summary": "Update Exam",
         "tags": [
-          "工具集"
+          "考试"
         ]
       }
     },
@@ -13629,7 +13676,7 @@
         ],
         "summary": "End Exam",
         "tags": [
-          "工具集"
+          "考试"
         ]
       }
     },
@@ -13678,7 +13725,7 @@
         ],
         "summary": "Publish Exam",
         "tags": [
-          "工具集"
+          "考试"
         ]
       }
     },
@@ -13725,7 +13772,7 @@
         ],
         "summary": "Admin List Questions",
         "tags": [
-          "工具集"
+          "考试"
         ]
       },
       "post": {
@@ -13782,7 +13829,7 @@
         ],
         "summary": "Create Question",
         "tags": [
-          "工具集"
+          "考试"
         ]
       }
     },
@@ -13838,7 +13885,7 @@
         ],
         "summary": "Delete Question",
         "tags": [
-          "工具集"
+          "考试"
         ]
       },
       "put": {
@@ -13904,7 +13951,7 @@
         ],
         "summary": "Update Question",
         "tags": [
-          "工具集"
+          "考试"
         ]
       }
     },
@@ -13951,32 +13998,57 @@
         ],
         "summary": "Exam Ranking",
         "tags": [
-          "工具集"
+          "考试"
         ]
       }
     },
-    "/api/v1/tools/admin/resource": {
-      "post": {
-        "description": "资源审核：{resource_id, action: approve|reject, note?}。",
-        "operationId": "review_resource_api_v1_tools_admin_resource_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
-              }
+    "/api/v1/tools/admin/resources": {
+      "get": {
+        "operationId": "admin_list_resources_api_v1_tools_admin_resources_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
             }
           },
-          "required": true
-        },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Review Resource Api V1 Tools Admin Resource Post"
+                  "title": "Response Admin List Resources Api V1 Tools Admin Resources Get"
                 }
               }
             },
@@ -13998,15 +14070,409 @@
             "OAuth2PasswordBearer": []
           }
         ],
-        "summary": "Review Resource",
+        "summary": "Admin List Resources",
         "tags": [
-          "工具集"
+          "资源"
+        ]
+      },
+      "post": {
+        "operationId": "create_resource_api_v1_tools_admin_resources_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Resource Api V1 Tools Admin Resources Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Create Resource",
+        "tags": [
+          "资源"
         ]
       }
     },
-    "/api/v1/tools/admin/task": {
+    "/api/v1/tools/admin/resources/pending": {
+      "get": {
+        "operationId": "pending_resources_api_v1_tools_admin_resources_pending_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Pending Resources Api V1 Tools Admin Resources Pending Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Pending Resources",
+        "tags": [
+          "资源"
+        ]
+      }
+    },
+    "/api/v1/tools/admin/resources/{resource_id}": {
+      "delete": {
+        "operationId": "delete_resource_api_v1_tools_admin_resources__resource_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "title": "Resource Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Delete Resource Api V1 Tools Admin Resources  Resource Id  Delete"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Delete Resource",
+        "tags": [
+          "资源"
+        ]
+      },
+      "put": {
+        "operationId": "update_resource_api_v1_tools_admin_resources__resource_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "title": "Resource Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Resource Api V1 Tools Admin Resources  Resource Id  Put",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Update Resource",
+        "tags": [
+          "资源"
+        ]
+      }
+    },
+    "/api/v1/tools/admin/resources/{resource_id}/approve": {
       "post": {
-        "operationId": "create_task_api_v1_tools_admin_task_post",
+        "operationId": "approve_resource_api_v1_tools_admin_resources__resource_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "title": "Resource Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Resource Api V1 Tools Admin Resources  Resource Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Approve Resource",
+        "tags": [
+          "资源"
+        ]
+      }
+    },
+    "/api/v1/tools/admin/resources/{resource_id}/reject": {
+      "post": {
+        "operationId": "reject_resource_api_v1_tools_admin_resources__resource_id__reject_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "title": "Resource Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reason"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reject Resource Api V1 Tools Admin Resources  Resource Id  Reject Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Reject Resource",
+        "tags": [
+          "资源"
+        ]
+      }
+    },
+    "/api/v1/tools/admin/tasks": {
+      "get": {
+        "operationId": "admin_list_tasks_api_v1_tools_admin_tasks_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Admin List Tasks Api V1 Tools Admin Tasks Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Admin List Tasks",
+        "tags": [
+          "任务"
+        ]
+      },
+      "post": {
+        "operationId": "create_task_api_v1_tools_admin_tasks_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -14023,7 +14489,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Create Task Api V1 Tools Admin Task Post",
+                  "title": "Response Create Task Api V1 Tools Admin Tasks Post",
                   "type": "object"
                 }
               }
@@ -14048,69 +14514,41 @@
         ],
         "summary": "Create Task",
         "tags": [
-          "工具集"
+          "任务"
         ]
       }
     },
-    "/api/v1/tools/admin/task/claims/pending": {
+    "/api/v1/tools/admin/tasks/claims/pending": {
       "get": {
-        "operationId": "pending_claims_api_v1_tools_admin_task_claims_pending_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Pending Claims Api V1 Tools Admin Task Claims Pending Get"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Pending Claims",
-        "tags": [
-          "工具集"
-        ]
-      }
-    },
-    "/api/v1/tools/admin/task/claims/{claim_id}/review": {
-      "post": {
-        "description": "认领审核：{approved: bool, note?}。",
-        "operationId": "review_claim_api_v1_tools_admin_task_claims__claim_id__review_post",
+        "operationId": "pending_claims_api_v1_tools_admin_tasks_claims_pending_get",
         "parameters": [
           {
-            "in": "path",
-            "name": "claim_id",
-            "required": true,
+            "in": "query",
+            "name": "skip",
+            "required": false,
             "schema": {
-              "title": "Claim Id",
+              "default": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Limit",
               "type": "integer"
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Review Claim Api V1 Tools Admin Task Claims  Claim Id  Review Post"
+                  "title": "Response Pending Claims Api V1 Tools Admin Tasks Claims Pending Get"
                 }
               }
             },
@@ -14132,15 +14570,125 @@
             "OAuth2PasswordBearer": []
           }
         ],
-        "summary": "Review Claim",
+        "summary": "Pending Claims",
         "tags": [
-          "工具集"
+          "任务"
         ]
       }
     },
-    "/api/v1/tools/admin/task/{task_id}": {
+    "/api/v1/tools/admin/tasks/claims/{claim_id}/approve": {
+      "post": {
+        "operationId": "approve_claim_api_v1_tools_admin_tasks_claims__claim_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "claim_id",
+            "required": true,
+            "schema": {
+              "title": "Claim Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Approve Claim Api V1 Tools Admin Tasks Claims  Claim Id  Approve Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Approve Claim",
+        "tags": [
+          "任务"
+        ]
+      }
+    },
+    "/api/v1/tools/admin/tasks/claims/{claim_id}/reject": {
+      "post": {
+        "operationId": "reject_claim_api_v1_tools_admin_tasks_claims__claim_id__reject_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "claim_id",
+            "required": true,
+            "schema": {
+              "title": "Claim Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reason"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Reject Claim Api V1 Tools Admin Tasks Claims  Claim Id  Reject Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Reject Claim",
+        "tags": [
+          "任务"
+        ]
+      }
+    },
+    "/api/v1/tools/admin/tasks/{task_id}": {
       "delete": {
-        "operationId": "delete_task_api_v1_tools_admin_task__task_id__delete",
+        "operationId": "delete_task_api_v1_tools_admin_tasks__task_id__delete",
         "parameters": [
           {
             "in": "path",
@@ -14157,7 +14705,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Delete Task Api V1 Tools Admin Task  Task Id  Delete"
+                  "title": "Response Delete Task Api V1 Tools Admin Tasks  Task Id  Delete"
                 }
               }
             },
@@ -14181,11 +14729,11 @@
         ],
         "summary": "Delete Task",
         "tags": [
-          "工具集"
+          "任务"
         ]
       },
       "put": {
-        "operationId": "update_task_api_v1_tools_admin_task__task_id__put",
+        "operationId": "update_task_api_v1_tools_admin_tasks__task_id__put",
         "parameters": [
           {
             "in": "path",
@@ -14213,7 +14761,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Update Task Api V1 Tools Admin Task  Task Id  Put",
+                  "title": "Response Update Task Api V1 Tools Admin Tasks  Task Id  Put",
                   "type": "object"
                 }
               }
@@ -14238,105 +14786,7 @@
         ],
         "summary": "Update Task",
         "tags": [
-          "工具集"
-        ]
-      }
-    },
-    "/api/v1/tools/admin/task/{task_id}/close": {
-      "post": {
-        "operationId": "close_task_api_v1_tools_admin_task__task_id__close_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "task_id",
-            "required": true,
-            "schema": {
-              "title": "Task Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Close Task Api V1 Tools Admin Task  Task Id  Close Post",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Close Task",
-        "tags": [
-          "工具集"
-        ]
-      }
-    },
-    "/api/v1/tools/admin/task/{task_id}/publish": {
-      "post": {
-        "operationId": "publish_task_api_v1_tools_admin_task__task_id__publish_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "task_id",
-            "required": true,
-            "schema": {
-              "title": "Task Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Publish Task Api V1 Tools Admin Task  Task Id  Publish Post",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Publish Task",
-        "tags": [
-          "工具集"
+          "任务"
         ]
       }
     },
@@ -14362,32 +14812,61 @@
         ],
         "summary": "Auxilio Analysis",
         "tags": [
-          "工具集"
+          "学习助手",
+          "学习助手"
         ]
       }
     },
-    "/api/v1/tools/component-registry": {
+    "/api/v1/tools/components": {
       "get": {
-        "operationId": "list_components_api_v1_tools_component_registry_get",
+        "operationId": "list_components_api_v1_tools_components_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response List Components Api V1 Tools Component Registry Get"
+                  "title": "Response List Components Api V1 Tools Components Get"
                 }
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "List Components",
         "tags": [
-          "工具集"
+          "组件注册表"
         ]
       },
       "post": {
-        "operationId": "create_component_api_v1_tools_component_registry_post",
+        "operationId": "create_component_api_v1_tools_components_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -14399,11 +14878,11 @@
           "required": true
         },
         "responses": {
-          "201": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Create Component Api V1 Tools Component Registry Post"
+                  "title": "Response Create Component Api V1 Tools Components Post"
                 }
               }
             },
@@ -14427,21 +14906,21 @@
         ],
         "summary": "Create Component",
         "tags": [
-          "工具集"
+          "组件注册表"
         ]
       }
     },
-    "/api/v1/tools/component-registry/{item_id}": {
+    "/api/v1/tools/components/{component_id}": {
       "delete": {
-        "operationId": "delete_component_api_v1_tools_component_registry__item_id__delete",
+        "operationId": "delete_component_api_v1_tools_components__component_id__delete",
         "parameters": [
           {
             "in": "path",
-            "name": "item_id",
+            "name": "component_id",
             "required": true,
             "schema": {
-              "title": "Item Id",
-              "type": "integer"
+              "title": "Component Id",
+              "type": "string"
             }
           }
         ],
@@ -14450,7 +14929,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Delete Component Api V1 Tools Component Registry  Item Id  Delete"
+                  "title": "Response Delete Component Api V1 Tools Components  Component Id  Delete"
                 }
               }
             },
@@ -14474,19 +14953,19 @@
         ],
         "summary": "Delete Component",
         "tags": [
-          "工具集"
+          "组件注册表"
         ]
       },
       "get": {
-        "operationId": "get_component_api_v1_tools_component_registry__item_id__get",
+        "operationId": "get_component_api_v1_tools_components__component_id__get",
         "parameters": [
           {
             "in": "path",
-            "name": "item_id",
+            "name": "component_id",
             "required": true,
             "schema": {
-              "title": "Item Id",
-              "type": "integer"
+              "title": "Component Id",
+              "type": "string"
             }
           }
         ],
@@ -14495,7 +14974,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get Component Api V1 Tools Component Registry  Item Id  Get"
+                  "title": "Response Get Component Api V1 Tools Components  Component Id  Get"
                 }
               }
             },
@@ -14514,19 +14993,19 @@
         },
         "summary": "Get Component",
         "tags": [
-          "工具集"
+          "组件注册表"
         ]
       },
       "put": {
-        "operationId": "update_component_api_v1_tools_component_registry__item_id__put",
+        "operationId": "update_component_api_v1_tools_components__component_id__put",
         "parameters": [
           {
             "in": "path",
-            "name": "item_id",
+            "name": "component_id",
             "required": true,
             "schema": {
-              "title": "Item Id",
-              "type": "integer"
+              "title": "Component Id",
+              "type": "string"
             }
           }
         ],
@@ -14545,7 +15024,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Update Component Api V1 Tools Component Registry  Item Id  Put"
+                  "title": "Response Update Component Api V1 Tools Components  Component Id  Put"
                 }
               }
             },
@@ -14569,21 +15048,61 @@
         ],
         "summary": "Update Component",
         "tags": [
-          "工具集"
+          "组件注册表"
         ]
       }
     },
-    "/api/v1/tools/component-registry/{item_id}/guide": {
-      "put": {
-        "operationId": "update_guide_api_v1_tools_component_registry__item_id__guide_put",
+    "/api/v1/tools/components/{component_id}/guide": {
+      "get": {
+        "operationId": "get_guide_api_v1_tools_components__component_id__guide_get",
         "parameters": [
           {
             "in": "path",
-            "name": "item_id",
+            "name": "component_id",
             "required": true,
             "schema": {
-              "title": "Item Id",
-              "type": "integer"
+              "title": "Component Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Guide Api V1 Tools Components  Component Id  Guide Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Guide",
+        "tags": [
+          "组件注册表"
+        ]
+      },
+      "post": {
+        "operationId": "create_guide_api_v1_tools_components__component_id__guide_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "component_id",
+            "required": true,
+            "schema": {
+              "title": "Component Id",
+              "type": "string"
             }
           }
         ],
@@ -14602,7 +15121,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Update Guide Api V1 Tools Component Registry  Item Id  Guide Put"
+                  "title": "Response Create Guide Api V1 Tools Components  Component Id  Guide Post"
                 }
               }
             },
@@ -14624,23 +15143,63 @@
             "OAuth2PasswordBearer": []
           }
         ],
-        "summary": "Update Guide",
+        "summary": "Create Guide",
         "tags": [
-          "工具集"
+          "组件注册表"
         ]
       }
     },
-    "/api/v1/tools/component-registry/{item_id}/variants": {
-      "put": {
-        "operationId": "replace_variants_api_v1_tools_component_registry__item_id__variants_put",
+    "/api/v1/tools/components/{component_id}/migration-status": {
+      "get": {
+        "operationId": "get_migration_status_api_v1_tools_components__component_id__migration_status_get",
         "parameters": [
           {
             "in": "path",
-            "name": "item_id",
+            "name": "component_id",
             "required": true,
             "schema": {
-              "title": "Item Id",
-              "type": "integer"
+              "title": "Component Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Migration Status Api V1 Tools Components  Component Id  Migration Status Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Migration Status",
+        "tags": [
+          "组件注册表"
+        ]
+      },
+      "put": {
+        "operationId": "set_migration_status_api_v1_tools_components__component_id__migration_status_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "component_id",
+            "required": true,
+            "schema": {
+              "title": "Component Id",
+              "type": "string"
             }
           }
         ],
@@ -14648,11 +15207,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "items": {
-                  "$ref": "#/components/schemas/ComponentVariantInput"
-                },
-                "title": "Body",
-                "type": "array"
+                "$ref": "#/components/schemas/ComponentMigrationStatusInput"
               }
             }
           },
@@ -14663,7 +15218,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Replace Variants Api V1 Tools Component Registry  Item Id  Variants Put"
+                  "title": "Response Set Migration Status Api V1 Tools Components  Component Id  Migration Status Put"
                 }
               }
             },
@@ -14685,32 +15240,23 @@
             "OAuth2PasswordBearer": []
           }
         ],
-        "summary": "Replace Variants",
+        "summary": "Set Migration Status",
         "tags": [
-          "工具集"
+          "组件注册表"
         ]
       }
     },
-    "/api/v1/tools/component-registry/{item_id}/variants/{variant_id}/toggle": {
-      "post": {
-        "operationId": "toggle_variant_api_v1_tools_component_registry__item_id__variants__variant_id__toggle_post",
+    "/api/v1/tools/components/{component_id}/variants": {
+      "get": {
+        "operationId": "list_variants_api_v1_tools_components__component_id__variants_get",
         "parameters": [
           {
             "in": "path",
-            "name": "item_id",
+            "name": "component_id",
             "required": true,
             "schema": {
-              "title": "Item Id",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "path",
-            "name": "variant_id",
-            "required": true,
-            "schema": {
-              "title": "Variant Id",
-              "type": "integer"
+              "title": "Component Id",
+              "type": "string"
             }
           }
         ],
@@ -14719,7 +15265,171 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Toggle Variant Api V1 Tools Component Registry  Item Id  Variants  Variant Id  Toggle Post"
+                  "title": "Response List Variants Api V1 Tools Components  Component Id  Variants Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Variants",
+        "tags": [
+          "组件注册表"
+        ]
+      },
+      "post": {
+        "operationId": "create_variant_api_v1_tools_components__component_id__variants_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "component_id",
+            "required": true,
+            "schema": {
+              "title": "Component Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentVariantInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Create Variant Api V1 Tools Components  Component Id  Variants Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Create Variant",
+        "tags": [
+          "组件注册表"
+        ]
+      }
+    },
+    "/api/v1/tools/components/{component_id}/variants/preset": {
+      "post": {
+        "operationId": "apply_preset_api_v1_tools_components__component_id__variants_preset_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "component_id",
+            "required": true,
+            "schema": {
+              "title": "Component Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentVariantPresetInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Apply Preset Api V1 Tools Components  Component Id  Variants Preset Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Apply Preset",
+        "tags": [
+          "组件注册表"
+        ]
+      }
+    },
+    "/api/v1/tools/components/{component_id}/variants/toggle": {
+      "post": {
+        "operationId": "toggle_variant_api_v1_tools_components__component_id__variants_toggle_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "component_id",
+            "required": true,
+            "schema": {
+              "title": "Component Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentVariantToggleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Toggle Variant Api V1 Tools Components  Component Id  Variants Toggle Post"
                 }
               }
             },
@@ -14743,7 +15453,73 @@
         ],
         "summary": "Toggle Variant",
         "tags": [
-          "工具集"
+          "组件注册表"
+        ]
+      }
+    },
+    "/api/v1/tools/components/{component_id}/variants/{variant_id}": {
+      "put": {
+        "operationId": "update_variant_api_v1_tools_components__component_id__variants__variant_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "component_id",
+            "required": true,
+            "schema": {
+              "title": "Component Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "required": true,
+            "schema": {
+              "title": "Variant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentVariantInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Update Variant Api V1 Tools Components  Component Id  Variants  Variant Id  Put"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Update Variant",
+        "tags": [
+          "组件注册表"
         ]
       }
     },
@@ -14875,7 +15651,7 @@
         },
         "summary": "List Exams",
         "tags": [
-          "工具集"
+          "考试"
         ]
       }
     },
@@ -14917,7 +15693,7 @@
         },
         "summary": "Get Exam",
         "tags": [
-          "工具集"
+          "考试"
         ]
       }
     },
@@ -14964,7 +15740,7 @@
         ],
         "summary": "My Results",
         "tags": [
-          "工具集"
+          "考试"
         ]
       }
     },
@@ -15006,7 +15782,7 @@
         },
         "summary": "List Exam Questions",
         "tags": [
-          "工具集"
+          "考试"
         ]
       }
     },
@@ -15063,33 +15839,7 @@
         ],
         "summary": "Submit Answers",
         "tags": [
-          "工具集"
-        ]
-      }
-    },
-    "/api/v1/tools/points": {
-      "get": {
-        "operationId": "my_points_api_v1_tools_points_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response My Points Api V1 Tools Points Get"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "My Points",
-        "tags": [
-          "工具集"
+          "考试"
         ]
       }
     },
@@ -15099,11 +15849,21 @@
         "parameters": [
           {
             "in": "query",
-            "name": "top_n",
+            "name": "skip",
             "required": false,
             "schema": {
-              "default": 20,
-              "title": "Top N",
+              "default": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Limit",
               "type": "integer"
             }
           }
@@ -15130,32 +15890,105 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "summary": "Leaderboard",
         "tags": [
-          "工具集"
+          "积分"
         ]
       }
     },
-    "/api/v1/tools/resource": {
+    "/api/v1/tools/points/me": {
       "get": {
-        "operationId": "list_resources_api_v1_tools_resource_get",
+        "operationId": "my_points_api_v1_tools_points_me_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response My Points Api V1 Tools Points Me Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "My Points",
+        "tags": [
+          "积分"
+        ]
+      }
+    },
+    "/api/v1/tools/points/me/history": {
+      "get": {
+        "operationId": "my_history_api_v1_tools_points_me_history_get",
         "parameters": [
           {
             "in": "query",
-            "name": "resource_type",
+            "name": "skip",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Resource Type"
+              "default": 0,
+              "title": "Skip",
+              "type": "integer"
             }
           },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response My History Api V1 Tools Points Me History Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "My History",
+        "tags": [
+          "积分"
+        ]
+      }
+    },
+    "/api/v1/tools/resources": {
+      "get": {
+        "operationId": "list_resources_api_v1_tools_resources_get",
+        "parameters": [
           {
             "in": "query",
             "name": "tag",
@@ -15173,33 +16006,69 @@
             }
           },
           {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "default": "approved",
-              "title": "Status",
-              "type": "string"
-            }
-          },
-          {
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
+              "description": "跳过的记录数（与 page 互斥）",
+              "minimum": 0,
               "title": "Skip",
               "type": "integer"
             }
           },
           {
+            "description": "每页返回的最大记录数",
             "in": "query",
             "name": "limit",
             "required": false,
             "schema": {
-              "default": 20,
+              "default": 100,
+              "description": "每页返回的最大记录数",
+              "maximum": 500,
+              "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -15208,7 +16077,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response List Resources Api V1 Tools Resource Get"
+                  "$ref": "#/components/schemas/PaginatedResponse_dict_"
                 }
               }
             },
@@ -15227,16 +16096,18 @@
         },
         "summary": "List Resources",
         "tags": [
-          "工具集"
+          "资源"
         ]
-      },
+      }
+    },
+    "/api/v1/tools/resources/upload": {
       "post": {
-        "operationId": "create_resource_api_v1_tools_resource_post",
+        "operationId": "upload_resource_api_v1_tools_resources_upload_post",
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/ResourceInput"
+                "$ref": "#/components/schemas/Body_upload_resource_api_v1_tools_resources_upload_post"
               }
             }
           },
@@ -15248,7 +16119,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Create Resource Api V1 Tools Resource Post",
+                  "title": "Response Upload Resource Api V1 Tools Resources Upload Post",
                   "type": "object"
                 }
               }
@@ -15271,103 +16142,15 @@
             "OAuth2PasswordBearer": []
           }
         ],
-        "summary": "Create Resource",
+        "summary": "Upload Resource",
         "tags": [
-          "工具集"
+          "资源"
         ]
       }
     },
-    "/api/v1/tools/resource/files/{filename}": {
+    "/api/v1/tools/resources/{resource_id}": {
       "get": {
-        "operationId": "serve_resource_file_api_v1_tools_resource_files__filename__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "filename",
-            "required": true,
-            "schema": {
-              "title": "Filename",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Serve Resource File Api V1 Tools Resource Files  Filename  Get"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Serve Resource File",
-        "tags": [
-          "工具集"
-        ]
-      }
-    },
-    "/api/v1/tools/resource/upload": {
-      "post": {
-        "operationId": "upload_resource_file_api_v1_tools_resource_upload_post",
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_upload_resource_file_api_v1_tools_resource_upload_post"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Upload Resource File Api V1 Tools Resource Upload Post"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Upload Resource File",
-        "tags": [
-          "工具集"
-        ]
-      }
-    },
-    "/api/v1/tools/resource/{resource_id}": {
-      "get": {
-        "operationId": "get_resource_api_v1_tools_resource__resource_id__get",
+        "operationId": "get_resource_api_v1_tools_resources__resource_id__get",
         "parameters": [
           {
             "in": "path",
@@ -15384,7 +16167,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get Resource Api V1 Tools Resource  Resource Id  Get"
+                  "title": "Response Get Resource Api V1 Tools Resources  Resource Id  Get"
                 }
               }
             },
@@ -15403,13 +16186,111 @@
         },
         "summary": "Get Resource",
         "tags": [
-          "工具集"
+          "资源"
         ]
       }
     },
-    "/api/v1/tools/task": {
+    "/api/v1/tools/resources/{resource_id}/download": {
       "get": {
-        "operationId": "list_tasks_api_v1_tools_task_get",
+        "operationId": "download_resource_api_v1_tools_resources__resource_id__download_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "title": "Resource Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Download Resource Api V1 Tools Resources  Resource Id  Download Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download Resource",
+        "tags": [
+          "资源"
+        ]
+      }
+    },
+    "/api/v1/tools/resources/{resource_id}/rate": {
+      "post": {
+        "operationId": "rate_resource_api_v1_tools_resources__resource_id__rate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "title": "Resource Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "score",
+            "required": true,
+            "schema": {
+              "title": "Score",
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Rate Resource Api V1 Tools Resources  Resource Id  Rate Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Rate Resource",
+        "tags": [
+          "资源"
+        ]
+      }
+    },
+    "/api/v1/tools/tasks": {
+      "get": {
+        "operationId": "list_tasks_api_v1_tools_tasks_get",
         "parameters": [
           {
             "in": "query",
@@ -15424,43 +16305,74 @@
                   "type": "null"
                 }
               ],
+              "default": "open",
               "title": "Status"
             }
           },
           {
-            "in": "query",
-            "name": "category",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Category"
-            }
-          },
-          {
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
+              "description": "跳过的记录数（与 page 互斥）",
+              "minimum": 0,
               "title": "Skip",
               "type": "integer"
             }
           },
           {
+            "description": "每页返回的最大记录数",
             "in": "query",
             "name": "limit",
             "required": false,
             "schema": {
-              "default": 20,
+              "default": 100,
+              "description": "每页返回的最大记录数",
+              "maximum": 500,
+              "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -15469,7 +16381,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response List Tasks Api V1 Tools Task Get"
+                  "$ref": "#/components/schemas/PaginatedResponse_dict_"
                 }
               }
             },
@@ -15488,19 +16400,19 @@
         },
         "summary": "List Tasks",
         "tags": [
-          "工具集"
+          "任务"
         ]
       }
     },
-    "/api/v1/tools/task/claims/mine": {
+    "/api/v1/tools/tasks/claimed/me": {
       "get": {
-        "operationId": "my_claims_api_v1_tools_task_claims_mine_get",
+        "operationId": "my_claims_api_v1_tools_tasks_claimed_me_get",
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response My Claims Api V1 Tools Task Claims Mine Get"
+                  "title": "Response My Claims Api V1 Tools Tasks Claimed Me Get"
                 }
               }
             },
@@ -15514,107 +16426,95 @@
         ],
         "summary": "My Claims",
         "tags": [
-          "工具集"
+          "任务"
         ]
       }
     },
-    "/api/v1/tools/task/claims/{claim_id}": {
-      "delete": {
-        "operationId": "cancel_claim_api_v1_tools_task_claims__claim_id__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "claim_id",
-            "required": true,
-            "schema": {
-              "title": "Claim Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Cancel Claim Api V1 Tools Task Claims  Claim Id  Delete"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Cancel Claim",
-        "tags": [
-          "工具集"
-        ]
-      }
-    },
-    "/api/v1/tools/task/claims/{claim_id}/submit": {
-      "post": {
-        "operationId": "submit_claim_api_v1_tools_task_claims__claim_id__submit_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "claim_id",
-            "required": true,
-            "schema": {
-              "title": "Claim Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Submit Claim Api V1 Tools Task Claims  Claim Id  Submit Post"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Submit Claim",
-        "tags": [
-          "工具集"
-        ]
-      }
-    },
-    "/api/v1/tools/task/{task_id}": {
+    "/api/v1/tools/tasks/claims/me": {
       "get": {
-        "operationId": "get_task_api_v1_tools_task__task_id__get",
+        "operationId": "my_claims_alias_api_v1_tools_tasks_claims_me_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response My Claims Alias Api V1 Tools Tasks Claims Me Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "My Claims Alias",
+        "tags": [
+          "任务"
+        ]
+      }
+    },
+    "/api/v1/tools/tasks/claims/{claim_id}/submit": {
+      "post": {
+        "operationId": "submit_proof_api_v1_tools_tasks_claims__claim_id__submit_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "claim_id",
+            "required": true,
+            "schema": {
+              "title": "Claim Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "proof",
+            "required": true,
+            "schema": {
+              "title": "Proof",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Submit Proof Api V1 Tools Tasks Claims  Claim Id  Submit Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Submit Proof",
+        "tags": [
+          "任务"
+        ]
+      }
+    },
+    "/api/v1/tools/tasks/{task_id}": {
+      "get": {
+        "operationId": "get_task_api_v1_tools_tasks__task_id__get",
         "parameters": [
           {
             "in": "path",
@@ -15631,7 +16531,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get Task Api V1 Tools Task  Task Id  Get"
+                  "title": "Response Get Task Api V1 Tools Tasks  Task Id  Get"
                 }
               }
             },
@@ -15650,13 +16550,13 @@
         },
         "summary": "Get Task",
         "tags": [
-          "工具集"
+          "任务"
         ]
       }
     },
-    "/api/v1/tools/task/{task_id}/claim": {
+    "/api/v1/tools/tasks/{task_id}/claim": {
       "post": {
-        "operationId": "claim_task_api_v1_tools_task__task_id__claim_post",
+        "operationId": "claim_task_api_v1_tools_tasks__task_id__claim_post",
         "parameters": [
           {
             "in": "path",
@@ -15668,32 +16568,12 @@
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "additionalProperties": true,
-                    "type": "object"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Body"
-              }
-            }
-          }
-        },
         "responses": {
-          "201": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Claim Task Api V1 Tools Task  Task Id  Claim Post",
-                  "type": "object"
+                  "title": "Response Claim Task Api V1 Tools Tasks  Task Id  Claim Post"
                 }
               }
             },
@@ -15717,49 +16597,7 @@
         ],
         "summary": "Claim Task",
         "tags": [
-          "工具集"
-        ]
-      }
-    },
-    "/api/v1/tools/task/{task_id}/claims": {
-      "get": {
-        "operationId": "task_claims_api_v1_tools_task__task_id__claims_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "task_id",
-            "required": true,
-            "schema": {
-              "title": "Task Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Task Claims Api V1 Tools Task  Task Id  Claims Get"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Task Claims",
-        "tags": [
-          "工具集"
+          "任务"
         ]
       }
     },

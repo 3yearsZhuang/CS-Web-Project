@@ -27,7 +27,7 @@ BACKEND_PY := $(CURDIR)/CS-Web-Backend/.venv/bin/python
 BACKEND_PORT := 9000
 FRONTEND_PORT := 2333
 
-.PHONY: dev-up dev-backend dev-frontend dev-logs dev-down restart-frontend setup up down logs ps rebuild status contract-baseline contract-check check-version check check-contract check-docs check-fe-boundary check-version-group check-gitignore-sync deps-export
+.PHONY: dev-up dev-backend dev-frontend dev-logs dev-down restart-frontend setup up down logs ps rebuild status contract-baseline contract-check check-version check check-contract check-docs check-fe-boundary check-version-group check-gitignore-sync deps-export clean-artifacts
 
 # 本地开发统一用后台进程托管（不依赖 tmux，开箱即用）。
 # 前后端各自 nohup 后台运行，PID 写入 .dev.pid，日志落盘 .dev-*.log。
@@ -180,4 +180,13 @@ deps-export:
 	uv export --format requirements-txt -o requirements.lock && \
 	uv export --extra dev --format requirements-txt -o requirements-dev.lock
 	@echo ">>> 依赖锁已重生成（uv.lock / requirements.lock / requirements-dev.lock）"
+
+# ---- 清理构建可再生产物与确定无用文件（A+B，安全：跳过被 git 跟踪的源码）----
+#   make clean-artifacts                  # 预览（dry-run），复核将要删除的目标
+#   make clean-artifacts APPLY=1          # 真删（A+B：.build / 缓存 / 日志 / 临时）
+#   make clean-artifacts APPLY=1 WITH_DEPS=1  # 含依赖 node_modules/.venv（C）
+# 安全守卫：凡 git 跟踪的路径（如 tools/scripts/fe/build 源码）一律跳过，绝不误删。
+clean-artifacts:
+	@bash $(CURDIR)/scripts/clean-artifacts.sh $(if $(filter 1,$(APPLY)),--apply,) $(if $(filter 1,$(WITH_DEPS)),--with-deps,)
+	@echo ">>> clean-artifacts 完成（默认 dry-run，确认无误后 APPLY=1 真删）"
 

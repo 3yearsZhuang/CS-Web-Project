@@ -7,9 +7,11 @@
 
 ---
 
-## [Unreleased]
+## [1.0.0.七夕] - 2026-08-19
 
-> 当前 `0.9.9` 尚未打 tag 发版；0.9.9 时代的所有收口（测试/质量/运维/架构/安全）均记于下方 `[0.9.9]`。本节省略重复内容，发版后用于记录 1.0.0 之前的后续改动。
+> **1.0.0 正式版 · 代号「七夕」（2026-08-19）** —— 首个稳定发布版本。六道 1.0.0 发布门槛全部明确并闭环：#1 契约门禁 + 管理员强制 2FA + ER-01（已闭环）、#2 管理员审计不丢（R17 闭环）、#3 端到端验收闭环（E2E 发布前必过，根仓 `e2e.yml` 加 `push:main` 保证 `main` 始终「可发布绿」）、#4 多实例幂等（arq cron 单点调度）、#6 D10 功能边界（Wiki/活动评价入 1.0、DM/相册延后）。门槛#5 外部监控有意延后（见下方 Known Limitations，风险接受）。四源核心版本号统一升 `1.0.0`（`make check-version` 通过），并引入**发布代号**机制：本版代号 `七夕`（七夕节当日发布），展示版 `1.0.0.七夕`。发布工具链见 `scripts/tag_and_release.sh`（F-9）。
+>
+> **版本号规则（2026-08-19 起）**：机器版本（pyproject / `app/__init__.__version__` / package.json `version` / uv.lock）保持 PEP 440 / semver 合规的三段式（如 `1.0.0`）；`codename`（节日标签如 `七夕` 或 MMDD 日期如 `0819`）为纯展示的发布代号，拼成 `1.0.0.七夕` / `1.0.0.0819`，仅用于页脚与 CHANGELOG 标题。npm / PEP 440 不允许 4 段或非 ASCII，故打包文件只用核心段。
 
 ### Added
 
@@ -27,7 +29,9 @@
 ### Changed
 
 - **D10 功能边界拍板（1.0.0 scope）**：社区四件套边界确定——Wiki、活动评价纳入 1.0.0 规划（随 1.0 交付跟进）；私信 DM、相册延后至 P1 波次（1.0.0 不含）。活动评价随已有活动模块在 1.0 补；Wiki 作为新模块规划推进。
-- **1.0.0 发布门槛#3 定义补列（SSOT 同步）**：门槛#3 原清单未枚举，已于 2026-08-19 补列定义为「端到端验收闭环（E2E 发布前必过）」——真实 docker-compose 全栈部署形态下核心用户旅程 E2E 全绿，作为 1.0.0 发布前必过（非仅 nightly）；状态未闭环，对应 P0-4（须补发布前 E2E 必过门禁）。见 `docs/项目待办事项-优先级重排.md`。
+- **1.0.0 发布门槛#3 定义补列并闭环（SSOT 同步）**：门槛#3 原清单未枚举，已于 2026-08-19 补列定义为「端到端验收闭环（E2E 发布前必过）」——真实 docker-compose 全栈部署形态下核心用户旅程 E2E 全绿，作为 1.0.0 发布前必过（非仅 nightly）；**已于 2026-08-19 闭环**：根仓 `e2e.yml` 加 `push:main` 触发，合并到 `main` 即跑全栈 E2E，保证默认分支「可发布绿」（保留 nightly + 手动），对应 P0-4。见 `docs/项目待办事项-优先级重排.md`。
+
+- **发布工程收口（F-9 / C 收口）**：新增 `scripts/tag_and_release.sh`——自动撰写 changelog（将 `[Unreleased]` → 指定版本 + 日期）并同步四源版本号（pyproject / `__init__.__version__` / package.json / uv.lock），跑 `make check-version` 自检后给出打 tag 指令；版本号四源统一升 `1.0.0`，`make check-version` 通过。
 
 - **P1-4 / C-15 BFF 样板生成（方向 A 首步·通用响应原语，已启动）**：勘察纠正——C-15 缺口非类型（前端 `gen:api-types` 已用 `openapi-typescript` 从 `openapi.baseline.json` 生成 `backend-api.d.ts`）；真正重复在 140 个 `route.ts` 运行骨架的样板（body 兜底 / 数组提取 / 成功·错误响应 + Cookie 接线 / 安全读体）。`backend-client.ts` 已有成熟 `to*` schema 翻译助手（~13 个），故本次只抽**通用 handler 原语**：新增 `bodyOrEmpty` / `arrayFrom` / `okJson` / `errJson` / `readJsonBody`（与 `proxyBackend`/`normalizeError`/Cookie 助手同文件）。示范重构 `src/app/api/tools/component-registry/route.ts`（GET/POST）改用原语，行为不变。`ts-check` 无新增错误（仅基线 10 处无关错误）；`check:bff-boundary` 通过。后续：将更多 route.ts 迁移到原语，再上 route 骨架生成器（B/C）。**本 batch 已迁移 4 个 route.ts**（component-registry/overview/favorites/follows，覆盖纯 GET、软错误分支 + 自定义 map 三种模式），ts-check 无新增错误（基线 10）、check:bff-boundary 通过。
 
@@ -82,6 +86,12 @@
 - **P1-6 / C-19 批量迁移（#17~#24 全域收口·全部客户端裸 fetch 收敛完成）**：承接 community-* 收尾后按序推进剩余全部域，统一收敛到共享原语 `apiRequest`（`src/shared/hooks/use-api-request.ts`），策略 B（组件内联 fetch 抽专用 use-* hook；已是 use-* 的就地换 `apiRequest`）。逐域完成：① **admin-*（14）**——含 `admin-roles-panel.tsx` 6 处 fetch（GET roles/permissions + PUT 保存权限 + POST 创建 + PATCH 编辑 + DELETE 删除，401→login / 403→onForbidden / `error` 语义全保留）、`admin-logs-panel`（3）、`admin-messages-panel` / `admin-feature-visibility-panel`（各 1），并修复 #17 失败代理误改坏的 `use-user-list.ts`（`r` 变量与 API 结果重名致 TDZ，统一改名 `result`）；② **tools/*（11）**——`app/tools/exam/page.tsx`、`app/tools/exam/[id]/use-exam.ts`（GET 考试/题目 + GET auth/me + my-results + POST 提交）、`app/tools/dev-center/page.tsx`（auth/me 探测）、`app/tools/task/use-tasks.ts`（8 处 fetch 全换：claims / points / leaderboard / admin-claims / claim / 取消认领 / create / publish / review）；③ **auth-profile（7）**、**events（2）**、**about（1）**、**workbench（5，仅 loadConversations/openConversation 换、assistant-chat SSE 保留）**、**shared-hooks（3）**、**misc（3）**。每文件 `pnpm ts-check` 10 基线零新增；全局客户端裸 `fetch(` 仅余排除项（BFF `route.ts` / `server-only` `backend-client.ts` / 原语自身 / SWR 基础设施 `swr-provider`·`use-auth` / `assistant-chat` SSE 流式），C-19 客户端收敛彻底闭环。
 
 ---
+
+### Known Limitations
+
+- **门槛#5 外部监控/可观测性有意延后（风险接受）**：1.0.0 不含集中式 APM / 外部告警链路（Prometheus `/metrics` 端点已具备，但缺 Grafana / Alertmanager 等外部看板与告警）。依据 SSOT 门槛#5 决策：当前用户规模 <200，运维风险可接受，不阻塞 1.0.0；规模化触发后立项（见 P2-4 / EX-1）。发布后须由运维按 `BackDoc-SLO.md` 自行接入监控，本项不作为 1.0.0 验收项，特此显式记录以免事后误读为遗漏。
+- **上帝服务拆分（C-17）与 repo 巨型文件（C-18）延后至 1.0.0 之后**：`user_service.py` / `auth_service.py` / `community_repo.py` 等仍 >700 行，属已知架构债，已在 SSOT 降为 P2（"查询层治理"专题，分阶段可回滚），不在 1.0.0 验收范围。
+- **DM 私信 / 相册延后至 P1 波次**：依 D10 边界拍板，1.0.0 不含。
 
 ## [0.9.9]
 
