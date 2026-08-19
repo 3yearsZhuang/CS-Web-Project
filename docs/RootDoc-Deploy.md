@@ -58,7 +58,7 @@ Auxilio 为内置学习助手 Agent；其 LLM 能力通过以下可选变量开�
 |------|------|------|--------|
 | `LLM_PROVIDER` | LLM 供应商：`openai`（OpenAI 兼容协议）/ `anthropic` / `none`（禁用→规则模式） | 否 | `none` |
 | `LLM_API_KEY` | 供应商 API Key（仅存 `.env`，不落库/日志/前端） | 否（开启 LLM 时必填） | 空 |
-| `LLM_BASE_URL` | OpenAI 兼容自定义网关（DeepSeek / 通义 / Kimi / 本地 vLLM） | 否 | 空 |
+| `LLM_BASE_URL` | OpenAI 兼容自定义网关（Ollama、vLLM 等本地/第三方网关） | 否 | 空 |
 | `LLM_MODEL` | 模型名（如 `gpt-4o-mini`） | 否 | `gpt-4o-mini` |
 | `LLM_TIMEOUT` | 单次调用超时（秒） | 否 | `60` |
 | `LLM_MAX_TOKENS` | 单次回复最大 token | 否 | `1024` |

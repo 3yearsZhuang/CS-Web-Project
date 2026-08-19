@@ -59,7 +59,7 @@
 
 - **P1-3 子项④ façade 收口（续点 C · community，勘察结论：延期）**：`community.py:122`（`list_members`，FTS + JSONB 裸查询）与 `community.py:671`（`list_tags`，裸查询 + Python 聚合）均为**无 service 包裹的裸查询 endpoint**，全仓无 `list_members`/`list_tags` service 方法可代。最小 facade 收口（仅走现有工厂）不适用；若要做需新建 service/repo 方法抽取查询，属 C-16「service 直查下沉」/ C-17 上帝模块拆分范畴，不在本次最小收口内——判定延期，不改 community.py（与 C-16 方向 C 不越界口径一致）。
 
-- **Auxilio v1 上线（LLM 对话重构收口）**：LLM 对话升级为「Auxilio v1」卡片（`widgets/llm-widget.tsx`，primary 左主列、类 DeepSeek 网页版）；头部「用量与设置」统一按钮展开用量统计 + 模型接入设置面板；工作台布局改为问候条顶部全宽 + Auxilio v1 左主列 + 其余功能右栏；删除旧 `/tools/auxilio` 分析页与工具区入口（前后端可见性注册表同步删 `tools-auxilio`、`wb-assistant-chat` 并入 `wb-llm-usage`）。
+- **Auxilio v1 上线（LLM 对话重构收口）**：LLM 对话升级为「Auxilio v1」卡片（`widgets/llm-widget.tsx`，primary 左主列、对话优先布局）；头部「用量与设置」统一按钮展开用量统计 + 模型接入设置面板；工作台布局改为问候条顶部全宽 + Auxilio v1 左主列 + 其余功能右栏；删除旧 `/tools/auxilio` 分析页与工具区入口（前后端可见性注册表同步删 `tools-auxilio`、`wb-assistant-chat` 并入 `wb-llm-usage`）。
 
 - **工作台（Workbench）像素化（方案 A 完整融合，FrontDoc-UID §15.12）**：`/tools` 页根已带 `pixel-page`，本次把可见工作台推入融合层——① 9 个 widget 盒装卡（greeting/today-tasks/github-heatmap/llm-widget/quick-notes/pomodoro/exam-countdown/llm-usage-stats/assistant-chat）`card-minimal`→共享 `<DnaCard corner={…}>`（角标 HI/TSK/GIT/AUX/NOTE/FCS/EXM/MEM/CHAT），非嵌入态独立卡保留 `card-minimal` 避免 DnaCard 嵌套；② `today-tasks` 任务列表 `<ul>/<li>`→**A 索引铁路** `.idx-rail`（序号/标题/元数据含逾期态/箭头），新增 `.dna-card .idx-rail .idx` 作用域遮罩跟随卡面；③ 顶部 4 CTA 转 `pixel-outline`、「清空」转新增 `pixel-danger`，各 widget 内按钮（刷新/用量入口/保存/newChat/发送/番茄钟三键/便签新增）统一转 `pixel`/`pixel-outline`；④ 顶部新增可见 `<SectionMarker>[ 01 ] 工作台</SectionMarker>`；⑤ `globals.css` 新增 `.btn-pixel-danger`/`.btn-pixel-danger-sm` 与 `.dna-card .idx-rail .idx` 覆盖。`ts-check` 持基线 10 错、`lint` 持基线 3 错、next build 通过，无新增回归。
 
