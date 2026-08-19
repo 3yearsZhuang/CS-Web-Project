@@ -7,6 +7,10 @@
 
 ---
 
+## [Unreleased]
+
+> 进行中 / 下一波次变更累积区；发版时由 `scripts/tag_and_release.sh` 自动转为具体版本号 + 日期。已闭环项不在此滞留（见 `docs/项目待办事项-优先级重排.md`）。
+
 ## [1.0.0.七夕] - 2026-08-19
 
 > **1.0.0 正式版 · 代号「七夕」（2026-08-19）** —— 首个稳定发布版本。六道 1.0.0 发布门槛全部明确并闭环：#1 契约门禁 + 管理员强制 2FA + ER-01（已闭环）、#2 管理员审计不丢（R17 闭环）、#3 端到端验收闭环（E2E 发布前必过，根仓 `e2e.yml` 加 `push:main` 保证 `main` 始终「可发布绿」）、#4 多实例幂等（arq cron 单点调度）、#6 D10 功能边界（Wiki/活动评价入 1.0、DM/相册延后）。门槛#5 外部监控有意延后（见下方 Known Limitations，风险接受）。四源核心版本号统一升 `1.0.0`（`make check-version` 通过），并引入**发布代号**机制：本版代号 `七夕`（七夕节当日发布），展示版 `1.0.0.七夕`。发布工具链见 `scripts/tag_and_release.sh`（F-9）。
@@ -63,27 +67,9 @@
 
 - **工作台（Workbench）像素化（方案 A 完整融合，FrontDoc-UID §15.12）**：`/tools` 页根已带 `pixel-page`，本次把可见工作台推入融合层——① 9 个 widget 盒装卡（greeting/today-tasks/github-heatmap/llm-widget/quick-notes/pomodoro/exam-countdown/llm-usage-stats/assistant-chat）`card-minimal`→共享 `<DnaCard corner={…}>`（角标 HI/TSK/GIT/AUX/NOTE/FCS/EXM/MEM/CHAT），非嵌入态独立卡保留 `card-minimal` 避免 DnaCard 嵌套；② `today-tasks` 任务列表 `<ul>/<li>`→**A 索引铁路** `.idx-rail`（序号/标题/元数据含逾期态/箭头），新增 `.dna-card .idx-rail .idx` 作用域遮罩跟随卡面；③ 顶部 4 CTA 转 `pixel-outline`、「清空」转新增 `pixel-danger`，各 widget 内按钮（刷新/用量入口/保存/newChat/发送/番茄钟三键/便签新增）统一转 `pixel`/`pixel-outline`；④ 顶部新增可见 `<SectionMarker>[ 01 ] 工作台</SectionMarker>`；⑤ `globals.css` 新增 `.btn-pixel-danger`/`.btn-pixel-danger-sm` 与 `.dna-card .idx-rail .idx` 覆盖。`ts-check` 持基线 10 错、`lint` 持基线 3 错、next build 通过，无新增回归。
 
-- **P1-6 / C-19 前端数据获取收敛（启动·样板）**：从 `modules/community/ui/follow-button.tsx` 抽出 `useFollow` hook（`use-follow.ts`），将组件内联的 2 处 BFF `fetch`（首屏拉取关注态 + POST 关注/取关）收敛进同目录 hook，套用既有 `useTopicActions` 的乐观更新+失败回滚范式；`FollowButton` 公开 props 不变（调用方 `community-topic-hero.tsx` 无感），组件仅保留 UI 与未登录跳转 `/login`。固化 C-19「组件→use-* hook→BFF fetch」统一模板，为后续批量迁移其余组件内直连 fetch 立样。`pnpm ts-check` 10 基线零新增。注：SSOT 命名的目标原语 `useApiRequest` 在当前代码库尚未存在，实为上述 hook 范式；是否新建共享 `useApiRequest` 原语列为后续 CP 待确认。
-
-- **P1-6 / C-19 前端数据获取收敛（收尾·共享原语 + 批量迁移）**：① 新建客户端共享原语 `src/shared/hooks/use-api-request.ts`（`apiRequest<T>(path, init?)` 薄封装：自动 JSON 序列化 body + Content-Type、统一错误提取对齐后端 camelCase `message`、网络异常兜底、不抛异常返回 `{ok,status,data,error}`；+ `useApiRequest<T>(path, options?)` hook 版带 data/error/loading 态与 `run()`/`immediate`）。与后端 `backend-client.ts`（`server-only`）互补——本文件为**客户端**原语。② 批量迁移 2 个组件的内联 fetch 进同目录 hook：`report-button.tsx`→`useReport`（POST `/api/community/reports`，401→`router.push('/login')`，错误归一至 `result.error`）；`announcement-banner.tsx`→`useAnnouncements`（GET `/api/announcements`，过滤本地 dismissed）。组件仅保留 UI/时序，调用方无感。③ 将三处 hook（`useFollow` GET `cache:'no-store'`+POST 乐观回滚 / `useReport` / `useAnnouncements`）的裸 `fetch` 全部收敛到 `apiRequest`，消除重复样板。④ `use-follow.test.ts` 6/6 通过（收敛后补 `mock` 的 `text()` 并放宽 GET 断言为 `objectContaining({method:'GET',cache:'no-store'})`，因 `apiRequest` 固定设 `method`）。`pnpm ts-check` 10 基线零新增。`useApiRequest` 原语已建成，后续其余 40+ 模块直连 fetch 可批量接入。
-
-- **P1-6 / C-19 批量迁移启动（架构收敛·抽 hook，2026-08-18 晚）**：用户选 **B 策略**（组件内联 fetch 仿 `useFollow` 抽专用 `use-*` hook，已是 `use-*` 的就地换 `apiRequest`）。建 10 域任务板（#15~#24，共 61 文件），推荐序列 notification-bell→community-*→admin-*→tools/*→auth/profile→events→about→workbench→shared-hooks→misc。首点 **notification-bell 已完成**：抽 `components/use-notification-bell.ts`（`useNotificationBell`），4 处裸 fetch（GET 未读数/列表 + POST 标记已读/全部已读，含乐观更新+回滚）收敛到 `apiRequest`；组件仅留 UI/`open`/outside-click，`TYPE_STYLES` 不变、`Notification` 类型 re-export（供 `user-menu` 消费）。`pnpm ts-check` 10 基线零新增。后续逐文件按序列推进，每步暂停确认。
-
-- **P1-6 / C-19 批量迁移（community-* 首文件·topics-manager）**：从 `modules/community/ui/topics-manager.tsx` 抽出 `useTopicsManager` hook（`use-topics-manager.ts`）。7 处裸 fetch 全收敛 `apiRequest`：2 列表/版块 GET（`/api/admin/community/community/categories`、`/api/admin/community/community/topics?...`，失败 `getError` 归一并降级空列表）+ 5 操作 POST/DELETE（hide/restore/pin/feature/硬删，经通用 `runAction` 包装：设 `busyIds`、错误归一至 `actionError`、成功后用 `lastQuery` ref 缓存的查询刷新列表）。组件保留筛选/排序/搜索/分页等视图态与 `confirm`/`window.prompt` 时序，仅作为 UI 壳（直接调用 `hideTopic`/`restoreTopic`/`togglePin`/`toggleFeature`/`deleteTopic`）。`pnpm ts-check` 10 基线零新增（已修复 3 处残留 `handleTogglePin`/`handleToggleFeature`/`handleRestore` 引用）。community-* 域下一文件按序待推。
-
-- **P1-6 / C-19 批量迁移（community-* 第二文件·categories-manager）**：从 `modules/community/ui/categories-manager.tsx` 抽出 `useCategoriesManager` hook（`use-categories-manager.ts`）。4 处裸 fetch 全收敛 `apiRequest`：1 列表 GET（`/api/admin/community/community/categories`，失败 `getError` 归一并降级空列表）+ 3 操作 POST/PUT/DELETE（新建/编辑/删除版块，body 自动 JSON 化、成功自动 `loadCategories` 刷新；删除失败落 hook 顶层 `error`，新建/编辑失败落组件表单级 `createError`/`editError` 以保留表单内联报错）。组件保留新建/编辑表单视图态（字段/`creating`/`savingEdit`/`editingId`）、字段校验与 `confirm` 时序，仅作 UI 壳（直接调用 `createCategory`/`updateCategory`/`deleteCategory`）。`pnpm ts-check` 10 基线零新增。community-* 域下一文件（users-manager）按序待推。
-
-- **P1-6 / C-19 批量迁移（community-* 第三文件·users-manager）**：从 `modules/community/ui/users-manager.tsx` 抽出 `useUsersManager` hook（`use-users-manager.ts`）。3 处裸 fetch 全收敛 `apiRequest`：1 列表 GET（`/api/admin/users?page&pageSize=20&search`，失败 `getError` 归一并降级空列表）+ 2 操作 POST（禁言/解禁，经通用 `runAction` 包装：设 `busyIds`、错误归一至 `actionError`、成功后用 `lastQuery` ref 缓存的查询刷新列表）。`AdminUserItem` 类型迁入 hook 并 re-export。`handleDisable` 保留 `confirm` 时序（禁言需二次确认，解禁免确认）。组件仅保留搜索/分页视图态，仅作 UI 壳（直接调用 `disableUser`/`enableUser`）。`pnpm ts-check` 10 基线零新增。community-* 域下一文件（announcements-manager）按序待推。
-
-- **P1-6 / C-19 批量迁移（community-* 第四文件·announcements-manager）**：从 `modules/community/ui/announcements-manager.tsx` 抽出 `useAnnouncementsManager` hook（`use-announcements-manager.ts`）。4 处裸 fetch 全收敛 `apiRequest`：1 列表 GET（`/api/admin/announcements`，失败 `getError` 归一并降级空列表）+ 3 操作（PATCH 启用/停用 `isActive`、DELETE 删除、POST 新建，新建成功由 hook 自动 `loadAnnouncements` 刷新、列表操作经 `runAction` 包装设 `busyIds`/`actionError` 并刷新）。`AnnouncementItem` 类型迁入 hook 并 re-export；`LEVEL_OPTIONS` 视图常量留组件（引用 `AnnouncementItem['level']`）。组件保留新建表单视图态（`showCreate`/`createForm`/`creating`/`createError`）、字段校验（`title` 必填）与 `confirm` 时序，仅作 UI 壳（直接调用 `toggleActive`/`deleteAnnouncement`/`createAnnouncement`）。`pnpm ts-check` 10 基线零新增。community-* 域下一文件（dashboard-manager）按序待推。
-
-- **P1-6 / C-19 批量迁移（community-* 第五文件·dashboard-manager）**：从 `modules/community/ui/dashboard-manager.tsx` 抽出 `useDashboardManager` hook（`use-dashboard-manager.ts`）。4 处裸 fetch（看板聚合，原 `Promise.all` + `.json()`）全收敛 `apiRequest`：`/api/admin/users?pageSize=1`、`/api/community/feed?stats=1`、`/api/admin/announcements`、`/api/admin/community/community/categories`；任一 `!ok` → 置 `error` + 空 `stats`（fail-fast，与列表面板一致；较原始"非 JSON 才 .catch"更显式，对看板合理）。`DashboardStats` 类型迁入 hook 并 re-export。组件仅作 UI 壳（渲染 `statCards`，仍用 `t`）。`pnpm ts-check` 10 基线零新增。community-* 域下一文件（reports-manager）按序待推。
-
-- **P1-6 / C-19 批量迁移（community-* 第六文件·reports-manager）**：从 `modules/community/ui/reports-manager.tsx` 抽出 `useReportsManager` hook（`use-reports-manager.ts`）。2 处裸 fetch 全收敛 `apiRequest`：1 列表 GET（`/api/admin/community/reports?status`，失败 `getError` 归一并降级空列表）+ 1 操作 POST（`/api/admin/community/reports/${id}?action=resolve|dismiss`，`tc('actionFailed')` 归一）。操作成功后**本地移除该行**（`setReports(prev => prev.filter(r => r.id !== id))`，保留原始「处理即从列表消失」行为，无需重拉）。`ReportRow`/`ReportStatusFilter` 类型迁入 hook 并 re-export；`REPORT_STATUS_FILTERS` 视图常量留组件。`handleAction` 保留 `confirm` 时序（resolve/dismiss 各带确认文案），组件仅作 UI 壳（直接调用 `resolveReport`/`dismissReport`）。`pnpm ts-check` 10 基线零新增。community-* manager 类面板至此全部完成（topics/categories/users/announcements/dashboard/reports），下一文件进入非 manager 组件序列（community-post-list）。
-
-- **P1-6 / C-19 批量迁移（community-* 收尾·8 非 manager 文件 + 共享原语增强）**：完成 community-* 域最后 8 个文件的收敛，全域清零（manager 类 6 + 非 manager 8 + notification-bell = 15 文件）。① **共享原语增强**（`src/shared/hooks/use-api-request.ts`）：`extractError` 同时读 `message` 与 `error`（兼容社区历史 `{error}` 端点，避免 server 错误消息被丢弃）；新增 `isRawBody` 检测，对 `FormData`/`Blob`/`URLSearchParams` body **原样透传、不 JSON 序列化、不强制 Content-Type**（支撑文件上传）。② 抽 hook（2）：`community-post-list.tsx`→`use-community-post-list.ts`（GET 列表，request-id ref 保竞态安全，复用原 `cancelled` 语义）；`community-profile-tab.tsx`→`use-profile-community-tab.ts`（topics/replies/favorites 三 sub-tab 加载+分页+切换）。③ 就地换 `apiRequest`（6）：`community-reply-item.tsx`（楼中楼点赞 POST，乐观更新+回滚保留）、`community-topic-edit-form.tsx`（PUT 保存）、`community-markdown-editor.tsx`（图片上传 FormData，借原语 raw body 支持）、`app/community/new/use-compose.ts`（me+categories 并行 GET + 发布 POST）、`app/community/use-community-feed.ts`（auth/me 探测 + tags/stats + 4 路并行侧边栏 + feed 主加载，401/行为语义全保留）、`app/community/drafts/page.tsx`（401 登录态探测，`status===0` 视为未登录，与原始 `.catch` 行为对齐）。每文件 `pnpm ts-check` 10 基线零新增；`community/ui` 与 `app/community` 两目录裸 `fetch(` grep 归零。community-* 域**全部完成**。
-
-- **P1-6 / C-19 批量迁移（#17~#24 全域收口·全部客户端裸 fetch 收敛完成）**：承接 community-* 收尾后按序推进剩余全部域，统一收敛到共享原语 `apiRequest`（`src/shared/hooks/use-api-request.ts`），策略 B（组件内联 fetch 抽专用 use-* hook；已是 use-* 的就地换 `apiRequest`）。逐域完成：① **admin-*（14）**——含 `admin-roles-panel.tsx` 6 处 fetch（GET roles/permissions + PUT 保存权限 + POST 创建 + PATCH 编辑 + DELETE 删除，401→login / 403→onForbidden / `error` 语义全保留）、`admin-logs-panel`（3）、`admin-messages-panel` / `admin-feature-visibility-panel`（各 1），并修复 #17 失败代理误改坏的 `use-user-list.ts`（`r` 变量与 API 结果重名致 TDZ，统一改名 `result`）；② **tools/*（11）**——`app/tools/exam/page.tsx`、`app/tools/exam/[id]/use-exam.ts`（GET 考试/题目 + GET auth/me + my-results + POST 提交）、`app/tools/dev-center/page.tsx`（auth/me 探测）、`app/tools/task/use-tasks.ts`（8 处 fetch 全换：claims / points / leaderboard / admin-claims / claim / 取消认领 / create / publish / review）；③ **auth-profile（7）**、**events（2）**、**about（1）**、**workbench（5，仅 loadConversations/openConversation 换、assistant-chat SSE 保留）**、**shared-hooks（3）**、**misc（3）**。每文件 `pnpm ts-check` 10 基线零新增；全局客户端裸 `fetch(` 仅余排除项（BFF `route.ts` / `server-only` `backend-client.ts` / 原语自身 / SWR 基础设施 `swr-provider`·`use-auth` / `assistant-chat` SSE 流式），C-19 客户端收敛彻底闭环。
+- **P1-6 / C-19 前端数据获取收敛（共享原语）**：新建客户端共享原语 `src/shared/hooks/use-api-request.ts`——`apiRequest<T>(path, init?)` 薄封装（自动 JSON 序列化 body + Content-Type、统一错误提取兼容 `message`/`error`、网络异常兜底、不抛异常返回 `{ok,status,data,error}`）+ `useApiRequest<T>(path, options?)` hook 版（data/error/loading 态 + `run()`/`immediate`）；新增 `isRawBody` 检测，对 `FormData`/`Blob`/`URLSearchParams` body 原样透传以支撑文件上传。与后端 `server-only` `backend-client.ts` 互补，构成全栈请求原语对。
+- **P1-6 / C-19 前端数据获取收敛（全域迁移·覆盖）**：按用户拍板的 **B 策略**（组件内联 fetch 仿 `useFollow` 抽专用 `use-*` hook；已是 `use-*` 的就地换 `apiRequest`）全域迁移，覆盖 community（15 文件：6 manager + 8 非 manager + notification-bell）/ admin-*（14）/ tools/*（11，含 exam/task/dev-center）/ auth-profile（7）/ events（2）/ about（1）/ workbench（5，仅非 SSE 部分）/ shared-hooks（3）/ misc（3），合计约 61 文件。每文件 `pnpm ts-check` 全程 10 基线零新增，调用方无感。
+- **P1-6 / C-19 前端数据获取收敛（闭环结论）**：客户端裸 `fetch(` 全域清零，仅余受控排除项（BFF `route.ts` / `server-only` `backend-client.ts` / 原语自身 / SWR 基础设施 `swr-provider`·`use-auth` / `assistant-chat` SSE 流式），C-19 客户端收敛彻底闭环。
 
 ---
 
@@ -131,15 +117,6 @@
 - **测试基础设施（ER-41/43）**：消除固定 id=1 依赖（新增 `admin_user` fixture，19 处硬编码 `1` 替换）；服务单测改真实 `__init__(db=mock_db)`（9 处 `Service.__new__()` 重构为 fixture）。
 - **架构快赢（ER-55/56）**：`config.py` 按域拆 6 子模型（database/security/web/rate_limit/ops/business），`Settings` 多继承保持 `settings.X` 扁平；`events.py` 复用模块级应急 loop 消除启动期反复 `asyncio.run`；`COMMUNITY_LIMITS`/`MENTION_PATTERN` 迁入 `constants.py` 单一来源。
 - **版本四源对齐 0.9.9（ER-10）**：pyproject / `__init__.__version__` / package.json / uv.lock 统一。
-
-### Fixed
-
-- **tags JSONB 过滤根因修复**：列类型 `JSON().with_variant(JSONB)` 时 `contains` 退化为字符串 `LIKE` 且实际调用抛 `invalid input syntax for type json`；统一 `type_coerce(列, JSONB).contains([tag])` 走 `@>`（5 处同源：community_repo.py:113 / community.py:121 / event_repo.py:36 / tools_repo.py:40 / tools_repo.py:235）。
-- **组件注册表 500**：`POST /api/v1/tools/component-registry` 误声明 `response_model=dict` 与返回 `ComponentItemOut` 不匹配，移除 `response_model` 后恢复（tools.py:606）。
-- **全量测试失败清零（2026-08-11，10 个全部定位修复）**：dependency_manifest cryptography 双源漂移、maintenance_tasks monkeypatch 目标、phase4 view_count 异步、rate_limit Redis 键跨运行残留、api/v1 分页断言补 `total_pages`、queue_worker 闭包 `Function.name` 对齐；终态 432 passed / 0 failed / 1 skipped。
-
-### Changed
-
 - **仓库死代码/死配置/临时文件清理（C-1~C-6，2026-08-17）**：前端 0 字节临时文件 `git rm --cached` + `_tmp_*` 忽略（C-1）；删后端 `.coverage.Mac.*` 残留（C-2）；删 `pyproject.toml` 死配置段 `[tool.basedpyright]`（C-3）；删前端死代码 `mail.ts` + `nodemailer`/`@types/nodemailer` 依赖 + 清理 `index.ts` 注释（C-5，F-A1）；删一次性 Alembic 修复脚本 `scripts/sync_alembic_version_ids.sql`（C-6，F-A2）；根仓 `be_err.txt` 等经核实不存在（C-4，CS-01）。
 - **依赖声明双轨收敛为 uv 单源（C-7，N-07/CS-05）**：`pyproject.toml`+`uv.lock` 为唯一来源，`requirements*` 六份由 `uv export` 重新生成；`pyproject` 增 dev extra；Makefile 加 `deps-export`；`test_dependency_manifest.py` 改验 `pyproject ⊆ uv.lock`。
 - **三份 .gitignore 公共段漂移补齐（C-8，N-04）**：根/后端/前端 `.gitignore` 补齐 `.devlogs/`/`.dev.pid`/`.trae-cn/`/`.workbuddy/`；新增 `scripts/check/check_gitignore_sync.py` + `make check-gitignore-sync`（正/负向测试通过）。
@@ -147,6 +124,12 @@
 - **三份 .env.example 职责矩阵（C-10，N-14）**：17 组变量职责矩阵入 `RootDoc-EngConv.md` §5.1（含前端遗留变量说明）。
 - **文档地图与状态修正（C-11/C-12/C-13，F-*）**：孤儿调研文档 `docs/公共组件调研报告.md` 登记入 `docs/README.md` 文档地图（C-11，F-B1）；社区重构文档 `BackDoc-Refactor-CommunityService.md` 状态改"已完成"+§8 排期+测试路径修正+索引同步（C-12，F-8/F-B3）；历史分卷 `项目演变历史-0.9.5/0.9.6/0.9.7.md` 合并为 `项目演变历史-0.9.5~0.9.7.md` 并删三卷、同步索引（C-13，F-B2）。
 - **前端 CHANGELOG 补 0.9.9 锚点（C-14，F-4 关联）**：`CS-Web-Frontend/CHANGELOG.md` 补 `[0.9.9]` 段+链接+header 边界说明（权威以根仓 CHANGELOG 为准）。
+
+### Fixed
+
+- **tags JSONB 过滤根因修复**：列类型 `JSON().with_variant(JSONB)` 时 `contains` 退化为字符串 `LIKE` 且实际调用抛 `invalid input syntax for type json`；统一 `type_coerce(列, JSONB).contains([tag])` 走 `@>`（5 处同源：community_repo.py:113 / community.py:121 / event_repo.py:36 / tools_repo.py:40 / tools_repo.py:235）。
+- **组件注册表 500**：`POST /api/v1/tools/component-registry` 误声明 `response_model=dict` 与返回 `ComponentItemOut` 不匹配，移除 `response_model` 后恢复（tools.py:606）。
+- **全量测试失败清零（2026-08-11，10 个全部定位修复）**：dependency_manifest cryptography 双源漂移、maintenance_tasks monkeypatch 目标、phase4 view_count 异步、rate_limit Redis 键跨运行残留、api/v1 分页断言补 `total_pages`、queue_worker 闭包 `Function.name` 对齐；终态 432 passed / 0 failed / 1 skipped。
 
 ### Docs
 

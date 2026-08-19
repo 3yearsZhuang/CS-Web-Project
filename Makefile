@@ -119,7 +119,7 @@ status:
 
 # ---- 自检聚合入口（按功能分组）----
 # make check              跑全部自检（契约 + 文档 + 前端边界 + 版本 + gitignore）
-# make check-contract     仅契约（基线生成 + 比对）
+# make check-contract     仅契约比对（基线更新走显式 make contract-baseline）
 # make check-docs         仅文档死链
 # make check-fe-boundary  仅 BFF 安全边界
 # make check-version-group 仅版本四源一致
@@ -129,7 +129,7 @@ check: check-contract check-docs check-fe-boundary check-version-group check-git
 	@echo ">>> 全部自检通过 ✅"
 
 # 契约类（G3：API 契约冻结）
-check-contract: contract-baseline contract-check
+check-contract: contract-check
 
 # 文档类（ER-09：死链审计）
 check-docs: check-docs-links
