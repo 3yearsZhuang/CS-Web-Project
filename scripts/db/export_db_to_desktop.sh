@@ -3,8 +3,8 @@
 # export_db_to_desktop.sh —— 根级：导出开发环境 PostgreSQL 备份到用户桌面
 #
 # 用法：
-#   ./scripts/export_db_to_desktop.sh                  # 默认导出到 ~/Desktop
-#   ./scripts/export_db_to_desktop.sh /自定义/目录      # 指定输出目录
+#   ./scripts/db/export_db_to_desktop.sh                  # 默认导出到 ~/Desktop
+#   ./scripts/db/export_db_to_desktop.sh /自定义/目录      # 指定输出目录
 #
 # 说明：
 #   - 复用 CS-Web-Backend/tools/scripts/backup_db.sh 的备份逻辑（pg_dump 自定义格式 + gzip）。
@@ -21,7 +21,7 @@ set -euo pipefail
 
 # ---- 路径定位 ----
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 ENV_FILE="${REPO_ROOT}/.env"
 
 # ---- 加载环境变量（根 .env）----

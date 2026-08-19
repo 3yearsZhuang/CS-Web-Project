@@ -3,10 +3,10 @@
 # healthcheck.sh —— 根级：定时自检脚本
 #
 # 用法：
-#   ./scripts/healthcheck.sh                 # 执行全部检查，失败项输出红色，全部通过 exit 0
-#   ./scripts/healthcheck.sh --quiet         # 只输出异常项（用于 cron 静默运行）
-#   ./scripts/healthcheck.sh --json          # 以 JSON 格式输出检查结果
-#   ./scripts/healthcheck.sh --only disk,bak # 仅运行指定检查项（逗号分隔）
+#   ./scripts/db/healthcheck.sh                # 执行全部检查，失败项输出红色，全部通过 exit 0
+#   ./scripts/db/healthcheck.sh --quiet        # 只输出异常项（用于 cron 静默运行）
+#   ./scripts/db/healthcheck.sh --json         # 以 JSON 格式输出检查结果
+#   ./scripts/db/healthcheck.sh --only disk,bak # 仅运行指定检查项（逗号分隔）
 #
 # 检查项（对齐 RootDoc-Deploy.md §七 告警规则）：
 #   container  所有 compose 服务容器状态为 Up/healthy
@@ -17,7 +17,7 @@
 #   logerr     最近 1 小时 ERROR 日志数量与摘要
 #
 # 使用场景：
-#   1. 手动巡检：./scripts/healthcheck.sh
+#   1. 手动巡检：./scripts/db/healthcheck.sh
 #   2. 定时自检：加入宿主机 crontab 或 compose sidecar
 #   3. 告警触发：有失败项时 exit 非 0，配合 cron MAILTO/外部告警
 # =============================================================================
@@ -26,8 +26,12 @@ set -uo pipefail
 
 # ---- 配置 ----
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMPOSE_FILE="$PROJECT_ROOT/docker-compose.yml"
+
+# ---- 共享健康探测（lib/health-probe.sh）----
+# shellcheck source=lib/health-probe.sh
+source "$SCRIPT_DIR/lib/health-probe.sh"
 
 # 阈值
 DISK_USAGE_THRESHOLD=85       # 磁盘使用率告警阈值 %
@@ -139,11 +143,9 @@ check_health() {
 
   local failed=()
 
-  # 后端 /health（经 compose 网络，通过宿主机 curl 容器内部需要端口映射；后端 compose 用了 expose，不映射宿主。
-  # 改用 docker compose exec 在容器内打 127.0.0.1 —— 与 update.sh 保持一致）
+  # 后端 /health（容器内探测，见 lib/health-probe.sh —— 与 update.sh 共用）
   if docker compose -f "$COMPOSE_FILE" ps backend | grep -q "Up"; then
-    if docker compose -f "$COMPOSE_FILE" exec -T backend python -c \
-      "import urllib.request,sys; r=urllib.request.urlopen('http://127.0.0.1:8000/health',timeout=$HEALTH_CONNECT_TIMEOUT); sys.exit(0 if r.status==200 else 1)" 2>/dev/null; then
+    if probe_backend_health "$COMPOSE_FILE" "$HEALTH_CONNECT_TIMEOUT"; then
       ok "backend /health → 200"
     else
       fail "backend /health 失败"
@@ -165,10 +167,9 @@ check_health() {
     fi
   fi
 
-  # 前端 /api/health（转发后端 /health）
+  # 前端 /api/health（容器内探测，转发后端 /health，见 lib/health-probe.sh）
   if docker compose -f "$COMPOSE_FILE" ps cs-website | grep -q "Up"; then
-    if docker compose -f "$COMPOSE_FILE" exec -T cs-website sh -c \
-      "curl -sf -m $HEALTH_CONNECT_TIMEOUT http://127.0.0.1:2333/api/health >/dev/null" 2>/dev/null; then
+    if probe_frontend_health "$COMPOSE_FILE" "$HEALTH_CONNECT_TIMEOUT"; then
       ok "frontend /api/health → 200"
     else
       fail "frontend /api/health 失败（BFF→后端链路不通？）"
