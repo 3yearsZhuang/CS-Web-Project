@@ -349,6 +349,6 @@ OTEL_SERVICE_NAME=cs-web-backend
 
 ## 九、信息缺口声明（1.0.1）
 
-- **`.env.example` 未列出 `LLM_*` 变量**：后端 `CS-Web-Backend/app/core/config.py` 已定义 `LLM_PROVIDER/LLM_API_KEY/LLM_BASE_URL/LLM_MODEL/LLM_TIMEOUT/LLM_MAX_TOKENS/LLM_DAILY_BUDGET`，默认 `LLM_PROVIDER=none` 即可运行；如要求示例值显式化，需补 `.env.example`（超出本文档范围，标记待办）。
+- **`.env.example` 未列出 `LLM_*` 变量**：需显式化模板（汇入 `docs/项目待办v2.md` W-1）。
 - **运行环境版本以代码为准**：Node>=22 / Python>=3.13 取自 `package.json` 与 `pyproject.toml`，后续升级须同步本文 §2.1。
 - **迁移 head 以 `CS-Web-Backend/alembic` 实际链为准**：现行 Alembic head 已推进（最新含 `e5f6a7b8c9d0`，详见 `docs/RootDoc-MigEval.md` §七），本文不重复迁移细节。
