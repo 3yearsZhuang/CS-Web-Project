@@ -3946,6 +3946,87 @@
         "title": "RoleUpdate",
         "type": "object"
       },
+      "SearchGroup": {
+        "description": "单个范围的搜索结果组。",
+        "properties": {
+          "items": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/SearchResultItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "title": "SearchGroup",
+        "type": "object"
+      },
+      "SearchResponse": {
+        "description": "全站搜索聚合响应。",
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "results": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SearchGroup"
+            },
+            "title": "Results",
+            "type": "object"
+          },
+          "scope": {
+            "title": "Scope",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query",
+          "scope",
+          "results"
+        ],
+        "title": "SearchResponse",
+        "type": "object"
+      },
+      "SearchResultItem": {
+        "description": "统一搜索结果项：type / id / title / subtitle / url。",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "subtitle": {
+            "default": "",
+            "title": "Subtitle",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "url": {
+            "default": "",
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "title"
+        ],
+        "title": "SearchResultItem",
+        "type": "object"
+      },
       "SendCodeRequest": {
         "description": "发送邮箱验证码。",
         "properties": {
@@ -5079,23 +5160,69 @@
             }
           },
           {
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
+              "description": "跳过的记录数（与 page 互斥）",
+              "minimum": 0,
               "title": "Skip",
               "type": "integer"
             }
           },
           {
+            "description": "每页返回的最大记录数",
             "in": "query",
             "name": "limit",
             "required": false,
             "schema": {
-              "default": 20,
+              "default": 100,
+              "description": "每页返回的最大记录数",
+              "maximum": 500,
+              "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -5290,23 +5417,69 @@
             }
           },
           {
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
+              "description": "跳过的记录数（与 page 互斥）",
+              "minimum": 0,
               "title": "Skip",
               "type": "integer"
             }
           },
           {
+            "description": "每页返回的最大记录数",
             "in": "query",
             "name": "limit",
             "required": false,
             "schema": {
-              "default": 50,
+              "default": 100,
+              "description": "每页返回的最大记录数",
+              "maximum": 500,
+              "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -9508,23 +9681,69 @@
             }
           },
           {
+            "description": "跳过的记录数（与 page 互斥）",
             "in": "query",
-            "name": "page",
+            "name": "skip",
             "required": false,
             "schema": {
-              "default": 1,
-              "title": "Page",
+              "default": 0,
+              "description": "跳过的记录数（与 page 互斥）",
+              "minimum": 0,
+              "title": "Skip",
               "type": "integer"
             }
           },
           {
+            "description": "每页返回的最大记录数",
             "in": "query",
-            "name": "pageSize",
+            "name": "limit",
             "required": false,
             "schema": {
-              "default": 20,
-              "title": "Pagesize",
+              "default": 100,
+              "description": "每页返回的最大记录数",
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
             }
           }
         ],
@@ -13472,6 +13691,80 @@
         "summary": "Assign Role To User",
         "tags": [
           "RBAC权限管理"
+        ]
+      }
+    },
+    "/api/v1/search": {
+      "get": {
+        "description": "全站聚合搜索：hero 页传 scope=all；模块页传对应单 scope。",
+        "operationId": "global_search_api_v1_search_get",
+        "parameters": [
+          {
+            "description": "搜索关键词",
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "description": "搜索关键词",
+              "maxLength": 80,
+              "minLength": 1,
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "description": "搜索范围",
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "description": "搜索范围",
+              "title": "Scope",
+              "type": "string"
+            }
+          },
+          {
+            "description": "每类返回条数",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 5,
+              "description": "每类返回条数",
+              "maximum": 10,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Global Search",
+        "tags": [
+          "搜索",
+          "搜索"
         ]
       }
     },
