@@ -6,7 +6,7 @@
 > 最后更新：2026-08-09（收敛为项目专属方法论，补齐「方法论 ↔ 规范」引用桥）
 > 覆盖：前端目录 / 组件分层 / 复用阈值 / 样式法则 / 接入仪式 / 协作约束
 
-**权威位置**：本文档是「本项目前端目录 / 架构方法论」的唯一权威。架构事实见 [`FrontDoc-01-Arch.md`](../CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md)，编码规范见 [`FrontDoc-Conv.md`](../CS-Web-Frontend/tools/docs/FrontDoc-Conv.md)，视觉与交互规范见 [`FrontDoc-UID.md`](../CS-Web-Frontend/tools/docs/FrontDoc-UID.md)，通用工程规范见 [`RootDoc-EngConv.md`](RootDoc-EngConv.md)。
+**权威位置**：本文档是「本项目前端目录 / 架构方法论」的唯一权威。架构事实见 [`FrontDoc-01-Arch.md`](../CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md)，编码规范见 [`FrontDoc-03-Conv.md`](../CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md)，视觉与交互规范见 [`FrontDoc-UID.md`](../CS-Web-Frontend/tools/docs/FrontDoc-UID.md)，通用工程规范见 [`RootDoc-EngConv.md`](RootDoc-EngConv.md)。
 
 ---
 

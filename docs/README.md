@@ -17,15 +17,16 @@
 | [api-reference.html](api-reference.html) | API 参考（ReDoc 查看器，由 `openapi.baseline.json` 经 `make gen-api-docs` 生成，请勿手改；入口说明见 [api-reference.md](api-reference.md)） |
 | [项目待办事项-优先级重排.md](项目待办事项-优先级重排.md) | 项目待办 / 进行中事项 + ADR 待评估项存放处（与 `RootDoc-ADR.md` 索引联动；2026-08-18 起原 `项目待办事项.md` 并入本文件） |
 | [DocGovernance.md](DocGovernance.md) | 文档治理规范（三层架构 + 所有权矩阵 + 反模式清单，SSOT 规则） |
-| [公共组件调研报告.md](公共组件调研报告.md) | 前后端公共组件调研（2026-08-12：组件库 / 共享层位置与清单，参考 / 调研类） |
-| [模块命名映射表.md](模块命名映射表.md) | 三端业务模块 ↔ API 契约映射 SSOT（2026-08-19：命名规范 / 三端落点 / 门禁 / 违约点红线 / 变更记录，配套 `make check-module-naming`） |
+| [RootDoc-ModuleMap.md](RootDoc-ModuleMap.md) | 三端业务模块 ↔ API 契约映射 SSOT（2026-08-19：命名规范 / 三端落点 / 门禁 / 违约点红线 / 变更记录，配套 `make check-module-naming`；2026-08-20 由 `模块命名映射表.md` 改名） |
+| [RootDoc-ICP-Filing.md](RootDoc-ICP-Filing.md) | ICP 备案填报信息（原 `.codebuddy/` 迁入，2026-08-20：服务内容描述 / 基本信息表 / 填报指引） |
+| [RootDoc-DocHealth.md](RootDoc-DocHealth.md) | 文档结构健康诊断与合并方案（2026-08-20：重复/过度引用/分散/失准 四维取证 + 逆向目标结构 + P0~P3 合并瘦身清单；含原 DocEval/DupAudit 结论） |
 
 ## 子仓库文档索引（原地保留，非迁移）
 
 | 仓库 | 入口 | 内容 |
 |---|---|---|
-| `CS-Web-Backend/tools/docs/` | [README.md](../CS-Web-Backend/tools/docs/README.md) | 后端 FastAPI 文档索引：`BackDoc-01-Arch.md`（架构 + 业务模块契约 Part B）、`BackDoc-02-Sec.md`（安全）、`BackDoc-Conv.md`（工程约定）、`BackDoc-Infra.md`（基础设施） |
-| `CS-Web-Frontend/tools/docs/` | [README.md](../CS-Web-Frontend/tools/docs/README.md) | 前端文档：`FrontDoc-01-Arch.md`（架构 + 业务模块契约 Part B + 前后端联动）、`FrontDoc-Conv.md`（编码规范，对标后端 BackDoc-Conv.md）、`FrontDoc-02-Sec.md`（安全）、`FrontDoc-UID.md`（UI 设计规范 + Markdown 编辑器 §14）、`FrontDoc-Ops.md`（运维）、`FrontDoc-i18n.md`（国际化迁移指南） |
+| `CS-Web-Backend/tools/docs/` | [README.md](../CS-Web-Backend/tools/docs/README.md) | 后端 FastAPI 文档索引：`BackDoc-01-Arch.md`（架构 + 业务模块契约 Part B）、`BackDoc-02-Sec.md`（安全）、`BackDoc-03-Conv.md`（工程约定）、`BackDoc-Infra.md`（基础设施） |
+| `CS-Web-Frontend/tools/docs/` | [README.md](../CS-Web-Frontend/tools/docs/README.md) | 前端文档：`FrontDoc-01-Arch.md`（架构 + 业务模块契约 Part B + 前后端联动）、`FrontDoc-03-Conv.md`（编码规范，对标后端 BackDoc-03-Conv.md）、`FrontDoc-02-Sec.md`（安全）、`FrontDoc-UID.md`（UI 设计规范 + Markdown 编辑器 §14）、`FrontDoc-Ops.md`（运维）、`FrontDoc-i18n.md`（国际化迁移指南） |
 | `CS-Mobile/tools/docs/` | [README.md](../CS-Mobile/tools/docs/README.md) | 移动端文档：uni-app 单码双端架构/构建、ApiClient 薄层与 token 安全存储、U-02~U-04 依赖；`arch/` 归档 7 份移动端架构方案（高层架构/系统设计/UserStory/部署/安全/调研/资料摘要，G1~G5 审核通过，唯一权威） |
 
 ---

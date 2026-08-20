@@ -1,8 +1,8 @@
 # 全栈部署 / 运维（RootDoc-Deploy）
 
 > 更新人：3yearsZ
-> 最后更新：2026-08-08（补充 0.9.8 部署要点：可选 LLM_* 环境变量与 Auxilio 降级、/health 健康检查端点、Node>=22 / Python>=3.13 运行环境、docker-compose 子仓库(submodule) 构建上下文）
-> 对应版本：0.9.8（后端 `CS-Web-Backend/app/__init__.py` `__version__ = "0.9.8"`）。部署文档权威基线，端侧细节见深链接。
+> 最后更新：2026-08-20（版本锚定由 0.9.8 更新为 1.0.1；部署要点含可选 LLM_* 环境变量与 Auxilio 降级、/health 健康检查端点、Node>=22 / Python>=3.13 运行环境、docker-compose 子仓库(submodule) 构建上下文）
+> 对应版本：1.0.1（后端 `CS-Web-Backend/app/__init__.py` `__version__ = "1.0.1"`）。部署文档权威基线，端侧细节见深链接。
 > 根级编排层的部署唯一权威。覆盖：本地开发并行启动、容器化全栈部署（db+backend+redis+worker+frontend）、回滚、数据卷与备份。
 > 深链接（各端专项，勿在此重复）：前端 `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md`（Docker/外部反向代理/SLO/Runbook）、后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md`（运维端点 `/health /readyz /metrics/json /status`）。跨端 SLO 与可观测性基线见本文 **§七**。
 
@@ -39,9 +39,9 @@
 | `NEXT_PUBLIC_SITE_URL` | 站点 URL | 生产 ✅ |
 | `TRUST_PROXY` | 是否信任反向代理头（默认 `false`；外部反代配置后设为 `true`） | 按部署方式 |
 
-> 本地覆盖用不跟踪的 `.env.local`；后端开发模板 `.env.development`（最全参考样板），见后端 `CS-Web-Backend/tools/docs/BackDoc-Conv.md` §7。
+> 本地覆盖用不跟踪的 `.env.local`；后端开发模板 `.env.development`（最全参考样板），见后端 `CS-Web-Backend/tools/docs/BackDoc-03-Conv.md` §7。
 
-### 2.1 运行环境要求（0.9.8）
+### 2.1 运行环境要求（1.0.1）
 
 | 组件 | 最低版本 | 依据 |
 |------|----------|------|
@@ -50,7 +50,7 @@
 
 > 低于上述版本会导致前端依赖解析失败或后端镜像构建失败，部署前须确认本地与 CI 环境达标。
 
-### 2.2 可选环境变量：LLM 学习助手（Auxilio，0.9.8 新增）
+### 2.2 可选环境变量：LLM 学习助手（Auxilio，1.0.1 纳入）
 
 Auxilio 为内置学习助手 Agent；其 LLM 能力通过以下可选变量开启，**未配置时 `LLM_PROVIDER` 默认 `none`，Auxilio 自动降级为纯规则推荐模式（不调用任何外部模型，不影响其他功能）**：
 
@@ -347,8 +347,8 @@ OTEL_SERVICE_NAME=cs-web-backend
 
 ---
 
-## 九、信息缺口声明（0.9.8）
+## 九、信息缺口声明（1.0.1）
 
 - **`.env.example` 未列出 `LLM_*` 变量**：后端 `CS-Web-Backend/app/core/config.py` 已定义 `LLM_PROVIDER/LLM_API_KEY/LLM_BASE_URL/LLM_MODEL/LLM_TIMEOUT/LLM_MAX_TOKENS/LLM_DAILY_BUDGET`，默认 `LLM_PROVIDER=none` 即可运行；如要求示例值显式化，需补 `.env.example`（超出本文档范围，标记待办）。
 - **运行环境版本以代码为准**：Node>=22 / Python>=3.13 取自 `package.json` 与 `pyproject.toml`，后续升级须同步本文 §2.1。
-- **迁移 head 以 `CS-Web-Backend/alembic` 实际链为准**：现行 Alembic head 为 `d3e4f5a6b7c8`（详见 `docs/RootDoc-MigEval.md` §七），本文不重复迁移细节。
+- **迁移 head 以 `CS-Web-Backend/alembic` 实际链为准**：现行 Alembic head 已推进（最新含 `e5f6a7b8c9d0`，详见 `docs/RootDoc-MigEval.md` §七），本文不重复迁移细节。

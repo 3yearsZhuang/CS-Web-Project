@@ -7,7 +7,7 @@
 
 ## 0. 当前真实进度（先读这一段，避免被"目标态"误导）
 
-截至 2026-08-07，项目处于 **0.9.8 → 1.0.0 准备期**。请务必区分"真实态"与"目标态"：
+截至 2026-08-20，项目处于 **1.0.1 · 七夕（2026-08-19 发布）**。请务必区分"真实态"与"目标态"：
 
 | 维度 | 真实态（当前代码） | 目标态（1.0.0 计划） |
 |---|---|---|
@@ -186,20 +186,20 @@ make logs          # 跟踪日志
 ### 6.5 API 调用统计（api-usage）— 部分就绪
 
 - 后端 `/api/workbench/stats/api-usage` 与前端 BFF `/api/workbench/stats/api-usage` 路由、以及 i18n 词条（`apiUsage*`）均已就绪。
-- **截至 0.9.8，该卡片尚未在 `widget-registry.ts` 的 `WIDGETS` 中注册**，工作台暂不可见；如需开放需先在 registry 登记对应 widget（见 `CS-Web-Frontend/src/modules/workbench/README.md`）。[待填写：确认 api-usage-stats widget 是否计划随 1.0.0 一并注册]
+- **截至 1.0.1，该卡片尚未在 `widget-registry.ts` 的 `WIDGETS` 中注册**（2026-08-20 核对源码确认），工作台暂不可见；如需开放需先在 registry 登记对应 widget（见 `CS-Web-Frontend/src/modules/workbench/README.md`）。
 
 ---
 
 # 附录 A：前端工程规则
 
-> Source of truth（聚合入口）：本附录为新人聚合入口。**禁止事项**权威为前端 `FrontDoc-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 视觉侧）/ 根 `RootDoc-EngConv.md §二`（通用红线）；模块协作契约、ADR 编号规则、文档维护 lifecycle 为本附录专属权威；编码规范细则见 `FrontDoc-Conv.md`。本附录不复述禁止事项列表。
+> Source of truth（聚合入口）：本附录为新人聚合入口。**禁止事项**权威为前端 `FrontDoc-03-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 视觉侧）/ 根 `RootDoc-EngConv.md §二`（通用红线）；模块协作契约、ADR 编号规则、文档维护 lifecycle 为本附录专属权威；编码规范细则见 `FrontDoc-03-Conv.md`。本附录不复述禁止事项列表。
 > 变更触发：新增移除依赖、模块结构调整、ADR 新增、文档结构变更、新增安全/工程发现。
-> **边界说明**：本附录为面向新人的**聚合文档**——对「ADR 编号、文档维护 lifecycle」等本附录专属项，本附录是权威；**禁止事项**权威为 `FrontDoc-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 视觉侧）/ 根 `RootDoc-EngConv.md §二`（通用红线），本附录 A.1 仅为入口指针；对**通用/端侧编码细则**（命名、DRY、圈复杂度、分层、迁移等），权威分别为根 `docs/RootDoc-EngConv.md`、后端 `CS-Web-Backend/tools/docs/BackDoc-01-Arch.md`（Part B 模块契约）、前端 `CS-Web-Frontend/tools/docs/FrontDoc-Conv.md`（编码规范）、`FrontDoc-01-Arch.md`（Part B 模块契约与前后端联动）与 `FrontDoc-UID.md`（UI 规范）；**模块协作契约**（模块职责 / 边界 / 前后端联动）权威为前端 `FrontDoc-01-Arch.md` Part B。本附录不重复展开，冲突时以对应权威文件为准。
+> **边界说明**：本附录为面向新人的**聚合文档**——对「ADR 编号、文档维护 lifecycle」等本附录专属项，本附录是权威；**禁止事项**权威为 `FrontDoc-03-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 视觉侧）/ 根 `RootDoc-EngConv.md §二`（通用红线），本附录 A.1 仅为入口指针；对**通用/端侧编码细则**（命名、DRY、圈复杂度、分层、迁移等），权威分别为根 `docs/RootDoc-EngConv.md`、后端 `CS-Web-Backend/tools/docs/BackDoc-01-Arch.md`（Part B 模块契约）、前端 `CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md`（编码规范）、`FrontDoc-01-Arch.md`（Part B 模块契约与前后端联动）与 `FrontDoc-UID.md`（UI 规范）；**模块协作契约**（模块职责 / 边界 / 前后端联动）权威为前端 `FrontDoc-01-Arch.md` Part B。本附录不重复展开，冲突时以对应权威文件为准。
 
 ## A.1 禁止事项（入口指针）
 
 > ⚠️ 本附录**不再复述**禁止事项列表（单一权威见下方）。按类别查对应权威：
-> - **前端编码侧禁止项**（react-dev-inspector / Vite / 跨模块 server import / types 运行时依赖 / 循环依赖 / 组件直连后端等）→ 前端专项规范 [`FrontDoc-Conv.md §12`](../CS-Web-Frontend/tools/docs/FrontDoc-Conv.md#12-禁止事项汇总)。
+> - **前端编码侧禁止项**（react-dev-inspector / Vite / 跨模块 server import / types 运行时依赖 / 循环依赖 / 组件直连后端等）→ 前端专项规范 [`FrontDoc-03-Conv.md §12`](../CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md#12-禁止事项汇总)。
 > - **UI 视觉侧禁止项**（硬编码颜色、默认阴影、发光、白名单外圆角、ease-in-out、渐变等）→ [`FrontDoc-UID.md §11`](../CS-Web-Frontend/tools/docs/FrontDoc-UID.md#11-ui-专属禁止清单)。
 > - **通用工程红线**（硬编码、魔法值、空 catch、密钥明文等）→ 根 [`RootDoc-EngConv.md §二`](./RootDoc-EngConv.md#二代码质量红线)。
 >
@@ -226,21 +226,21 @@ make logs          # 跟踪日志
 
 ## A.5 文档维护流程
 
-- 每个系统维度有且仅有一个权威位置（Source-of-Truth 无重复规则）：禁止事项→前端 `FrontDoc-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 侧）/ 根 `RootDoc-EngConv.md §二`（通用）；ADR→`RootDoc-ADR.md`（索引/速查，L0 SSOT）/ 根 `CHANGELOG.md`（完整记录）/ `项目待办事项-优先级重排.md`（待评估）；风险→根 `CHANGELOG.md` R 表；依赖矩阵→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` 2.3；安全发现→`CS-Web-Frontend/tools/docs/FrontDoc-02-Sec.md`；API 契约→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part B（模块组织视图，原始契约以 `docs/api-reference.md` 为准）；环境变量→`CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part A。
+- 每个系统维度有且仅有一个权威位置（Source-of-Truth 无重复规则）：禁止事项→前端 `FrontDoc-03-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 侧）/ 根 `RootDoc-EngConv.md §二`（通用）；ADR→`RootDoc-ADR.md`（索引/速查，L0 SSOT）/ 根 `CHANGELOG.md`（完整记录）/ `项目待办事项-优先级重排.md`（待评估）；风险→根 `CHANGELOG.md` R 表；依赖矩阵→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` 2.3；安全发现→`CS-Web-Frontend/tools/docs/FrontDoc-02-Sec.md`；API 契约→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part B（模块组织视图，原始契约以 `docs/api-reference.md` 为准）；环境变量→`CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part A。
 - 变更同步检查清单（PR 自检模板）：
   - [ ] `pnpm run ts-check` 通过
   - [ ] 调目录结构 → `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part A
   - [ ] 新增/修改 API → `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part B
   - [ ] 新增管理员权限 → `CS-Web-Frontend/tools/docs/FrontDoc-02-Sec.md` Part 2
   - [ ] 架构决策 → L0 SSOT [`RootDoc-ADR.md`](RootDoc-ADR.md)（索引/速查）；完整记录见根 `CHANGELOG.md`、待评估项见 `项目待办事项-优先级重排.md`
-  - [ ] 新增禁止事项 → `FrontDoc-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 侧）
-  - [ ] 新增页面/组件 → `CS-Web-Frontend/tools/docs/FrontDoc-UID.md`（视觉）+ `FrontDoc-Conv.md`（编码规范）
+  - [ ] 新增禁止事项 → `FrontDoc-03-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 侧）
+  - [ ] 新增页面/组件 → `CS-Web-Frontend/tools/docs/FrontDoc-UID.md`（视觉）+ `FrontDoc-03-Conv.md`（编码规范）
   - [ ] 新增环境变量 → `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part A + `README.md` 环境变量表
   - [ ] 修 bug → 立即 grep 同模式跨模块扫描，审计结果写入 ADR「审计确认安全」清单（防再犯 #6）
 
 ## A.6 编码规范补充（入口指针）
 
-> ⚠️ 前端**编码规范细则**（文件命名 `kebab-case`、导入顺序、server-only 边界、React Compiler 红线、样式令牌、widget 注册表、i18n 等）的唯一权威位置为前端专项规范 [`FrontDoc-Conv.md`](../CS-Web-Frontend/tools/docs/FrontDoc-Conv.md)（§2 命名、§10 server-only 边界等）。本附录作为新人入口，不重复展开，冲突以该专项规范为准。
+> ⚠️ 前端**编码规范细则**（文件命名 `kebab-case`、导入顺序、server-only 边界、React Compiler 红线、样式令牌、widget 注册表、i18n 等）的唯一权威位置为前端专项规范 [`FrontDoc-03-Conv.md`](../CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md)（§2 命名、§10 server-only 边界等）。本附录作为新人入口，不重复展开，冲突以该专项规范为准。
 
 ## A.7 防再犯清单（explanation）
 
@@ -260,7 +260,7 @@ make logs          # 跟踪日志
 
 # 附录 B：后端工程约定
 
-> 完整架构 / 编码规范 / 业务模块见 `CS-Web-Backend/tools/docs/` 下的 `BackDoc-01-Arch.md`（Part A 架构 + Part B 业务模块）/ `BackDoc-Conv.md`。此处仅保留"必须守住的不变量"与"加一个 API 资源"配方。
+> 完整架构 / 编码规范 / 业务模块见 `CS-Web-Backend/tools/docs/` 下的 `BackDoc-01-Arch.md`（Part A 架构 + Part B 业务模块）/ `BackDoc-03-Conv.md`。此处仅保留"必须守住的不变量"与"加一个 API 资源"配方。
 
 ## B.1 必须守住的不变量（速览）
 

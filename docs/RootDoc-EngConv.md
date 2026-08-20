@@ -2,11 +2,11 @@
 
 > 更新人：3yearsZ
 > 最后更新：2026-08-05（统一 RootDoc 命名）
-> 从后端 `CS-Web-Backend/tools/docs/BackDoc-Conv.md` 与前端 `../CS-Web-Frontend/tools/docs/FrontDoc-UID.md` 提炼的**框架无关**通用原则。
+> 从后端 `CS-Web-Backend/tools/docs/BackDoc-03-Conv.md` 与前端 `../CS-Web-Frontend/tools/docs/FrontDoc-UID.md` 提炼的**框架无关**通用原则。
 > 本项目（FztbuCS-Project）内的 Python/FastAPI 与 TypeScript/Next.js 代码均适用。
 > 端侧强相关的完整规范仍以各子仓库为权威（见文末深链接），此处只收通用原则，避免重复漂移。
 >
-> **约定类文档边界**：通用（两端共用）规范以本文件为权威；**后端专项**约定见 `CS-Web-Backend/tools/docs/BackDoc-Conv.md`；**前端专项**约定见 `../CS-Web-Frontend/tools/docs/FrontDoc-Conv.md`（编码规范）、`FrontDoc-01-Arch.md`（架构与约定）与 `FrontDoc-UID.md`（UI 规范）；`docs/Onboarding.md` 附录 A 为面向新人的**聚合摘要（非权威）**，细则一律指回上述权威文件。约定文件与聚合摘要出现冲突时，以各自的权威文件为准。
+> **约定类文档边界**：通用（两端共用）规范以本文件为权威；**后端专项**约定见 `CS-Web-Backend/tools/docs/BackDoc-03-Conv.md`；**前端专项**约定见 `../CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md`（编码规范）、`FrontDoc-01-Arch.md`（架构与约定）与 `FrontDoc-UID.md`（UI 规范）；`docs/Onboarding.md` 附录 A 为面向新人的**聚合摘要（非权威）**，细则一律指回上述权威文件。约定文件与聚合摘要出现冲突时，以各自的权威文件为准。
 
 ---
 
@@ -22,7 +22,7 @@
 
 ### 三端业务模块命名（2026-08-19 确立，P2-9）
 
-**正文权威**：[`模块命名映射表.md`](模块命名映射表.md)（唯一权威：三端模块 ↔ 契约资源映射、门禁、违约点红线、变更记录）——本小节仅保留速查，避免双源漂移。
+**正文权威**：[`RootDoc-ModuleMap.md`](RootDoc-ModuleMap.md)（唯一权威：三端模块 ↔ 契约资源映射、门禁、违约点红线、变更记录）——本小节仅保留速查，避免双源漂移。
 
 **速查**：三端业务模块名 = API 资源名（`openapi.baseline.json` 中 `/api/v1` 路径第一段，复数）——前端/移动端 `src/modules/<资源>/`、后端 `app/api/v1/<资源>.py`（tools 子域收 `api/v1/tools/` 包）；业务组件进所属模块 `ui/` + `ui/hooks/`，公共层只留跨 ≥2 域复用件。
 **门禁**：`make check-module-naming`（`scripts/check/check_module_naming.py`）强制三端模块名 ⊆ 契约资源名，已接入根 CI PR 门禁（P2-9，2026-08-19）。
@@ -144,7 +144,7 @@
 
 ## 十、前端工程约定（React Compiler / 语义色板 / widget registry / i18n）
 
-> 本条原为前端专属工程约定的通用原则收录，现已全部迁移至前端专项规范 [`../CS-Web-Frontend/tools/docs/FrontDoc-Conv.md`](../CS-Web-Frontend/tools/docs/FrontDoc-Conv.md)（§3 React Compiler 红线、§5 样式令牌、§8 工作台 widget 注册表、§9 i18n）。**禁止事项分发**：前端**编码侧**禁止项汇总见 `FrontDoc-Conv.md §12`；**UI 视觉**禁止项见 `FrontDoc-UID.md §11`；后端见 `BackDoc-Conv.md`；本 §二 仅保留框架无关的通用红线。此处不再重复，避免双份漂移。
+> 本条原为前端专属工程约定的通用原则收录，现已全部迁移至前端专项规范 [`../CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md`](../CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md)（§3 React Compiler 红线、§5 样式令牌、§8 工作台 widget 注册表、§9 i18n）。**禁止事项分发**：前端**编码侧**禁止项汇总见 `FrontDoc-03-Conv.md §12`；**UI 视觉**禁止项见 `FrontDoc-UID.md §11`；后端见 `BackDoc-03-Conv.md`；本 §二 仅保留框架无关的通用红线。此处不再重复，避免双份漂移。
 
 ---
 
@@ -152,7 +152,7 @@
 
 | 端 | 权威文档 |
 |---|---|
-| 后端 | `CS-Web-Backend/tools/docs/BackDoc-Conv.md`（编码规范、命名、质量红线、安全/错误处理约定） |
-| 前端编码 | `../CS-Web-Frontend/tools/docs/FrontDoc-Conv.md`（前端编码规范、TS/React/Next.js 约定、样式令牌、组件契约） |
-| 前端视觉 | `../CS-Web-Frontend/tools/docs/FrontDoc-UID.md`（视觉与交互设计规范）；前端编码规范（含 server-only 边界）见 `../CS-Web-Frontend/tools/docs/FrontDoc-Conv.md`，根级 `docs/Onboarding.md` 附录 A.6 仅为入口指针 |
+| 后端 | `CS-Web-Backend/tools/docs/BackDoc-03-Conv.md`（编码规范、命名、质量红线、安全/错误处理约定） |
+| 前端编码 | `../CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md`（前端编码规范、TS/React/Next.js 约定、样式令牌、组件契约） |
+| 前端视觉 | `../CS-Web-Frontend/tools/docs/FrontDoc-UID.md`（视觉与交互设计规范）；前端编码规范（含 server-only 边界）见 `../CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md`，根级 `docs/Onboarding.md` 附录 A.6 仅为入口指针 |
 | 前端方法论 | `../docs/RootDoc-FEArch.md`（目录设计艺术，CS-Web-Frontend 专属方法论） |

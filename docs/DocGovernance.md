@@ -8,17 +8,19 @@
 | 层 | 位置 | 角色 | 代表文档 |
 |----|------|------|----------|
 | **L0 项目级** | `docs/` | 跨仓全局唯一权威 | Onboarding(入口)、README(索引)、RootDoc-EngConv(工程约定)、RootDoc-Deploy(部署运维)、RootDoc-MigEval(迁移)、api-reference(契约·生成)、RootDoc-ADR(设计决策) |
-| **L1 子仓架构** | `*/tools/docs/*-01-Arch.md` | 各仓唯一权威 | BackDoc-01-Arch、FrontDoc-01-Arch（架构＋模块契约＋前后端联动） |
-| **L2 子仓专题** | `*/tools/docs/*` | 只引用上层、不重述 | *-Sec、*-Conv、FrontDoc-Ops/UID/i18n、capsule-tabs |
+| **L1 子仓架构** | `*/tools/docs/*-01-Arch.md` | 各仓唯一权威 | BackDoc-01-Arch、FrontDoc-01-Arch、MobileDoc-01-Arch（架构＋模块契约＋前后端联动） |
+| **L2 子仓专题** | `*/tools/docs/*` | 只引用上层、不重述 | *-Sec、*-Conv、FrontDoc-Ops/UID/i18n、capsule-tabs、MobileDoc-Sec/Conv |
 
 **引用方向：L2 → L1 → L0，单向。** 禁止反向承载内容（例如 L0 不得把 L1 的架构细节抄过来重述）。
+
+> **移动端前缀规定（2026-08-20 确立）**：CS-Mobile 子仓文档统一前缀为 `MobileDoc-`（如 `MobileDoc-01-Arch.md`、`MobileDoc-02-Sec.md`、`MobileDoc-03-Conv.md`）。当前移动端权威文档仍为 `CS-Mobile/tools/docs/arch/`（G1~G5 审核通过，唯一权威）；`MobileDoc-*` 属**待建**，须以 `arch/` 方案为输入提炼。
 
 ## 2. 所有权矩阵（同一主题只在一处定义）
 
 | 主题 | 唯一归属 | 严禁重复出现的位置 |
 |------|----------|--------------------|
 | 命名 / 质量红线 / 错误处理 / 安全配置 / 测试 / Git 约定 | `RootDoc-EngConv.md` | Onboarding 附录 A、*-Conv 的全量重述 |
-| 禁止事项 / 禁止清单 | `RootDoc-EngConv.md`（通用红线）；**前端编码侧→`FrontDoc-Conv.md §12`、UI 视觉侧→`FrontDoc-UID.md §11`**（仓内差异） | Onboarding A.1（2026-08-09 已改为入口指针，不再复述） |
+| 禁止事项 / 禁止清单 | `RootDoc-EngConv.md`（通用红线）；**前端编码侧→`FrontDoc-03-Conv.md §12`、UI 视觉侧→`FrontDoc-UID.md §11`**（仓内差异） | Onboarding A.1（2026-08-09 已改为入口指针，不再复述） |
 | 防再犯清单（安全教训） | `*-Sec.md`「教训」节 | Onboarding A.7 |
 | 架构 / 模块契约 / 前后端联动 | 子仓 `*-01-Arch.md`（L1） | RootDoc-FEArch（仅桥接索引）、根 CHANGELOG.md |
 | 迁移可行性 / 执行细节 | `RootDoc-MigEval.md` | 根 CHANGELOG.md、FrontDoc-Ops |
@@ -30,7 +32,7 @@
 
 1. **历史文档不得承载活内容（仅主索引可被活文档引用）**：原 `项目演变历史-0.9.x.md` 等分卷与 `项目演变历史.md` 已于 2026-08-17 全量并入根 `CHANGELOG.md` 并删除；活文档**仅可引用根 `CHANGELOG.md`**，原 `docs/archive/` 分卷不得再引用；规划长文（工作台改造方案 / 功能模块可见性方案）已于 2026-08-18 归档删除（C-20，落地结论见根 `CHANGELOG.md`，未完成残余项见 `项目待办事项-优先级重排.md`）。
 2. **同一事实只写一次**：定义处写全，其余处只链接，不重述。
-3. **跨仓相对链接深度必须正确**（当前存在系统性错误，见 §4）：
+3. **跨仓相对链接深度必须正确**（2026-08-20 全量审计：仅前端 `tools/docs/README.md` 1 处深度错误已修正，当前无残余）：
    - 子仓 `tools/docs/` → 根 `docs/`：`../../../docs/...`（3 级上溯）
    - 根 `docs/` → 子仓：`../CS-Web-*/...`（1 级上溯）
    - 子仓 ↔ 子仓：`../../../CS-Web-*/tools/docs/...`（3 级上溯）

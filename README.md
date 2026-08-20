@@ -2,7 +2,7 @@
 
 > 计算机协会官网平台 · 前后端分离 + 根级编排
 
-> **当前真实进度（2026-08-08）**：版本 **0.9.8 → 1.0.0 准备期**。后端 FastAPI + PostgreSQL 为唯一业务数据源；前端为纯 BFF 薄转发层（`src/modules/*/server/`、`src/shared/db`、本地审计等直连层已整体删除，B1 闭环；审计走后端 `POST /api/v1/audit/logs`，E2E 经后端 API 建号）。完整待办见 `docs/项目待办事项-优先级重排.md`。
+> **当前真实进度（2026-08-20）**：版本 **1.0.1 · 七夕（2026-08-19 发布）**。后端 FastAPI + PostgreSQL 为唯一业务数据源；前端为纯 BFF 薄转发层（`src/modules/*/server/`、`src/shared/db`、本地审计等直连层已整体删除，B1 闭环；审计走后端 `POST /api/v1/audit/logs`，E2E 经后端 API 建号）。完整待办见 `docs/项目待办事项-优先级重排.md`。
 
 本仓库为**编排/部署仓库（monorepo 外层）**，通过 Git 子仓库(submodule) 收敛前后端两个独立源码仓库，并在根级统一管理全栈容器编排与启动命令。
 
@@ -23,7 +23,7 @@ FztbuCS-Project/
 
 ## 核心特性
 
-> 以下能力在 **0.9.8** 中已具备；认证相关接口统一前缀 `/api/v1`，完整契约见后端 Swagger 与仓库根 `openapi.baseline.json`。
+> 以下能力在 **1.0.1** 中已具备；认证相关接口统一前缀 `/api/v1`，完整契约见后端 Swagger 与仓库根 `openapi.baseline.json`。
 
 - **统一工作台（Workbench）**：个人数据聚合视图，集中呈现 GitHub 贡献热力图、API 调用统计、番茄钟专注记录、LLM 用量等（端点见「使用示例 · 工作台」）。
 - **Auxilio 学习助手**：SSE 流式对话，支持会话管理与 Skills 工具调用；前端「助手对话」入口即对应其接口。
@@ -103,8 +103,8 @@ make down         # 停止
 | 移动端 | `package.json` → `version` + `manifest.json` → `versionName` | `CS-Mobile/package.json` / `CS-Mobile/src/manifest.json` |
 
 - 改版本号**四处同步**：前端 `package.json` + 后端 `pyproject.toml` + 后端 `app/__init__.py.__version__` + 后端 `uv.lock`（依赖锁定随版本一起更新）；**移动端 CS-Mobile 为第五处**：`package.json.version` 与 `src/manifest.json.versionName/versionCode` 同步更新。
-- 变更记录（唯一权威）：[`CHANGELOG.md`](CHANGELOG.md)，按 Keep a Changelog 维护，全量记录各版本显著变更（0.9.8 含工作台 / Auxilio 等新增能力；2026-08-17 起并入原 `docs/项目演变历史.md`）。
-- 当前语义版本线：`0.9.x`（尚未进入 1.0.0）。
+- 变更记录（唯一权威）：[`CHANGELOG.md`](CHANGELOG.md)，按 Keep a Changelog 维护，全量记录各版本显著变更（0.9.8 起含工作台 / Auxilio 等新增能力；2026-08-17 起并入原 `docs/项目演变历史.md`）。
+- 当前语义版本线：`1.0.1`（2026-08-19 发布）；后续演进见根 `CHANGELOG.md`。
 
 **架构一句话**
 

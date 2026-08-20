@@ -1,7 +1,7 @@
 # 数据迁移与多数据库支持评估报告（RootDoc-MigEval）
 
 > 更新人：3yearsZ
-> 最后更新：2026-08-09（补充 §八 前端迁移执行细节）
+> 最后更新：2026-08-20（更新 Alembic head 至 `e5f6a7b8c9d0`，版本锚定 1.0.1）
 > 评估内容时点：2026-08-05（归档说明见下）
 > 评估对象：`CS-Web-Frontend/data/app.db`（SQLite，旧前端单体数据库）
 > 目标库：`CS-Web-Backend` 后端 PostgreSQL（库名 `domefff`，Alembic 管理）
@@ -177,24 +177,26 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 
 ---
 
-## 七、现行 PostgreSQL 迁移链现状（0.9.8 补录，2026-08-08）
+## 七、现行 PostgreSQL 迁移链现状（1.0.1 更新，原 0.9.8 补录）
 
-> 本章为 2026-08-08 补录，反映当前（0.9.8）代码实际迁移状态，与上文 2026-08-05 评估时点记录互补。
+> 本章为 2026-08-08 起始补录（0.9.8）、2026-08-20 更新 head，反映当前（1.0.1）代码实际迁移状态，与上文 2026-08-05 评估时点记录互补。
 
 ### 7.1 当前数据源
 
 - 唯一数据源：后端 **PostgreSQL**（库名 `domefff`），由 **Alembic** 管理迁移。
 - 前端为纯 BFF，**零 SQLite**、无本地库；历史 SQLite→PG 脚本 `CS-Web-Frontend/tools/scripts/migrate-sqlite-to-pg.mjs` 已于 2026-08-07 随 SQLite 清理一并删除（见文首归档说明），现行不存在 SQLite 双引擎。
 
-### 7.2 现行 Alembic 迁移链（截至 2026-08-08）
+### 7.2 现行 Alembic 迁移链（截至 2026-08-20）
 
-当前迁移链为单一线性链，现行 head（最新迁移）为 **`d3e4f5a6b7c8`**（add `llm_usage_logs` + `llm_configs`，2026-08-08）：
+当前迁移链为单一线性链，现行 head（最新迁移）为 **`e5f6a7b8c9d0`**（add `llm_configs` 用户级功能开关，2026-08-20）；此前的 `d3e4f5a6b7c8`（add `llm_usage_logs` + `llm_configs`）与 `d4e5f6a7b8c9`（add `chat_events_trajectory`）为链上节点：
 
 ```text
 … → a3b4c5d6e7f8(chinese_fts_zhparser)
   → b0b1c2d3e4f5(add_workbench_tables)
   → c2d3e4f5a6b7(add_focus_sessions)
-  → d3e4f5a6b7c8(add_llm_usage_logs+llm_configs)  ← HEAD
+  → d3e4f5a6b7c8(add_llm_usage_logs+llm_configs)
+  → d4e5f6a7b8c9(add_chat_events_trajectory)
+  → e5f6a7b8c9d0(add_user_llm_feature_toggles)  ← HEAD
 ```
 
 | 迁移 ID | 内容 | 创建日期 |
@@ -202,13 +204,15 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 | `a3b4c5d6e7f8` | 中文全文检索 zhparser 条件安装（不可用时静默回退 `simple`） | 2026-08-07 |
 | `b0b1c2d3e4f5` | 工作台表（workbench） | 2026-08-08 |
 | `c2d3e4f5a6b7` | `focus_sessions`（番茄钟追踪） | 2026-08-08 |
-| `d3e4f5a6b7c8` | `llm_usage_logs` + `llm_configs`（LLM 用量与配置）← **HEAD** | 2026-08-08 |
+| `d3e4f5a6b7c8` | `llm_usage_logs` + `llm_configs`（LLM 用量与配置） | 2026-08-08 |
+| `d4e5f6a7b8c9` | `chat_events` Trajectory 事件日志（学习助手全事件 append-only） | 2026-08-19 |
+| `e5f6a7b8c9d0` | `llm_configs` 用户级功能开关（web_search_enabled / trajectory_enabled）← **HEAD** | 2026-08-20 |
 
 > 注：`a3b4c5d6e7f8` 是中文检索可靠性化的关键里程碑，属现行链上的中间节点，并非 head。
 
 ### 7.3 部署自动迁移
 
-- 容器编排内后端 `DB_AUTO_MIGRATE=true` → 空库自动 `alembic upgrade head`（head = `d3e4f5a6b7c8`）；库已最新则无操作。详见 `docs/RootDoc-Deploy.md` §四。
+- 容器编排内后端 `DB_AUTO_MIGRATE=true` → 空库自动 `alembic upgrade head`（head = `e5f6a7b8c9d0`）；库已最新则无操作。详见 `docs/RootDoc-Deploy.md` §四。
 - 回滚：`alembic downgrade` 可逐级回退；生产建议先独立迁移 job 再起多 worker（见 `CS-Web-Backend/tools/docs/BackDoc-Infra.md` §六）。
 
 ### 7.4 与本文评估时点记录的关系
@@ -224,7 +228,7 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 - 目标库：`domefff` 本地 PG 运行中，52 张表（Alembic 建），已有 1 seed 用户。
 - 迁移计划：后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md` §六 迁移验证 Phase 6 已规划数据迁移脚本，**脚本 `migrate-sqlite-to-pg.mjs` 已于 2026-08-05 实现并跑通（19 张表全部入库，外键完整、类型转换正确），该脚本已于 2026-08-07 删除**。
 - 主键差异：后端 `app/models/user.py` 明确 `id: Mapped[int]`；SQLite users 为 TEXT UUID。
-- 现行 Alembic head（2026-08-08）：**`d3e4f5a6b7c8`**（详见本文 §七）；`focus_sessions` 迁移 `c2d3e4f5a6b7`。
+- 现行 Alembic head（2026-08-20）：**`e5f6a7b8c9d0`**（详见本文 §七）；此前里程碑 `d3e4f5a6b7c8`、`focus_sessions` 迁移 `c2d3e4f5a6b7`。
 
 ---
 
@@ -305,9 +309,9 @@ PG `domefff` 已有 1 个 seed 用户（admin）和预置角色（8 个）。迁
 
 ---
 
-## 九、信息缺口声明（0.9.8）
+## 九、信息缺口声明（1.0.1）
 
-- **迁移 head 与任务参数卡不一致**：本文任务参数卡标注"迁移 head = `a3b4c5d6e7f8`"，但当前代码（2026-08-08）实际 Alembic head 为 **`d3e4f5a6b7c8`**（`a3b4c5d6e7f8` 为链上中间里程碑，提供中文检索 zhparser 能力）。本文以代码实际状态为准写入 §七；参数卡口径需由主理人校正。
+- **迁移 head 与任务参数卡不一致**：本文任务参数卡标注"迁移 head = `a3b4c5d6e7f8`"，但当前代码（2026-08-20）实际 Alembic head 为 **`e5f6a7b8c9d0`**（`a3b4c5d6e7f8` 为链上中间里程碑，提供中文检索 zhparser 能力；`d3e4f5a6b7c8`/`d4e5f6a7b8c9` 为后续节点）。本文以代码实际状态为准写入 §七；参数卡口径需由主理人校正。
 - **`focus_sessions` 迁移 ID 已确认**：`c2d3e4f5a6b7`，与参数卡一致。
 - **SQLite 双引擎 / `migrate-sqlite-to-pg.mjs`**：已删除并归档（见文首），现行无此能力，无待补数据。
 - **外部链接核查**：本文引用的 `BackDoc-Infra.md` / `CHANGELOG.md` / `项目待办事项-优先级重排.md` 均存在，无坏链；已删除文件（`migrate-sqlite-to-pg.mjs`、`BackDoc-MigV.md`）均在正文显式标注"已删除/已并入"，非失效引用。
