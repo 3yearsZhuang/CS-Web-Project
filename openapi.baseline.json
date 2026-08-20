@@ -16818,8 +16818,8 @@
       }
     },
     "/api/v1/tools/tasks/claims/{claim_id}/submit": {
-      "post": {
-        "operationId": "submit_proof_api_v1_tools_tasks_claims__claim_id__submit_post",
+      "get": {
+        "operationId": "submit_proof_api_v1_tools_tasks_claims__claim_id__submit_get",
         "parameters": [
           {
             "in": "path",
@@ -16845,7 +16845,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Submit Proof Api V1 Tools Tasks Claims  Claim Id  Submit Post"
+                  "title": "Response Submit Proof Api V1 Tools Tasks Claims  Claim Id  Submit Get"
                 }
               }
             },
