@@ -3,7 +3,7 @@
 > 文档层级：**L0（根级 `docs/`，跨仓库权威）**
 > 角色：架构决策（ADR）索引、边界上下文、数据流、韧性机制、BFF 交互风格的**唯一权威位置（SSOT）**
 > 来源：2026-08-09 文档治理重构，从 0.9.1 演变分卷抽离上述活内容（原归档已并入根 `CHANGELOG.md` 后删除）
-> 关联：完整 ADR 决策记录见 `[CHANGELOG.md](../CHANGELOG.md)`；前端权威架构见 `[FrontDoc-01-Arch.md](../CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md)`；治理规则见 `[DocGovernance.md](./DocGovernance.md) §2（所有权矩阵）
+> 关联：完整 ADR 决策记录见 `[CHANGELOG.md](../CHANGELOG.md)`；前端权威架构见 `[FrontDoc-01-Arch.md](../CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md)`；治理规则见 `[README.md](./README.md) §2（所有权矩阵）
 > 治理红线：禁止在根 `CHANGELOG.md` 历史章节中复述以下内容（对应章节已改为指向本文档的指针）
 
 ---
