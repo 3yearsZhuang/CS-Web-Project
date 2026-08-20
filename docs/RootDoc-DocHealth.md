@@ -48,7 +48,7 @@
 
 - 每篇头部「关联：…」普遍 4~8 个链接（如 `FrontDoc-01-Arch`、`BackDoc-02-Sec`、`README.md` 头部）。
 - 指路式语句高密度：`Onboarding.md` 附录把禁止事项拆成「→ 见 FrontDoc-03-Conv §12 / FrontDoc-UID §11」；`FrontDoc-i18n.md` / `Ops.md` 内多行「剩余待迁移清单已迁移至 `docs/项目待办v2.md`」——读者要拼凑一个完整事实需跨 3~5 篇。
-- `DocGovernance` 所有权矩阵本身鼓励"只引用、不重述"，副作用是**引用攀高**。
+- README 治理规范的「所有权矩阵」本身鼓励"只引用、不重述"，副作用是**引用攀高**。
 
 ## 五、分散证据
 
@@ -62,7 +62,7 @@
 
 | 仓 | 现状 | 目标 |
 |---|---|---|
-| 根 `docs/` | ~15 篇 | **6–8 篇**：README(索引)、Onboarding(入口，修失准)、RootDoc-EngConv(通用规范SSOT)、RootDoc-Deploy(部署)、CHANGELOG*(记录) + RootDoc-ADR(决策索引)、DocGovernance(治理)，保留 ModuleMap/待办两种特殊 SSOT；调研/评估/碎片合并或归档 |
+| 根 `docs/` | ~15 篇 | **6–8 篇**：README(索引)、Onboarding(入口，修失准)、RootDoc-EngConv(通用规范SSOT)、RootDoc-Deploy(部署)、CHANGELOG*(记录) + RootDoc-ADR(决策索引)、README 治理规范(治理)，保留 ModuleMap/待办两种特殊 SSOT；调研/评估/碎片合并或归档 |
 | 前端 `tools/docs/` | 10 篇 | **4–5 篇**：01-Arch、Conv(并入 i18n/Ops)、UID(合并 UIStandard/UIButton)、02-Sec、capsule-tabs(或并入 Conv) |
 | 后端 `tools/docs/` | 5 篇 | 基本健康，仅更新失准、回填 `[待填写]` |
 | 移动端 `tools/docs/` | 3 篇 + arch 归档 | 3 篇（刚建，已收敛，不动） |
