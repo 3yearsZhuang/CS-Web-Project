@@ -2584,6 +2584,16 @@
             "pattern": "^(openai|anthropic)$",
             "title": "Provider",
             "type": "string"
+          },
+          "trajectory_enabled": {
+            "default": true,
+            "title": "Trajectory Enabled",
+            "type": "boolean"
+          },
+          "web_search_enabled": {
+            "default": true,
+            "title": "Web Search Enabled",
+            "type": "boolean"
           }
         },
         "title": "LlmConfigIn",
