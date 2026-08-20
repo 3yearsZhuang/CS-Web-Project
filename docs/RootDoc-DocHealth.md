@@ -47,7 +47,7 @@
 ## 四、过度引用证据
 
 - 每篇头部「关联：…」普遍 4~8 个链接（如 `FrontDoc-01-Arch`、`BackDoc-02-Sec`、`README.md` 头部）。
-- 指路式语句高密度：`Onboarding.md` 附录把禁止事项拆成「→ 见 FrontDoc-03-Conv §12 / FrontDoc-UID §11」；`FrontDoc-i18n.md` / `Ops.md` 内多行「剩余待迁移清单已迁移至 `docs/项目待办事项-优先级重排.md`」——读者要拼凑一个完整事实需跨 3~5 篇。
+- 指路式语句高密度：`Onboarding.md` 附录把禁止事项拆成「→ 见 FrontDoc-03-Conv §12 / FrontDoc-UID §11」；`FrontDoc-i18n.md` / `Ops.md` 内多行「剩余待迁移清单已迁移至 `docs/项目待办v2.md`」——读者要拼凑一个完整事实需跨 3~5 篇。
 - `DocGovernance` 所有权矩阵本身鼓励"只引用、不重述"，副作用是**引用攀高**。
 
 ## 五、分散证据

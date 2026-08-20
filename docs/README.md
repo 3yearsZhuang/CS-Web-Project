@@ -15,7 +15,7 @@
 | [Onboarding.md](Onboarding.md) | 新开发者/新管理员第一天教程（环境→本地→部署→排障，含「当前真实进度」标注） |
 | [CHANGELOG.md](../CHANGELOG.md) | 全项目变更记录唯一权威（Keep a Changelog 格式，覆盖 `[Unreleased]` → `[0.9.1]`；2026-08-17 起并入原 `项目演变历史.md` 全量内容并删除该文件；跨项目版本锚点以此为准） |
 | [api-reference.html](api-reference.html) | API 参考（ReDoc 查看器，由 `openapi.baseline.json` 经 `make gen-api-docs` 生成，请勿手改；入口说明见 [api-reference.md](api-reference.md)） |
-| [项目待办事项-优先级重排.md](项目待办事项-优先级重排.md) | 项目待办 / 进行中事项 + ADR 待评估项存放处（与 `RootDoc-ADR.md` 索引联动；2026-08-18 起原 `项目待办事项.md` 并入本文件） |
+| [项目待办v2.md](项目待办v2.md) | 项目待办 / 进行中事项 + ADR 待评估项存放处（与 `RootDoc-ADR.md` 索引联动；2026-08-18 起原 `项目待办事项.md` 并入本文件） |
 | [DocGovernance.md](DocGovernance.md) | 文档治理规范（三层架构 + 所有权矩阵 + 反模式清单，SSOT 规则） |
 | [RootDoc-ModuleMap.md](RootDoc-ModuleMap.md) | 三端业务模块 ↔ API 契约映射 SSOT（2026-08-19：命名规范 / 三端落点 / 门禁 / 违约点红线 / 变更记录，配套 `make check-module-naming`；2026-08-20 由 `模块命名映射表.md` 改名） |
 | [RootDoc-ICP-Filing.md](RootDoc-ICP-Filing.md) | ICP 备案填报信息（原 `.codebuddy/` 迁入，2026-08-20：服务内容描述 / 基本信息表 / 填报指引） |
