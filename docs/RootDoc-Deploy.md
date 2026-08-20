@@ -1,7 +1,7 @@
 # 全栈部署 / 运维（RootDoc-Deploy）
 
 > 更新人：3yearsZ
-> 最后更新：2026-08-20（版本锚定由 0.9.8 更新为 1.0.1；部署要点含可选 LLM_* 环境变量与 Auxilio 降级、/health 健康检查端点、Node>=22 / Python>=3.13 运行环境、docker-compose 子仓库(submodule) 构建上下文）
+> 最后更新：2026-08-20（版本锚定更新至 1.0.1；运行环境与部署要点见正文）
 > 对应版本：1.0.1（后端 `CS-Web-Backend/app/__init__.py` `__version__ = "1.0.1"`）。部署文档权威基线，端侧细节见深链接。
 > 根级编排层的部署唯一权威。覆盖：本地开发并行启动、容器化全栈部署（db+backend+redis+worker+frontend）、回滚、数据卷与备份。
 > 深链接（各端专项，勿在此重复）：前端 `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md`（Docker/外部反向代理/SLO/Runbook）、后端 `CS-Web-Backend/tools/docs/BackDoc-Infra.md`（运维端点 `/health /readyz /metrics/json /status`）。跨端 SLO 与可观测性基线见本文 **§七**。
