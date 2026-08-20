@@ -1,304 +1,496 @@
-# Onboarding 手册（新开发者 / 新管理员第一天）
+# Onboarding 教程（新人第一天：从 0 到提第一个 PR）
 
-> 一份「环境 → 本地跑通 → 部署上线 → 常见故障排查」一条龙傻瓜式教程。
-> 配套权威文档：`docs/README.md`（文档地图）、`docs/RootDoc-Deploy.md`（部署运维）。
+> 更新人：3yearsZ
+> 更新日：2026-08-20
+> 版本：1.0.1 · 七夕（版本基线对齐 1.0.1；子模块指针 cfa270a / 884f68a / ceb1f9b）
+> Diátaxis：T（Tutorial · 学习导向 · 新人第一天完整路径；完成本教程 = 本地跑通 + 测试全绿 + 工作台体验 + 提第一个 PR）
+> 适用读者：第一次接触本项目的全栈/前端/后端/移动端开发者、首次部署的管理员、需要快速重建开发环境的贡献者
+> 学习时长：约 60 分钟（不含依赖下载时间）
+
+> **SSOT 分工声明**：本教程是**学习路径的唯一权威**（按步即成功，为新人而写）。目标导向的具体操作（单场景 How-to）见 [RootDoc-Deploy.md](RootDoc-Deploy.md)；实现级约束（MUST/MUST NOT）见 [RootDoc-EngConv.md](RootDoc-EngConv.md)、各子仓 `-02-Sec.md` / `-03-Conv.md`；架构决策动机见各 `-01-Arch.md`。本教程不与它们冲突，交叉引用仅作"深入阅读"指针。
+>
+> **前置红线（在开始第 1 步前 MUST 确认）**：
+> 1. 本机 Python ≥ 3.13、Node.js ≥ 22、pnpm = 9.x、Docker + Compose 可用；Python 3.12 及以下会因 `X | None` 语法在导入阶段直接失败。
+> 2. 可用磁盘 ≥ 15GB（容器镜像 + 依赖安装 + PG 数据卷 + 前端 node_modules）。
+> 3. 可访问 GitHub（含子模块拉取）；国内网络建议配置 npm/pip/uv 镜像。
+> 4. 本机 8000 / 9000 / 2333 / 5432 四个端口空闲；被占用时本教程步骤 3 会显式告知如何处理。
+
+> **你将学到什么（按顺序完成以下里程碑）**：
+> 1. ✅ 拉取仓库 + 子模块初始化（10 min）
+> 2. ✅ 前后端分别安装依赖 + 填写本地环境变量（15 min）
+> 3. ✅ 一键本地并行启动：前端 2333 + 后端 9000 + PG 5432（5 min）
+> 4. ✅ 完成三项跑通验证：注册/登录 /profile 完整 + /auth/me 200 + /health 200（10 min）
+> 5. ✅ 跑测试 + Lint：后端 pytest 全绿、前端 ts-check + lint:build + test 全绿（15 min）
+> 6. ✅ 体验工作台 /tools（热力图 + 学习助手 Auxilio）（5 min）
+> 7. ✅ 提交第一个 PR 的自检清单（5 min）
 
 ---
 
-## 0. 当前真实进度（先读这一段，避免被"目标态"误导）
+## 第 0 步：确认环境（5 min · 在任何代码命令之前）
 
-截至 2026-08-20，项目处于 **1.0.1 · 七夕（2026-08-19 发布）**。请务必区分"真实态"与"目标态"：
+本教程**每一步都有明确的成功验证标志**；如果某一步标志未出现，**不要继续下一步**，先翻到 §8 常见故障排查定位。
 
-| 维度 | 真实态（当前代码） | 目标态（1.0.0 计划） |
-|---|---|---|
-| 架构 | 前后端分离：FastAPI 后端（PG）+ Next.js 前端（BFF 薄转发） | 同左，且前端**纯 BFF** |
-| 数据存储 | 业务数据 100% 在后端 PostgreSQL；前端 **零 SQLite 依赖**（`shared/db` 双引擎代码、遗留脚本、`better-sqlite3` 依赖已于 2026-08-07 全部删除） | 同左（已达成） |
-| 前端 `src/modules/*/server/` | **已全部删除**（B1 收口完成，业务 100% 走后端 API + 前端 BFF 薄转发） | 同左 |
-| 契约 | `/api/v1/**` 已落地，camelCase 传输 | 冻结契约 + OpenAPI 比对门禁 |
-| 安全门禁 | 前端 `pnpm audit` 已改为 moderate 阻断；后端 pytest 依赖已固化 | CI 全绿 + 测试阶段可复现 |
-| 文档 | 本手册 + 根级 `docs/` 已建 | 各文档顶部加"真实进度"标注（进行中） |
-
-> 当前前端已是**纯 BFF**：`src/modules/*/server/`、`src/shared/db` 均已删除，业务数据统一在后端 PostgreSQL。新功能一律走后端 API + 前端 BFF 转发。
-
----
-
-## 1. 环境准备（开发者）
-
-### 1.1 工具链
-
-| 工具 | 版本 | 用途 |
-|---|---|---|
-| Git | 任意新版本 | 拉取含子仓库(submodule) 的仓库 |
-| Python | **3.13+**（与后端 `pyproject.toml` 一致；3.9 会因 `X \| None` 语法失败） | 后端运行 / 测试 |
-| Node.js | 22（>=22，对齐 `CS-Web-Frontend/package.json` engines） | 前端运行 / 构建 |
-| pnpm | 9.0.0 | 前端包管理（CI 锁定此版本） |
-| Docker + Compose | 新版 | 容器化全栈部署 |
-| PostgreSQL | 16（容器自动起） | 生产/测试数据库 |
-
-### 1.2 克隆仓库（含子仓库(submodule)）
+### 0.1 工具链版本验证（MUST 全部通过再继续）
 
 ```bash
-git clone <root-repo-url> FztbuCS-Project
+# 在任意目录执行以下 6 条；全部输出版本号且满足版本约束即通过
+git --version            # 任意新版本均可
+python3 --version        # 期望输出：Python 3.13.x （3.12.x 及以下不接受）
+node --version           # 期望输出：v22.x  （v21 及以下不接受）
+pnpm --version           # 期望输出：9.x   （8.x 或 10.x CI 不兼容）
+docker --version         # 任意带 compose 的新版本
+docker compose version   # compose v2 插件形式（非 docker-compose 连字符）
+```
+
+**成功标志**：6 条命令全部打印版本，无 `command not found`；Python/Node 满足最低版本。
+
+**未通过的处理**：
+- Python：`brew install python@3.13`（macOS）或从 python.org 下载；安装后用 `python3.13 --version` 确认。
+- Node.js：推荐 `nvm install 22 && nvm use 22`；或 `brew install node@22`。
+- pnpm：`corepack enable && corepack prepare pnpm@9.15.0 --activate` 或 `npm i -g pnpm@9`。
+- Docker：从 docker.com 装 Docker Desktop（自带 compose v2）。
+
+### 0.2 端口空闲验证
+
+```bash
+# macOS/Linux；4 条全部无输出即空闲
+lsof -i :8000 -i :9000 -i :2333 -i :5432 || true
+```
+
+**成功标志**：空输出（或仅 `COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME` 表头、后续无进程行）。
+
+**未通过的处理**：记录占用 PID，用 `kill <PID>` 释放；或阅读 §8.1「端口冲突」改用替代端口。
+
+---
+
+## 第 1 步：拉取仓库 + 子模块初始化（10 min）
+
+### 1.1 Clone 根仓
+
+```bash
+# 你本地存放项目的父目录；例如 ~/Code
+cd <your-workspace-parent>
+git clone <your-fork-or-upstream-url> FztbuCS-Project
 cd FztbuCS-Project
+```
+
+### 1.2 初始化三个子模块
+
+```bash
+# 在根目录执行；首次会下载 CS-Web-Backend、CS-Web-Frontend、CS-Mobile
 git submodule update --init --recursive
 ```
 
-### 1.3 后端环境
+**SHOULD** 执行后确认三个子目录均非空：
+
+```bash
+ls CS-Web-Backend/app/main.py  CS-Web-Frontend/package.json  CS-Mobile/package.json
+# 成功标志：3 条路径均存在（即无 "No such file or directory"）
+```
+
+### 1.3 （可选但推荐）配置用户信息
+
+```bash
+git config user.name  "<Your Name>"
+git config user.email "<your-github-email@example.com>"
+# 子模块内各自 commit 也需要；可使用 --global 一次性全局配置
+```
+
+---
+
+## 第 2 步：后端环境初始化（15 min）
+
+### 2.1 安装 Python 依赖
 
 ```bash
 cd CS-Web-Backend
-uv sync                          # 推荐：uv 安装全部依赖（锁于 uv.lock；等同 pip install -e ".[test]"）
-# 或传统方式：python -m venv .venv && source .venv/bin/activate && pip install -e ".[test]"
-cp .env.development .env         # 本地开发模板（生产用 .env.example）；填写 DATABASE_PASSWORD / SECRET_KEY / TOTP_ENCRYPTION_KEY / AUTH_SESSION_SECRET
-alembic upgrade head             # 初始化 / 同步 schema（开发环境 DB_AUTO_MIGRATE=True 亦会自动升级；CI 与测试建议显式执行）
+# 方式 A：推荐使用 uv（已锁 uv.lock，速度是 venv/pip 的 3~5 倍）
+uv sync
+
+# 方式 B（没有 uv 的临时替代）：
+# python3.13 -m venv .venv
+# source .venv/bin/activate
+# pip install -e ".[test]"
 ```
 
-### 1.4 前端环境
+**成功标志**：`uv sync` 末尾 `Resolved <N> packages`，无红色错误；结束后 `ls .venv/bin/python` 存在（方式 A 自动建 venv）。
+
+### 2.2 生成本地 `.env` 并填写 4 个必填密钥
+
+```bash
+# 在 CS-Web-Backend 目录内；.env.development 是"最全本地开发模板"
+cp .env.development .env
+```
+
+打开新建的 `.env`，**MUST** 修改以下 4 行（留空会导致启动阶段直接抛异常）：
+
+| 变量 | 建议值（本地开发） | 说明 |
+|---|---|---|
+| `DATABASE_PASSWORD` | `devpgpass123`（任意非空字符串） | PostgreSQL 超级用户密码 |
+| `SECRET_KEY` | `python -c "import secrets; print(secrets.token_urlsafe(48))"` 运行输出 | JWT 签名密钥，≥ 32 字节 |
+| `TOTP_ENCRYPTION_KEY` | 同上，再生成一条**不同的** | 2FA TOTP seed 加密密钥，≥ 32 字节 |
+| `AUTH_SESSION_SECRET` | 同上，再生成一条**不同的** | 前端 BFF Cookie 加密密钥，≥ 32 字节 |
+
+> **生成三条随机密钥的一条命令**：
+> ```bash
+> python -c "import secrets; [print(secrets.token_urlsafe(48)) for _ in range(3)]"
+> ```
+
+**成功标志**：`.env` 文件 4 个变量全部被赋值，行尾没有引号包裹值（uvicorn/pydantic 会自动去引号，加了引号反而会把引号当值的一部分）。
+
+### 2.3 启动 PostgreSQL（本地开发）
+
+```bash
+# 方式 A：用根级 docker compose 仅起数据库（推荐，端口 5432，库名 domefff）
+cd ..        # 回到项目根目录
+docker compose up -d db redis
+# 等 10 秒让 PG 初始化；然后确认容器健康
+docker compose ps
+# 期望：db 服务 STATE = Up (healthy)，redis = Up
+```
+
+方式 B（已有本机 PG）：创建用户 `postgres` / 数据库 `domefff`，并在 `.env` 里把 `DATABASE_HOST/PORT/USER/PASSWORD` 对齐到本机实例。**SHOULD** 使用方式 A 以避免环境差异。
+
+### 2.4 执行 Alembic 迁移建表
+
+```bash
+cd CS-Web-Backend
+source .venv/bin/activate   # 方式 B venv 才需要；uv run 会自动激活
+alembic upgrade head
+```
+
+**成功标志**：末尾打印 `INFO  [alembic.runtime.migration] Running upgrade  -> <revision-hex>, <migration message>`；最后一条是最新 head（`make gen-doc-facts` 可查 head 编号）。没有 `ERROR` / `Traceback`。
+
+**验证表已建**：
+
+```bash
+cd .. && docker compose exec -T db psql -U postgres -d domefff -c "\dt"
+# 成功标志：列出 users / roles / permissions / exams / events / posts 等 30+ 张表
+```
+
+---
+
+## 第 3 步：前端环境初始化（5 min）
+
+### 3.1 安装 pnpm 依赖
 
 ```bash
 cd CS-Web-Frontend
 pnpm install
-cp .env.example .env            # 至少填 AUTH_SESSION_SECRET / ALLOWED_ORIGINS / NEXT_PUBLIC_SITE_URL
 ```
 
----
+**成功标志**：末尾 `Progress: resolved <N>, reused <M>, downloaded <K>, added <L>`，无 `ERR_PNPM_*` 红色错误。
 
-## 2. 本地跑通
-
-### 2.1 一键并行起（推荐）
+### 3.2 生成前端 `.env`
 
 ```bash
-# 在仓库根目录
-make setup        # 首次：cp .env.example .env
-make dev-up       # 后端 :9000 热重载 + 前端 :2333 dev 同时前台运行
+cp .env.example .env
 ```
 
-- 前端：http://localhost:2333
-- 后端 Swagger：http://localhost:9000/docs（本地 `make dev-up` 经 `run.py --port 9000` 暴露）
-- 前端 BFF 经 `BACKEND_URL=http://localhost:9000` 转发（见前端 `.env`）
+打开 `.env`，至少填这三项（其余留默认即可）：
 
-> 端口约定：本地开发后端经 `run.py --port 9000` 暴露 9000；容器编排内后端服务端口为 8000，前端 BFF 经 `backend:8000` 直连（容器内 `expose: 8000`，不映射公网）。两者指向同一服务，仅场景不同。
-
-> 直接起（不依赖 `make`）：前端 `pnpm dev`（等价于 `pnpm tsx watch src/server.ts`，默认端口 **2333**，见 `CS-Web-Frontend/tools/scripts/dev-server.mjs`）；后端 `uvicorn app.main:app --port 9000`（或 `python run.py --env 1`，见 `CS-Web-Backend/README.md`）。本地数据库为 PostgreSQL **5432** 端口、库名 **domefff**（见 `CS-Web-Backend/.env.example` 的 `DATABASE_NAME` / `DATABASE_PORT`）；首次需 `alembic upgrade head` 建表。
-
-### 2.2 分开起（调试某一端）
-
-```bash
-make dev-backend    # 仅后端
-make dev-frontend   # 仅前端
-```
-
-### 2.3 验证跑通
-
-- 打开前端 → 注册账号（验证码）→ 登录 → 访问 `/profile` 看到完整用户信息。
-- 后端 `/auth/me` 返回 200 + 用户字段（camelCase）。
-- 健康检查：`GET /api/health`（前端 BFF 转发到后端 `/health`）。
-
-### 2.4 跑测试（验收-4 前置）
-
-```bash
-# 后端（需 PostgreSQL 测试库，pytest 自动加载 .env.test 并拒绝非 test 库名）
-cd CS-Web-Backend && python -m pytest
-
-# 前端
-cd CS-Web-Frontend && pnpm test -- --run
-pnpm run ts-check && pnpm run lint:build
-```
-
----
-
-## 3. 部署上线（管理员）
-
-### 3.1 容器化全栈（生产推荐）
-
-```bash
-# 仓库根目录
-make setup
-# 编辑 .env：填齐 4 个密钥；前端默认绑定 127.0.0.1:2333
-make up            # docker compose up -d --build
-make ps            # 查看状态
-make logs          # 跟踪日志
-```
-
-- 前端绑定宿主机回环地址 `127.0.0.1:2333`，后续由部署者自行配置 HTTPS 反向代理。
-- 后端不暴露公网，前端 BFF 经内部网络 `cs-net` 直连 `backend:8000`。
-- 数据卷：`pgdata`（PG）、根级 `data/`（上传文件）、`backups/`（备份）。
-
-> 生产模式使用 `Secure` Cookie。直接访问 HTTP 端口仅用于部署验证；正式使用应由外部反向代理提供 HTTPS，并在 `.env` 中将 `TRUST_PROXY` 设为 `true`。
-
-### 3.2 回滚 / 备份
-
-- 回滚：保留上一镜像标签，`docker compose up -d --force-recreate` 指定旧标签；详见 `RootDoc-Deploy.md`。
-- 备份：PG 用 `pg_dump` 到 `backups/`；确保 `DATABASE_PASSWORD` 不泄露。
-
----
-
-## 4. 常见故障排查
-
-| 现象 | 可能原因 | 处理 |
+| 变量 | 本地开发建议值 | 说明 |
 |---|---|---|
-| 后端启动报 `TOTP_ENCRYPTION_KEY` / `SECRET_KEY` 未设置 | `.env` 缺密钥 | 补全 4 个必填密钥后重启 |
-| 前端登录后始终 401 / requireAdmin 守卫 401 | BFF 未拿到后端身份（`/auth/me` 失败） | 确认 `BACKEND_URL` 可达；查后端 `/health` |
-| 前端 dev 报 `preload is not defined` | Next16+ 自定义 server + next-intl dev 期已知非致命错误 | 忽略，不影响构建 |
-| `pnpm audit` CI 失败 | 生产依赖存在 moderate+ 漏洞（G1 已阻断） | 升级依赖或团队评审后加豁免；不要直接放开 `continue-on-error` |
-| `X | None` 语法导入失败 | 本地 Python < 3.10 | 升级到 3.13+ |
-| SQLite 相关报错（前端） | `shared/db` 冗余层与 `better-sqlite3` 依赖已全部删除（B1 收口 + 2026-08-07 SQLite 清理） | 新代码一律走后端 API + 前端 BFF 转发，前端零 SQLite |
-| 后端测试连到生产库 | pytest 未加载 `.env.test` | 确保 `tests/` 配置拒绝非 test 库名 |
-| **前端活动/社区内容全部加载失败、登录无响应（BFF 路由全 500），但首页 `/` 正常 200** | **tsx watch 热重载缓存损坏**（多见于大规模删代码后）。后端与数据库均正常（可直连 `http://localhost:9000/api/v1/events` 验证 200） | **冷重启前端 dev server**：`make restart-frontend`（释放 :2333 并重新 `pnpm dev`，自动探活）。无需改代码 |
+| `AUTH_SESSION_SECRET` | **与后端 `.env` 同一条**（前后端共享，否则会话加解密互踢） | 必须与后端一致 |
+| `ALLOWED_ORIGINS` | `http://localhost:2333,http://127.0.0.1:2333` | 写端点 Origin 白名单 |
+| `NEXT_PUBLIC_SITE_URL` | `http://localhost:2333` | 登录回调 / OAuth 跳转拼接 |
+
+> **可选 LLM 配置**（不填也能跑，Auxilio 自动降级为纯规则推荐）：按 [RootDoc-Deploy.md](RootDoc-Deploy.md) §二 2.2 节 `LLM_*` 项补充。
+
+**成功标志**：`.env` 3 项齐全；`AUTH_SESSION_SECRET` 与后端 `.env` 值完全一致（逐字符）。
 
 ---
 
-## 5. 提交 / PR 自检速记
+## 第 4 步：一键并行起前后端（5 min）
 
-- 前端：`pnpm run ts-check` + `pnpm run lint:build` + `pnpm test -- --run` 全绿。
-- 后端：`python -m pytest` 全绿；`mypy` / `black` / `flake8` 门禁通过。
-- 新功能数据访问**只走后端**，前端仅做 BFF 转发（`src/modules/*/server/` 与 `shared/db` 均已删除，勿重建直连层）。
-- 改了 API 契约：同步更新 OpenAPI（`/api/v1/**` 冻结前需评审）。
+### 4.1 根级 `make dev-up`
 
----
+```bash
+cd ..   # 回到项目根目录
 
-## 6. 新特性体验路径（/tools 工作台）
+# 首次建议先 make setup（把根 .env.example 拷到根 .env；主要是 docker compose 用）
+make setup
+# 根级 .env 中 DATABASE_PASSWORD 与 CS-Web-Backend/.env 保持一致即可；其余默认
 
-本地跑通并登录后，可体验工作台（workbench）子模块聚合的新特性。工作台挂载于 `/tools` 页顶部，由 `CS-Web-Frontend/src/modules/workbench/widget-registry.ts` 配置驱动渲染，顶部用 `InlineTabs` 在「工作台」与「学习助手」两个视图间切换。
+# 前台同时起：后端 :9000（python run.py --port 9000 热重载）+ 前端 :2333（pnpm dev）
+make dev-up
+```
 
-### 6.1 进入工作台
+### 4.2 等待双方启动成功
 
-- 打开 http://localhost:2333/tools → 默认进入「工作台」视图（问候条 + 各 widget 卡片）。
-- 切到「学习助手」Tab 进入 Auxilio 对话（见 6.3）。
+两个进程会同时输出日志。**耐心等待 60 秒**（首次 pnpm dev 编译需要时间）。
 
-### 6.2 GitHub 贡献热力图（github-heatmap widget）
+**后端就绪标志**：日志出现 `Uvicorn running on http://0.0.0.0:9000` + `Application startup complete`。
 
-- 在卡片内绑定 **GitHub 用户名** → 展示 53×7 贡献方格 + 总贡献数 / 连续天数（streak）徽章。
-- 数据由**后端抓取公开贡献页并缓存（约 6h）**，**无需 token**；仅做展示，不写库。
-- **需登录后查看**：未登录时接口返回 401，卡片提示「请先登录后使用」。
+**前端就绪标志**：日志出现 `ready started server on 0.0.0.0:2333, url: http://localhost:2333`（Next.js）。
 
-### 6.3 Auxilio 学习助手对话（学习助手 Tab / assistant-chat widget）
+### 4.3 三条独立 curl 验证（不通过 MUST 不要进入下一步）
 
-- 进入 `/tools` 切到「学习助手」Tab，或直达 `/tools/auxilio`，即可与 Auxilio 对话。
-- 能力：SSE 流式打字机 + **工具调用状态卡**（如查考试倒计时、薄弱点、资源、API 统计）；后端未配置模型时自动降级为规则模式。
-- 会话持久化：左侧会话列表（新建 / 历史），数据来自 `/api/tools/auxilio/conversations`。
+新开一个终端窗口，回到根目录：
 
-### 6.4 LLM 用量统计（llm-usage widget）
+```bash
+# 验证 1：后端 /health 浅检查（liveness）
+curl -s http://localhost:9000/health
+# 期望：{"status":"ok"}   （200 OK）
 
-- 展示近 30 天大模型调用次数、Token 消耗、平均延迟与模型分布（来自 `llm_usage_logs` 埋点）。
-- 「LLM 设置」可自助接入 OpenAI 兼容 / Anthropic 的 API Key（后端 **AES-256-GCM** 加密存储）。
+# 验证 2：前端 BFF → 后端 的健康检查转发
+curl -s http://localhost:2333/api/health
+# 期望：{"status":"ok"}   （200 OK）；若 500 → 前端 BACKEND_URL 没指到 9000，查前端 .env
 
-### 6.5 API 调用统计（api-usage）— 部分就绪
+# 验证 3：后端 OpenAPI 文档页返回 200（不必打开浏览器，curl head 即可）
+curl -s -o /dev/null -w "%{http_code}" http://localhost:9000/docs
+# 期望：200
+```
 
-- 后端 `/api/workbench/stats/api-usage` 与前端 BFF `/api/workbench/stats/api-usage` 路由、以及 i18n 词条（`apiUsage*`）均已就绪。
-- **截至 1.0.1，该卡片尚未在 `widget-registry.ts` 的 `WIDGETS` 中注册**（2026-08-20 核对源码确认），工作台暂不可见；如需开放需先在 registry 登记对应 widget（见 `CS-Web-Frontend/src/modules/workbench/README.md`）。
-
----
-
-# 附录 A：前端工程规则
-
-> Source of truth（聚合入口）：本附录为新人聚合入口。**禁止事项**权威为前端 `FrontDoc-03-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 视觉侧）/ 根 `RootDoc-EngConv.md §二`（通用红线）；模块协作契约、ADR 编号规则、文档维护 lifecycle 为本附录专属权威；编码规范细则见 `FrontDoc-03-Conv.md`。本附录不复述禁止事项列表。
-> 变更触发：新增移除依赖、模块结构调整、ADR 新增、文档结构变更、新增安全/工程发现。
-> **边界说明**：本附录为面向新人的**聚合文档**——对「ADR 编号、文档维护 lifecycle」等本附录专属项，本附录是权威；**禁止事项**权威为 `FrontDoc-03-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 视觉侧）/ 根 `RootDoc-EngConv.md §二`（通用红线），本附录 A.1 仅为入口指针；对**通用/端侧编码细则**（命名、DRY、圈复杂度、分层、迁移等），权威分别为根 `docs/RootDoc-EngConv.md`、后端 `CS-Web-Backend/tools/docs/BackDoc-01-Arch.md`（Part B 模块契约）、前端 `CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md`（编码规范）、`FrontDoc-01-Arch.md`（Part B 模块契约与前后端联动）与 `FrontDoc-UID.md`（UI 规范）；**模块协作契约**（模块职责 / 边界 / 前后端联动）权威为前端 `FrontDoc-01-Arch.md` Part B。本附录不重复展开，冲突时以对应权威文件为准。
-
-## A.1 禁止事项（入口指针）
-
-> ⚠️ 本附录**不再复述**禁止事项列表（单一权威见下方）。按类别查对应权威：
-> - **前端编码侧禁止项**（react-dev-inspector / Vite / 跨模块 server import / types 运行时依赖 / 循环依赖 / 组件直连后端等）→ 前端专项规范 [`FrontDoc-03-Conv.md §12`](../CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md#12-禁止事项汇总)。
-> - **UI 视觉侧禁止项**（硬编码颜色、默认阴影、发光、白名单外圆角、ease-in-out、渐变等）→ [`FrontDoc-UID.md §11`](../CS-Web-Frontend/tools/docs/FrontDoc-UID.md#11-ui-专属禁止清单)。
-> - **通用工程红线**（硬编码、魔法值、空 catch、密钥明文等）→ 根 [`RootDoc-EngConv.md §二`](./RootDoc-EngConv.md#二代码质量红线)。
->
-> 冲突时以对应权威文件为准。
-
-## A.2 设计规范
-
-所有前端开发必须严格遵守 `CS-Web-Frontend/tools/docs/FrontDoc-UID.md`（编辑式技术极简 & 悬浮胶囊导航设计规范），新增页面/组件/视觉交互逐项对照 Checklist。
-
-## A.3 模块化开发规范
-
-- 每个模块：`server/`（已随 B1 收口整体删除，业务走后端）+ `types/`（类型）+ `ui/`（组件）。
-- 模块间通信矩阵：允许 `import from @/shared/...`、事件总线；禁止直接 import 另一模块 `server/` 或 `api/`。
-- 通信决策树：① 只需类型 → `import type`；② 通用工具 → `@/shared/...`；③ B 是被 admin 管理的模块 → 直接调 `B/server/index.ts`；④ 否则 → 事件总线 `appBus` 发布，B 监听。
-- 事件总线：发布 `<模块>.<动作>`（如 `topic.created`）；订阅方 `try/catch` 吞错不抛出。
-- 依赖矩阵维护：新增/修改模块依赖必须同步 `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md`「2.3 直接导入依赖矩阵」（架构不变量 FF1）。
-
-## A.4 ADR 引用规则
-
-- 何时创建：影响多模块/引入移除关键技术依赖/改变模块通信/不可逆决策/安全相关 → 记录 ADR。
-- 格式：`### ADR-XXX` + 状态/上下文/决策/替代方案/后果/可逆性/实施记录。ADR 索引与速查的权威位置为 L0 设计决策 SSOT [`RootDoc-ADR.md`](RootDoc-ADR.md)（已实施项）；完整决策记录见 [`CHANGELOG.md`](../CHANGELOG.md)，待评估项见 [`项目待办v2.md`](./项目待办v2.md)。（注：原 `项目演变历史-0.9.1.md` 等分卷及 `项目演变历史.md` 已于 2026-08-17 并入根 `CHANGELOG.md` 并删除，活文档仅引用 `CHANGELOG.md`。）
-- 锚点规则：GitHub 风格（标题转小写 + 空格转连字符 + 去标点，中文保留）。
-- 编号：连续递增（ADR-015…），废弃不回收；状态必须反映实施事实（防再犯 #2）。
-
-## A.5 文档维护流程
-
-- 每个系统维度有且仅有一个权威位置（Source-of-Truth 无重复规则）：禁止事项→前端 `FrontDoc-03-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 侧）/ 根 `RootDoc-EngConv.md §二`（通用）；ADR→`RootDoc-ADR.md`（索引/速查，L0 SSOT）/ 根 `CHANGELOG.md`（完整记录）/ `项目待办v2.md`（待评估）；风险→根 `CHANGELOG.md` R 表；依赖矩阵→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` 2.3；安全发现→`CS-Web-Frontend/tools/docs/FrontDoc-02-Sec.md`；API 契约→`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part B（模块组织视图，原始契约以 `docs/api-reference.md` 为准）；环境变量→`CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part A。
-- 变更同步检查清单（PR 自检模板）：
-  - [ ] `pnpm run ts-check` 通过
-  - [ ] 调目录结构 → `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part A
-  - [ ] 新增/修改 API → `CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md` Part B
-  - [ ] 新增管理员权限 → `CS-Web-Frontend/tools/docs/FrontDoc-02-Sec.md` Part 2
-  - [ ] 架构决策 → L0 SSOT [`RootDoc-ADR.md`](RootDoc-ADR.md)（索引/速查）；完整记录见根 `CHANGELOG.md`、待评估项见 `项目待办v2.md`
-  - [ ] 新增禁止事项 → `FrontDoc-03-Conv.md §12`（编码侧）/ `FrontDoc-UID.md §11`（UI 侧）
-  - [ ] 新增页面/组件 → `CS-Web-Frontend/tools/docs/FrontDoc-UID.md`（视觉）+ `FrontDoc-03-Conv.md`（编码规范）
-  - [ ] 新增环境变量 → `CS-Web-Frontend/tools/docs/FrontDoc-Ops.md` Part A + `README.md` 环境变量表
-  - [ ] 修 bug → 立即 grep 同模式跨模块扫描，审计结果写入 ADR「审计确认安全」清单（防再犯 #6）
-
-## A.6 编码规范补充（入口指针）
-
-> ⚠️ 前端**编码规范细则**（文件命名 `kebab-case`、导入顺序、server-only 边界、React Compiler 红线、样式令牌、widget 注册表、i18n 等）的唯一权威位置为前端专项规范 [`FrontDoc-03-Conv.md`](../CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md)（§2 命名、§10 server-only 边界等）。本附录作为新人入口，不重复展开，冲突以该专项规范为准。
-
-## A.7 防再犯清单（explanation）
-
-源自实际缺陷归纳（ADR-015/016/017、R4/R16/R17 等），修改相关代码前逐条对照：
-
-1. **日期比较：ISO 与 SQLite `datetime()` 字典序陷阱**——`T`(0x54) > 空格(0x20) 致同日过期被判定未过期。修复统一 `datetime(col) > datetime('now')` 归一化；空串 `expiresAt` 用 `|| null` 归一化（不拦截空串会静默隐藏）；回归测试用真实写入格式。
-2. **文档与实施状态脱节**——ADR 状态/R 表/里程碑为活文档，单次编辑须交叉检查，跨章节合并后 grep 验证条目唯一性。
-3. **测试覆盖与缺陷暴露错位**——测试数据必须模拟真实写入路径（UI 写 ISO 就用 ISO），覆盖边界用例（当天已过期/空串/null）。
-4. **server-only 边界假合规**——加 `import 'server-only'` 后须实际从客户端 import 验证报错；自定义 dev server 需本地空实现 + tsconfig + vitest 三重映射；例外须显式记录。
-5. **迁移幂等性与事务安全**——`CREATE+INSERT+DROP+RENAME` 必须 `db.transaction()` 包裹；迁移检测旧 schema 特征而非"表存在就迁移"；FK 语义：审计表 `SET NULL`、业务表 `CASCADE`。
-6. **跨模块同类缺陷系统排查**——修一处立即 grep 同模式扫描，审计结果写入 ADR「审计确认安全」清单。
-7. **同一字段多消费方不一致**——审计字段须 grep 所有读取点，鉴权路径（越权高危）与展示路径（数据陈旧）一并覆盖。
-
-> 元规则：① 任何"两端约定"（日期格式/文档与代码/测试与生产写入路径）必须显式校验两端一致；② 任何 bug 修复必须触发同模式 grep 扫描。
+三条全部成功 → 进入第 5 步的浏览器交互验收。任何一条失败 → 跳到 §8 故障排查对应条目。
 
 ---
 
-# 附录 B：后端工程约定
+## 第 5 步：浏览器跑通验证（10 min · 三条路径，每条都有明确成功画面）
 
-> 完整架构 / 编码规范 / 业务模块见 `CS-Web-Backend/tools/docs/` 下的 `BackDoc-01-Arch.md`（Part A 架构 + Part B 业务模块）/ `BackDoc-03-Conv.md`。此处仅保留"必须守住的不变量"与"加一个 API 资源"配方。
+### 5.1 路径 A：注册 → 登录 → 完整个人信息页（/profile）
 
-## B.1 必须守住的不变量（速览）
+1. 打开 **http://localhost:2333**
+2. 点右上角「注册」→ 填真实邮箱（本地开发会把验证码打印到**后端 stdout 日志**）→ 提交
+3. 切回后端终端窗口找一行类似 `[EmailService] verification code for a@b.com: 123456` → 把 6 位码粘到注册验证页 → 完成注册
+4. 自动跳登录页 → 输入刚注册的邮箱/密码 → 登录
+5. 点右上角头像 → 「个人中心」→ 跳 `/profile`
 
-1. **分层单向**：api → service → repository → model，禁止反向/跨层。
-2. **DB 会话**：路由 `Depends(get_db)`，路由外 `async with get_session()`；均不自动提交——repo 只 flush，service 显式 commit。
-3. **时间列**：ORM 一律 `DateTime(timezone=True)`；取当前时间用 `now_utc()`（`app/core/timezone.py`），禁止 `datetime.now()`/`utcnow()`。
-4. **出参时间**：带 datetime 的响应模型继承 `TZModel`（自动转本地时区）。
-5. **权限**：依赖注入 `Depends(require_permission("res","act"))`，不用装饰器。
-6. **业务异常**：抛 `BaseAppException` 子类，不在路由吞异常。
-7. **中间件短路**：`return JSONResponse(...)`，不 `raise HTTPException`。
-8. **日志**：`get_logger`，不 `print`、不直接配 handler。
-9. **Redis 可降级**：限流/缓存把 Redis 当增强项，非强依赖。
-10. **迁移铁律**：全环境仅 Alembic；禁止 `Base.metadata.create_all`；建库用 `DB_AUTO_CREATE_DATABASE`。
-11. **时区**：核心存 UTC，展示走 `settings.TIMEZONE`；必须装 `tzdata`。
-12. **新增 datetime 响应模型必须继承 `TZModel`**，不手写 per-field serializer。
+**成功标志（全部出现才算通过）**：
+- 页面标题「个人中心 - FztbuCS」
+- 基本信息卡片：头像（有默认 SVG，不是空白占位）、昵称、邮箱、角色标签（普通成员/社干/管理员）
+- 安全卡片：「密码已设置」字样；TOTP 开关可点击（开/关都允许，Tutorial 期不必开启）
+- 页面无 404 / 500 错误边界卡；F12 Console 无红色 `Uncaught`
 
-## B.2 加一个 API 资源（配方）
+### 5.2 路径 B：/auth/me 响应字段完整性
 
-完整配方在 `CS-Web-Backend/AGENTS.md`「加一个 API 资源」。要点：
+保持登录态（浏览器已拿到 Cookie），在同一浏览器开新 Tab 访问：
+**http://localhost:9000/api/v1/auth/me**（后端直连，跳过 BFF 便于排查 Cookie/BFF 层问题）
 
-1. `models/<x>.py` → 登记到 `models/__init__.py`
-2. `schemas/<x>.py`（Pydantic v2；带 datetime 继承 `TZModel`）
-3. `repositories/<x>_repo.py`（继承 `BaseRepository`）
-4. `services/<x>_service.py`（组合 repo）
-5. `api/v1/<x>.py` → 注册到 `api/v1/__init__.py`
-6. Alembic 建表/迁移
-7. `tools/tests/` 镜像补测试
-8. 业务模块在 `CS-Web-Backend/tools/docs/BackDoc-01-Arch.md` Part B 对应节登记（或新建 `CS-Web-Backend/tools/docs/modules/<name>.md` 并登记到 `CS-Web-Backend/tools/docs/README.md`）
+**成功标志**：JSON 响应 200，包含至少以下字段（camelCase，不是 snake_case）：
+```json
+{
+  "id": 1,
+  "email": "you@example.com",
+  "nickname": "...",
+  "roles": [{ "key": "member", "name": "普通成员" }],
+  "permissions": [...],
+  "createdAt": "2026-08-20T00:00:00+08:00"
+}
+```
 
-> **中心注册点**（必须登记，否则不生效）：ORM 模型、业务异常、中间件、配置项、API router、启动/关闭任务（`@register_startup`/`@register_shutdown`）、测试子包 `__init__.py`。
+字段缺失或蛇形命名 → 跳 §8.6「字段风格错位」。
 
-## B.3 后端常见坑
+### 5.3 路径 C：退出登录 → 再登录
 
-| 坑 | 说明 |
-|---|---|
-| 任务/路由不生效 | 99% 忘记在中心注册点登记（`models/__init__.py`、`v1/__init__.py`、`lifecycle/__init__.py`） |
-| 启动失败"时区非法" | 缺 `tzdata`（尤其 Windows/alpine），确保已装 |
-| 时间多了/少了 8 小时 | 用了 naive `datetime`；统一 `now_utc()` + `TZModel` |
-| 测试连不上库 | `.env.test` 需 `DATABASE_URL` 指向库名含 `test` 的库（`conftest.py` 校验） |
-| 改了配置但无效 | 没同步 `.env.example`，或字段名与 `Settings` 不一致 |
-| `alembic check` 报 drift | 别改历史迁移文件，新增增量迁移 |
+个人中心右上角头像 → 「退出登录」→ 被踢回 `/login`。
+
+**成功标志**：
+- 再次访问 `/profile` 被 302 跳回 `/login`（鉴权守卫生效）
+- 重新输入密码可再次登录（refresh token 没有被复用检测误踢）
+
+三条路径全过 → 本地跑通验收完成。你已具备「改代码 → 本地验证」的基础环境。
+
+---
+
+## 第 6 步：跑测试 + Lint（15 min · 提 PR 前 MUST 全绿）
+
+### 6.1 后端：pytest 全量 + mypy 静态
+
+```bash
+cd CS-Web-Backend
+source .venv/bin/activate   # 非 uv 方式需要；uv run 可省略
+
+# 6.1.1 单元 + 特性 + 集成测试（pytest 自动加载 .env.test，库名含 test 才允许执行，防止误扫生产）
+python -m pytest -q
+```
+
+**成功标志**：末尾 `=<N> passed in <T>s`，**0 failed / 0 error**；没有 `SKIP` 超过 5 个（超过的话查 tests/README.md 看是否漏装可选依赖）。
+
+```bash
+# 6.1.2 静态类型检查（RootEngConv §二 红线；CI 同配置）
+mypy app/              # 允许少量 warnings，但 MUST 0 error
+# 6.1.3 代码风格 + Lint
+black --check app/     # CI 阻断；未格式化用 black app/ 修复
+flake8 app/            # CI 阻断
+```
+
+**成功标志**：三条命令 `exit code 0`；任何一条非零 → §8.7「后端测试/Lint 失败」。
+
+### 6.2 前端：ts-check + lint:build + test
+
+```bash
+cd CS-Web-Frontend
+
+pnpm run ts-check      # tsc --noEmit；类型对齐（与后端 OpenAPI 生成类型对照）
+pnpm run lint:build    # ESLint + 生产构建产物静态检查；不含运行时
+pnpm test -- --run     # Vitest 单次跑，不 watch
+```
+
+**成功标志**：三条命令全部 0 error；test 末尾 `Test Files <M> passed | <N> failed`，`<N>=0`。
+
+> 以上四条命令（pytest + mypy + ts-check + test）**MUST** 在你提 PR 前在本地跑过一遍并全绿；CI 会重跑，不一致会被打回。
+
+---
+
+## 第 7 步：体验工作台 /tools（5 min）
+
+保持登录态，访问 **http://localhost:2333/tools**。
+
+顶部有两个 InlineTabs：「工作台」（默认）与「学习助手」。
+
+### 7.1 工作台：GitHub 贡献热力图绑定
+
+1. 在「GitHub 贡献热力图」卡输入框填你的 GitHub 用户名 → 点「绑定」
+2. 等待 ≤ 10 秒（首次后端抓公开页缓存 6h，未命中会慢）
+
+**成功标志**：出现 53×7 绿色方格热力图 + 徽章显示「总贡献数」与「连续天数 streak」。失败则卡片提示错误原因（用户不存在 / 限流 403）。
+
+### 7.2 学习助手 Tab：Auxilio 对话
+
+切到「学习助手」Tab → 在底部输入框发 `你能帮我做什么？`。
+
+**成功标志（两种之一）**：
+- 若根 `.env` 配了 `LLM_PROVIDER!=none`：流式打字机逐字输出，且有"调用工具"状态卡展示
+- 若未配 LLM：规则模式兜底回复，告诉你"当前未接入模型，可在设置中配置"；**不会报错或白屏**（降级路径 MUST 生效）
+
+---
+
+## 第 8 步：常见故障排查（任何步骤失败先查本节）
+
+本节按**最常出现 → 最少出现**排序；条目号与上方步骤号对应。
+
+### 8.1 端口冲突（第 0.2 步未通过）
+
+| 冲突端口 | 临时替代方案 | 永久修复 |
+|---|---|---|
+| 2333（前端） | `PORT=2334 pnpm dev` + 同步改前端 `.env` 的 `ALLOWED_ORIGINS` / `NEXT_PUBLIC_SITE_URL` | `lsof -ti :2333 | xargs kill -9` 释放旧进程 |
+| 9000（后端） | `python run.py --env 1 --port 9001` + 前端 `.env` 的 `BACKEND_URL=http://localhost:9001` | 同上，杀 PID |
+| 5432（PG） | docker compose 的 db 服务 `ports: "55432:5432"` 映射（不建议）+ 同步后端 `.env` `DATABASE_PORT=55432` | 卸载本机 PostgreSQL 或停掉 brew service |
+| 8000（容器内部后端） | 本教程本地开发不用 8000；冲突只影响 docker compose 生产部署，见 [RootDoc-Deploy.md](RootDoc-Deploy.md) | — |
+
+### 8.2 子模块为空 / 缺失（第 1.2 步失败）
+
+```bash
+# 彻底重来子模块（不会丢失你在子仓的改动，因为那在各自 .git 里）
+git submodule deinit -f --all
+git submodule update --init --recursive
+# 再次验证
+ls CS-Web-Backend/app/main.py
+```
+
+仍为空 → 检查你的 GitHub 权限：是否为当前仓组织成员、SSH Key 是否生效（`ssh -T git@github.com` 应返回 Hi <username>）。
+
+### 8.3 Python 导入报 `SyntaxError: invalid syntax` 指向 `X | None`（第 2.1 步）
+
+**100% 原因是 Python < 3.10**。`X | None` 联合类型语法在 3.10 才引入；本项目 requires-python >= 3.13。
+
+```bash
+# 确认实际运行的 python 版本
+python  --version    # 若仍是 3.9.x → PATH 里旧版本优先
+python3 --version    # 若仍不是 3.13 → 重装
+which python         # 看解析到哪个可执行文件
+```
+
+修复：`uv sync` 会自动按 `requires-python` 选解释器；或显式 `uv python install 3.13 && uv sync --python 3.13`。
+
+### 8.4 `alembic upgrade head` 报 `connection refused`（第 2.4 步）
+
+容器 db 服务没起来或端口错配：
+
+```bash
+cd <project-root>
+docker compose ps              # db STATE 应为 Up (healthy)
+docker compose logs db --tail 50
+# 常见原因：DATABASE_PASSWORD 根级 .env 与后端 .env 不一致
+# → 统一密码后 docker compose down && docker compose up -d db 重启
+```
+
+### 8.5 前端登录后 401 无限重定向登录页（第 5.1 步）
+
+排查顺序（从上到下逐一验证）：
+1. 后端 `/health` 是否 200（直连 localhost:9000，绕过 BFF）。不是 → §8.4 起后端。
+2. 前端 `.env` 的 `AUTH_SESSION_SECRET` 与后端 `.env` 的完全一致。不一致会导致 Cookie 签名校验失败 → 每次 `/auth/me` 都匿名。
+3. 前端 `.env` 的 `BACKEND_URL=http://localhost:9000`。不要写成 `127.0.0.1` 或 `0.0.0.0`（Cookie 同源策略匹配会诡异）。
+4. 冷重启前端 dev server：`make restart-frontend`（tsx watch 热重载缓存损坏常见表现：BFF 路由全 500 但首页正常；见 RootDoc-Deploy 历史 §四 注意项）。
+
+### 8.6 第 5.2 步字段为 snake_case（`created_at` 而非 `camelCase`）
+
+契约 1.0.1 规定传输字段是 camelCase。出现蛇形说明：
+- 后端 `TZModel` 或 `BaseResponse` 的 `by_alias=True` 别名未生效 → 查 schemas/base.py 配置。
+- 或你开了未合并的老分支 → 切回 main 并对齐子模块指针 `git submodule update`。
+
+### 8.7 第 6 步测试 / Lint 失败
+
+后端 pytest 失败最常见的 3 类：
+
+| 错误关键词 | 根因 | 处理 |
+|---|---|---|
+| `database "domefff" does not exist` 或 `rejected: not a test database` | 没加载 `.env.test`；`conftest.py` 强制库名含 `test` | `cp .env.test .env.test.local` 并确认 `DATABASE_URL` 里 dbname 含 `test`；或 `pytest -c pytest.ini` 显式用配置 |
+| `EMAIL_EXISTS` / 注册接口唯一约束冲突 | 上次跑的测试 user 残留（cleanup 不幂等） | `docker compose exec -T db psql -U postgres -d domefff_test -c "TRUNCATE users CASCADE;"` 清表后重跑 |
+| mypy `Cannot find implementation or library stub for module named "xxx"` | 缺 stub 包或 mypy.ini 未 ignore | 按错误提示 `uv add --dev types-xxx`；或在 `mypy.ini` 的 `[mypy-xxx]` 下加 `ignore_missing_imports = True` |
+
+前端失败最常见的 2 类：
+- `pnpm run lint:build` 报 `eslint` 规则 → 跟着提示文件行号修；或 `pnpm run lint:build -- --fix` 自动修能修的。
+- `ts-check` 报 `Type X is not assignable to type Y` 在契约 DTO → 重新生成前端类型：`make gen-openapi-types`（根 Makefile，从后端 `/openapi.json` 拉取并覆盖前端 `src/lib/api/generated.types.ts`）。
+
+### 8.8 `pnpm audit` CI 阻断（不是本节故障，但你提 PR 会遇到）
+
+前端 `package.json` 的 audit 已升级为 **moderate+ 即阻断**。本地看到 `pnpm audit` 有 moderate+ → 不要强行 `continue-on-error`：
+1. 先 `pnpm audit --fix` 自动升级可升级版本；
+2. 仍有漏洞 → 查漏洞路径是否 `devDependencies`：是 → 加 Waiver 并 @reviewer 审批；否 → 必须升级到修复版本或替换同类库。
+
+---
+
+## 第 9 步：提第一个 PR（5 min · 自检打钩清单）
+
+**在你修改任何代码后，提交前 MUST 逐项检查并在 PR Description 打钩**。CR 审核人看到未打钩的项会直接打回。
+
+### 9.1 通用自检（所有 PR 适用）
+
+- [ ] 第 6 步四项（pytest / mypy / ts-check / frontend test）在本地已跑且全绿；粘贴终端最后 10 行到 PR Comment。
+- [ ] 若新增/修改了 API Schema：`make gen-doc-facts` 本地 **0 diff**（OpenAPI 基线 + 版本三源 + 文档派生事实同步）。
+- [ ] 文档改动：若是 Reference/Explanation 类，已同步修改对应 L1/L2 权威文档（`-01-Arch` / `-02-Sec` / `-03-Conv`），而不是只在本 Onboarding 改。
+- [ ] 跨仓关联：若改了后端 `/api/v1` DTO，前端 `openapi.baseline.json` 与类型生成同步 PR 已关联（或同一 PR 同时改三仓指针）。
+- [ ] **没有把密钥 / token / 密码 / .env 内容写进 commit**（`git diff HEAD` 再过一遍 grep SECRET/KEY/PASS/TOKEN）。
+
+### 9.2 前端 PR 加检
+
+- [ ] `pnpm run lint:build` 通过；新增代码无裸 `any`。
+- [ ] 新增页面/组件已对照 [FrontDoc-UID.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/CS-Web-Frontend/tools/docs/FrontDoc-UID.md) 视觉 Checklist；UI 截图附 PR。
+- [ ] 写端点走 BFF → `assertAllowedOrigin` + Zod Schema + `proxyBackend` 调用链（见 [FrontDoc-03-Conv.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md) §2 调用链图）。
+
+### 9.3 后端 PR 加检
+
+- [ ] DDD 分层单向（api → service → repository → model），无反向 import。
+- 新增 datetime 响应继承 `TZModel`；取时间用 `now_utc()`；没有 `datetime.now()` / `.utcnow()`。
+- Alembic 迁移仅增量；未修改任何历史迁移文件。
+- 新增角色/权限：同步 `services/rbac/rbac_seed_data.py` 与 RBAC init 顺序；避免上生产后默认角色缺失。
+- 业务异常抛 `BaseAppException` 子类；路由不裸 `raise HTTPException`。
+
+### 9.4 移动端 PR（若涉及）
+
+- [ ] 业务代码 0 处裸 `wx.` / `plus.` 调用（CI grep 扫描）；端差异收敛进 `shared/utils/*.ts` 或 `platform/`。
+- [ ] Pinia persist 仅白名单；token/SafeUser/权限未持久化（见 [MobileDoc-03-Conv.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/CS-Mobile/tools/docs/MobileDoc-03-Conv.md) §4.2.2）。
+- [ ] 小程序包体（主包）构建未超 1.8MB；`pnpm run build:mp-weixin` 输出体积附 PR Comment。
+
+打钩完成 → 正常 `git push <your-fork> <branch>` 开 PR。等待 reviewer 反馈即可。
+
+---
+
+## 第 10 步：深入路径（Tutorial 结束后的自学导航）
+
+完成全部 9 步后你已成为可独立贡献的开发者；根据你的方向选择深入入口：
+
+| 你想做什么 | 第一站（权威 SSOT） | 第二站（实现级细节） |
+|---|---|---|
+| 理解整体架构与选型动机 | [README.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/README.md) → RootDoc-WritingGuide 总纲 | 对应子仓 `-01-Arch.md` Arc42 8 章 |
+| 改前端页面/组件/BFF 路由 | [FrontDoc-03-Conv.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md) | [FrontDoc-UID.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/CS-Web-Frontend/tools/docs/FrontDoc-UID.md)（视觉）+ [FrontDoc-02-Sec.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/CS-Web-Frontend/tools/docs/FrontDoc-02-Sec.md)（安全） |
+| 改后端 API / 模块 / 迁移 | [BackDoc-03-Conv.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/CS-Web-Backend/tools/docs/BackDoc-03-Conv.md) | [BackDoc-ModuleContracts.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/CS-Web-Backend/tools/docs/BackDoc-ModuleContracts.md)（各模块 RFC2119 契约） |
+| 改移动端 uni-app x / 双端差异 | [MobileDoc-03-Conv.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/CS-Mobile/tools/docs/MobileDoc-03-Conv.md) | [MobileDoc-02-Sec.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/CS-Mobile/tools/docs/MobileDoc-02-Sec.md)（双端存储/SSL Pinning/供应链） |
+| 部署上线 / 运维 Runbook | [RootDoc-Deploy.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/docs/RootDoc-Deploy.md) | [BackDoc-Infra.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/CS-Web-Backend/tools/docs/BackDoc-Infra.md) / FrontDoc-Ops.md |
+| 通用跨仓工程红线 + 命名门禁 + 版本三源 | [RootDoc-EngConv.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/docs/RootDoc-EngConv.md) | RootDoc-ModuleMap.md |
+
+---
+
+> ↩ **返回文档地图**：[README.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/README.md) · **Tutorial 配套 How-to（部署）**：[RootDoc-Deploy.md](RootDoc-Deploy.md) · **工程约定权威**：[RootDoc-EngConv.md](RootDoc-EngConv.md) · **架构入口**：三仓 `-01-Arch.md`

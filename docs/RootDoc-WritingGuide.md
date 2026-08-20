@@ -1,8 +1,37 @@
-# RootDoc-WritingGuide｜文档编写规范总纲
+# RootDoc-WritingGuide｜文档编写规范总纲（Reference · 全项目文档写作 SSOT，优先级高于任何单文档旧约定）
 
 > 更新人：3yearsZ
-> 生效日：2026-08-20
-> 版本：1.0.0
+> 更新日：2026-08-20
+> 版本：1.0.1 · 七夕（Diátaxis R 类规范，全项目文档写作 SSOT）
+> Diátaxis：R（Reference · 回答「是什么」，提供全项目文档的分类框架、行文规范、架构模板、术语表的精确权威定义；不包含可执行步骤）
+> 适用读者：全仓贡献者 / 文档作者 / Reviewer / 发布负责人；已完成 Onboarding 并了解项目结构
+> 变更触发：新增文档类型 / 规范层级调整 / 模板结构变更 / 术语表更新
+
+> **SSOT 分工声明**：
+> - 本文档是「**全项目文档写作规范的唯一权威（SSOT）**」——涵盖分类框架（Diátaxis）、行文质量（Google 中文落地）、架构模板（Arc42）、规范术语（RFC 2119）四个层级。
+> - 本文档优先级高于任何单文档中的旧约定；其他文档中的写作约定若与本文冲突，以本文为准。
+> - 单文档中的实例应用 → 各 `-01-Arch.md`（Arc42 模板实例）、`-02-Sec.md` / `-03-Conv.md`（RFC 2119 实例）、`RootDoc-EngConv.md`（跨仓约定实例）。
+> - 文档健康度度量与治理行动 → [RootDoc-DocHealth.md](RootDoc-DocHealth.md)（Explanation）。
+> - 模块契约详情 → [RootDoc-ModuleMap.md](RootDoc-ModuleMap.md)（Reference）。
+
+> **治理红线**：
+> - MUST NOT 在未经 Diátaxis 分类标注的情况下创建新文档；所有文档 MUST 在头部声明 T/H/R/E 类型（+L3/L4 叠加标注）
+> - MUST 在新建或重写文档时使用本文规定的 6 行元数据头部，顺序不可变
+> - MUST NOT 在 Arch 类文档中混入 RFC 2119 约束；RFC 2119 仅用于 `-02-Sec` / `-03-Conv` / `RootDoc-EngConv`
+> - MUST 在文档变更时同步更新本文档 §1.2 分类映射表
+
+---
+
+## 快速索引
+
+| 章节 | 主题 | 概述 | 适用文档 | 代码位置 |
+|------|------|------|----------|----------|
+| **§0 规范层级** | 四层规范体系总览 | L1 Diátaxis + L2 Google + L3 Arc42 + L4 RFC 2119 | 全部文档 | — |
+| **§1 Diátaxis 分类** | 四类文档定义 + 全文档映射 | T/H/R/E 定义、禁止混入项、全仓分类表 | 全部文档 | `docs/`、`CS-Web-Backend/tools/docs/`、`CS-Web-Frontend/tools/docs/`、`CS-Mobile/tools/docs/` |
+| **§2 Google 写作规范** | 中文落地检查清单 | 句子/段落/用词/代码四大维度 | 全部文档 | — |
+| **§3 Arc42 模板** | 架构文档 8 章结构 | 目标→上下文→构建块→运行时→部署→ADR→风险→术语 | 仅 `*-01-Arch.md`、`RootDoc-FEArch.md` | `CS-Web-Backend/tools/docs/BackDoc-01-Arch.md`、`CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md`、`CS-Mobile/tools/docs/MobileDoc-01-Arch.md`、`docs/RootDoc-FEArch.md` |
+| **§4 RFC 2119** | 四级术语表 + 示例 | MUST/MUST NOT/SHOULD/SHOULD NOT/MAY + 规范类结构模板 | `*-02-Sec.md`、`*-03-Conv.md`、`RootDoc-EngConv.md` | `CS-Web-Backend/tools/docs/BackDoc-02-Sec.md`、`CS-Web-Frontend/tools/docs/FrontDoc-02-Sec.md`、`CS-Mobile/tools/docs/MobileDoc-02-Sec.md`、`docs/RootDoc-EngConv.md` |
+| **§5 生效与例外** | 生效范围 + 例外声明 | 新建文档严格遵守；既有文档按 P1-P4 阶段重写 | 全部文档 | — |
 
 ---
 
@@ -247,3 +276,18 @@
    - 违反了本规范哪一条
    - 为什么必须违反（技术理由、业务紧急度等）
    - 计划修复时间
+
+---
+
+## 自检清单（文档变更时 MUST 逐项核对）
+
+| 检查项 | 说明 |
+|--------|------|
+| [ ] 头部 6 行元数据完整且顺序正确 | 更新人 / 更新日 / 版本 / Diátaxis / 适用读者 / 变更触发 |
+| [ ] Diátaxis 分类标注正确 | T / H / R / E （+L3 Arc42 / +L4 RFC 2119 叠加标注） |
+| [ ] 快速索引表与正文章节对齐 | 章节 / 主题 / 概述 / 代码位置准确 |
+| [ ] SSOT 分工声明无冲突 | 权威归属清晰，不与其他文档职责重叠 |
+| [ ] 治理红线以 RFC 2119 关键词标记 | MUST / MUST NOT / SHOULD 明确 |
+| [ ] 代码位置索引可定位 | 文件路径精确，符号名准确 |
+| [ ] §1.2 分类映射表已同步 | 新增/删除文档 MUST 更新分类表 |
+| [ ] 无指路式引用 > 2 个 / 篇 | 超过则说明文档定位不清 |
