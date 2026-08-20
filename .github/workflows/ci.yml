@@ -1,14 +1,17 @@
 name: Root CI (contract / version / docs)
 
-# 根仓 PR 级门禁（2026-08-19 补列，闭环「缺口②」残余项）：
-# 子仓库 CS-Web-Backend / CS-Web-Frontend 的 .github/workflows/ci.yml 已覆盖
-# lint / tsc / pytest / vitest / 覆盖率等代码级 PR 门禁（前端依赖审计在 FE 独立
-# .github/workflows/audit.yml；E2E 在根仓 e2e.yml）；但「API 契约冻结（G3/ER-04）」
-# 因 openapi.baseline.json 仅存于根仓、子模块 checkout 拿不到基线，此前只由 Jenkinsfile /
-# 根 `make contract-check` 覆盖，未进 GitHub Actions PR。本 workflow 在根仓视角同时握有
-# 基线 + 子模块代码，将契约冻结 + 版本四源一致 + 文档死链三项根级门禁补进 PR 必过。
+# 根仓协同门禁（per-repo 精修 + 根协同架构）：
+# 子仓（CS-Web-Backend / CS-Web-Frontend）各自跑自包含代码门禁；本文档只承担
+# 需要"根基线 + 子模块代码"同时在场才能判定的跨仓门禁：
+#   1) API 契约冻结（G3/ER-04）——后端当前契约 vs 根仓冻结基线；
+#   2) 前端契约快照同步——前端内嵌 openapi.baseline.json 快照必须与根仓基线一致
+#      （保证前端自包含生成类型的来源始终对齐后端契约）；
+#   3) 版本四源一致（ER-33）、文档死链（ER-09）、模块命名（P2-9）。
 #
-# 注意：契约比对需 import 后端 app（app.openapi()，无需 DB），故安装后端 dev 依赖。
+# checkout 说明：根仓 .gitmodules 声明了 CS-Web-Backend / CS-Web-Frontend / CS-Mobile
+# 三个子模块，其中 CS-Mobile 仓库在 GitHub 上不存在，`submodules: recursive` 会在
+# checkout 阶段直接失败（历史 CI 必红主因）。故此处改为手动选择性 init 后端+前端，
+# 跳过 CS-Mobile；模块命名门禁对缺失目录已容错（collect_dir_modules 对不存在目录返回空）。
 
 on:
   pull_request:
@@ -20,32 +23,63 @@ on:
 permissions:
   contents: read
 
+env:
+  # 契约比对需 import 后端 app（app.openapi()，无需 DB），这些为一次性 CI 占位值。
+  DATABASE_HOST: localhost
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: domefff
+  DATABASE_USER: postgres
+  DATABASE_PASSWORD: ci-placeholder
+  SECRET_KEY: ci-placeholder-secret-key-32bytes-minimum
+  TOTP_ENCRYPTION_KEY: ci-placeholder-totp-encryption-key-32bytes
+  ADMIN_PASSWORD: Ci-Build-Admin-2026!
+  ALLOWED_ORIGINS: http://localhost:2333
+  TESTING: "True"
+  DB_AUTO_CREATE_DATABASE: "False"
+
 jobs:
-  root-gates:
-    name: Contract freeze + Version sync + Docs links
+  cross-repo-gates:
+    name: Contract freeze + Snapshot sync + Version + Docs + Module naming
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
     steps:
-      - name: Checkout root repo with submodules
+      - name: Checkout root repo (no submodules)
         uses: actions/checkout@v5
-        with:
-          submodules: recursive
+
+      - name: Checkout backend & frontend submodules (skip CS-Mobile)
+        # 用 HTTPS 改写替代 SSH 子模块 URL；后端/前端子模块均为 PUBLIC，克隆无需凭据。
+        # CS-Mobile 在 GitHub 上不存在，必须跳过，否则 checkout 失败。
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --depth 1 CS-Web-Backend
+          git submodule update --init --depth 1 CS-Web-Frontend
+          if [ -d CS-Mobile/.git ]; then git submodule update --init --depth 1 CS-Mobile; fi
 
       - name: Setup Python 3.13
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
-          cache: 'pip'
-          cache-dependency-path: 'CS-Web-Backend/requirements-dev.lock'
+          python-version: "3.13"
+          cache: "pip"
+          cache-dependency-path: CS-Web-Backend/requirements-dev.lock
 
       - name: Install backend dev dependencies
         working-directory: CS-Web-Backend
         run: python -m pip install --require-hashes -r requirements-dev.lock
 
       - name: API contract freeze (G3 / ER-04)
-        # 比对当前 /api/v1 契约与根仓冻结基线；差异即失败（需评审并更新基线）。
-        run: make contract-check
+        # 比对后端当前 /api/v1 契约与根仓冻结基线；差异即失败（需评审后更新基线）。
+        working-directory: CS-Web-Backend
+        run: python tools/scripts/contract/export_openapi.py --check ../openapi.baseline.json
+
+      - name: Frontend contract snapshot sync
+        # 前端内嵌 openapi.baseline.json 快照必须与根仓基线逐字节一致，
+        # 保证前端自包含 gen:api-types 的来源始终对齐后端契约（单一事实源）。
+        run: |
+          if ! diff -q openapi.baseline.json CS-Web-Frontend/openapi.baseline.json; then
+            echo "::error::前端契约快照与根仓基线不一致。请在根仓更新基线后同步复制到 CS-Web-Frontend/openapi.baseline.json，并执行 pnpm gen:api-types 提交类型。"
+            exit 1
+          fi
 
       - name: Version four-source sync (ER-33)
         run: python3 scripts/check/check_version_sync.py
@@ -53,6 +87,6 @@ jobs:
       - name: Docs dead links (ER-09)
         run: python3 scripts/check/check_dead_links.py --base . --docs docs
 
-      - name: Module naming sync (P2-9, 2026-08-19)
-        # 三端模块名（前端/移动端 src/modules、后端 api/v1）须 ⊆ 契约资源名；新业务模块先入契约。
+      - name: Module naming sync (P2-9)
+        # 三端模块名 ⊆ 契约资源名；CS-Mobile 缺失时对其自动容错（返回空集）。
         run: python3 scripts/check/check_module_naming.py

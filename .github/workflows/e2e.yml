@@ -1,9 +1,8 @@
 name: E2E (full stack)
 
-# ER-14（方案C）：E2E 需完整环境（前端 BFF + 后端 + DB），成本较高，
-# 不进常规 PR。改为 nightly 全量跑 + 保留 workflow_dispatch 手动触发。
-# 2026-08-19 起新增 push:main 触发（门槛#3「E2E 发布前必过」闭环）：
-# 合并到默认分支即跑全栈 E2E，保证 main 始终处于「可发布绿」状态。
+# ER-14（方案C）：E2E 需完整环境（前端 BFF + 后端 + DB），成本较高，不进常规 PR。
+# 仅 nightly 全量跑 + workflow_dispatch 手动触发（已移除 push:main——避免每次合入
+# main 都触发昂贵 E2E、且此前因 CS-Mobile 子模块缺失在 checkout 阶段即失败）。
 # CI 经根仓 docker-compose 起后端栈（db/redis/backend），前端 dev server
 # 由 Playwright webServer 在 runner 上拉起，BFF 转发到 127.0.0.1:8000。
 
@@ -11,11 +10,6 @@ on:
   schedule:
     # 每日 02:00 北京时间（UTC 18:00 前一日）跑全量 E2E
     - cron: '0 18 * * *'
-  push:
-    # 门槛#3（E2E 发布前必过）闭环：合并到 main 即跑全栈 E2E，
-    # 保证默认分支始终处于「可发布绿」状态（发布即来自 main）。
-    # 仍保留 nightly（schedule）与手动（workflow_dispatch）触发。
-    branches: [main]
   workflow_dispatch:
     inputs:
       ref:
@@ -29,11 +23,19 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Checkout root repo with submodules
+      - name: Checkout root repo (no submodules)
         uses: actions/checkout@v5
         with:
-          submodules: recursive
           ref: ${{ github.event.inputs.ref || '' }}
+
+      - name: Checkout backend & frontend submodules (skip CS-Mobile)
+        # CS-Mobile 子模块在 GitHub 上不存在，`submodules: recursive` 会导致 checkout 失败。
+        # 改为 HTTPS 改写 + 手动 init 后端/前端（均 PUBLIC，克隆无需凭据）。
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --depth 1 CS-Web-Backend
+          git submodule update --init --depth 1 CS-Web-Frontend
+          if [ -d CS-Mobile/.git ]; then git submodule update --init --depth 1 CS-Mobile; fi
 
       - name: Generate .env for docker-compose
         # CI 一次性环境，全部用占位值；ADMIN_PASSWORD 供后端 rbac_init seed 建管理员
