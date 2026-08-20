@@ -3,11 +3,11 @@
 # update.sh —— 根级：轻量更新部署服务
 #
 # 用法：
-#   ./scripts/db/update.sh            # 自动检测变更的服务并更新
-#   ./scripts/db/update.sh --all      # 强制重建全部服务（不含 db/redis/caddy）
-#   ./scripts/db/update.sh backend    # 仅更新指定服务（backend / frontend / all）
-#   ./scripts/db/update.sh --no-pull  # 跳过 git pull，仅用当前代码重建
-#   ./scripts/db/update.sh --no-cache # 强制无缓存构建（慢，仅排查问题时用）
+#   ./scripts/ops/update.sh            # 自动检测变更的服务并更新
+#   ./scripts/ops/update.sh --all      # 强制重建全部服务（不含 db/redis/caddy）
+#   ./scripts/ops/update.sh backend    # 仅更新指定服务（backend / frontend / all）
+#   ./scripts/ops/update.sh --no-pull  # 跳过 git pull，仅用当前代码重建
+#   ./scripts/ops/update.sh --no-cache # 强制无缓存构建（慢，仅排查问题时用）
 #
 # 说明：
 #   - 基于根 docker-compose.yml，只重建有代码变更的服务，利用 Docker 层缓存加速。
@@ -59,7 +59,7 @@ while [[ $# -gt 0 ]]; do
     backend|Backend|BACKEND)     TARGET="backend"; shift ;;
     frontend|Frontend|FRONTEND)  TARGET="frontend"; shift ;;
     -h|--help)
-      echo "用法: ./scripts/db/update.sh [--all | backend | frontend] [--no-pull] [--no-cache]"
+      echo "用法: ./scripts/ops/update.sh [--all | backend | frontend] [--no-pull] [--no-cache]"
       echo ""
       echo "选项:"
       echo "  (无参数)    自动检测变更的服务并更新"

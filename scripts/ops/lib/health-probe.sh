@@ -2,7 +2,7 @@
 # =============================================================================
 # health-probe.sh —— 容器内健康端点探测（共享 lib）
 #
-# 供 scripts/db/update.sh（轮询）与 scripts/db/healthcheck.sh（单次）source 复用。
+# 供 scripts/ops/update.sh（轮询）与 scripts/ops/healthcheck.sh（单次）source 复用。
 # 两脚本原各自内联 docker compose exec 探测命令（c146d38 引入重复），收敛于此。
 #
 # 用法（被调用方 source 后）：

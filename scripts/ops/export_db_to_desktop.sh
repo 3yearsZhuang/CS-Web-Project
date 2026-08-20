@@ -3,11 +3,13 @@
 # export_db_to_desktop.sh —— 根级：导出开发环境 PostgreSQL 备份到用户桌面
 #
 # 用法：
-#   ./scripts/db/export_db_to_desktop.sh                  # 默认导出到 ~/Desktop
-#   ./scripts/db/export_db_to_desktop.sh /自定义/目录      # 指定输出目录
+#   ./scripts/ops/export_db_to_desktop.sh                  # 默认导出到 ~/Desktop
+#   ./scripts/ops/export_db_to_desktop.sh /自定义/目录      # 指定输出目录
 #
 # 说明：
-#   - 复用 CS-Web-Backend/tools/scripts/backup_db.sh 的备份逻辑（pg_dump 自定义格式 + gzip）。
+#   - 备份格式与 CS-Web-Backend/tools/scripts/db/backup_db.sh 对齐（pg_dump 自定义格式 + gzip）。
+#   - 本脚本与 backup_db.sh 各自维护：前者供根仓桌面快速导出（读根 .env + 内置 db→localhost 回退）；
+#     backup_db.sh 面向后端备份/恢复（读后端 .env，无 host 回退）。改动备份格式时需两处同步。
 #   - 连接参数取自根 .env（DATABASE_HOST / PORT / NAME / USER / PASSWORD）。
 #   - 开发环境通常 DATABASE_HOST=localhost（见 Makefile 注释），docker-compose 内为 db。
 #   - 导出文件：<桌面>/domefff_<时间戳>.sql.gz

@@ -3,10 +3,10 @@
 # healthcheck.sh —— 根级：定时自检脚本
 #
 # 用法：
-#   ./scripts/db/healthcheck.sh                # 执行全部检查，失败项输出红色，全部通过 exit 0
-#   ./scripts/db/healthcheck.sh --quiet        # 只输出异常项（用于 cron 静默运行）
-#   ./scripts/db/healthcheck.sh --json         # 以 JSON 格式输出检查结果
-#   ./scripts/db/healthcheck.sh --only disk,bak # 仅运行指定检查项（逗号分隔）
+#   ./scripts/ops/healthcheck.sh                # 执行全部检查，失败项输出红色，全部通过 exit 0
+#   ./scripts/ops/healthcheck.sh --quiet        # 只输出异常项（用于 cron 静默运行）
+#   ./scripts/ops/healthcheck.sh --json         # 以 JSON 格式输出检查结果
+#   ./scripts/ops/healthcheck.sh --only disk,bak # 仅运行指定检查项（逗号分隔）
 #
 # 检查项（对齐 RootDoc-Deploy.md §七 告警规则）：
 #   container  所有 compose 服务容器状态为 Up/healthy
@@ -17,7 +17,7 @@
 #   logerr     最近 1 小时 ERROR 日志数量与摘要
 #
 # 使用场景：
-#   1. 手动巡检：./scripts/db/healthcheck.sh
+#   1. 手动巡检：./scripts/ops/healthcheck.sh
 #   2. 定时自检：加入宿主机 crontab 或 compose sidecar
 #   3. 告警触发：有失败项时 exit 非 0，配合 cron MAILTO/外部告警
 # =============================================================================

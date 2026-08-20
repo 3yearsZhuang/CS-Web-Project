@@ -93,7 +93,7 @@ dev-down:
 # 缓存损坏（如大规模删代码后）。无需改代码，冷重启 dev server 即可恢复。
 restart-frontend:
 	@echo ">>> 冷重启前端 dev server（释放 :2333 并重新 pnpm dev）..."
-	cd CS-Web-Frontend && node ./tools/scripts/fe/build/restart-frontend.mjs
+	cd CS-Web-Frontend && node ./tools/scripts/build/restart-frontend.mjs
 
 # ---- 容器化部署（根级全栈 compose）----
 
@@ -148,8 +148,12 @@ check: check-contract check-docs check-fe-boundary check-version-group check-mod
 # 契约类（G3：API 契约冻结）
 check-contract: contract-check
 
-# 文档类（ER-09：死链审计）
-check-docs: check-docs-links
+# 文档类（ER-09：死链审计；doc-facts：派生事实一致）
+check-docs: check-docs-links check-doc-facts
+
+# 派生事实自检（C-方案：不实际改写，只报告待同步项）
+check-doc-facts:
+	python3 scripts/doc/gen_doc_facts.py --dry-run
 
 # 前端边界类（AL-1：BFF 安全边界）
 check-fe-boundary: check-bff-boundary
@@ -173,6 +177,12 @@ contract-check:
 # 生成 API 参考文档（ReDoc 查看器，D1：由基线真实生成，勿手改；需网络拉取 npx 包）：
 gen-api-docs:
 	npx -y @redocly/cli@latest build-docs openapi.baseline.json -o docs/api-reference.html
+
+# ---- 派生事实一键同步（方案 C：代码变更后刷新文档派生字段）----
+# 自动计算 Alembic head 并同步到相关文档（幂等）；版本/模块/测试以报告提示。
+# 手动用法：make gen-doc-facts
+gen-doc-facts:
+	python3 scripts/doc/gen_doc_facts.py
 
 # ---- 文档死链审计（ER-09）----
 # 可复现的 PR 门禁：扫描 docs/ 与根级 *.md，断文件链接即失败。
@@ -209,7 +219,7 @@ deps-export:
 #   make clean-artifacts                  # 预览（dry-run），复核将要删除的目标
 #   make clean-artifacts APPLY=1          # 真删（A+B：.build / 缓存 / 日志 / 临时）
 #   make clean-artifacts APPLY=1 WITH_DEPS=1  # 含依赖 node_modules/.venv（C）
-# 安全守卫：凡 git 跟踪的路径（如 tools/scripts/fe/build 源码）一律跳过，绝不误删。
+# 安全守卫：凡 git 跟踪的路径（如 tools/scripts/build 源码）一律跳过，绝不误删。
 clean-artifacts:
 	@bash $(CURDIR)/scripts/clean-artifacts.sh $(if $(filter 1,$(APPLY)),--apply,) $(if $(filter 1,$(WITH_DEPS)),--with-deps,)
 	@echo ">>> clean-artifacts 完成（默认 dry-run，确认无误后 APPLY=1 真删）"

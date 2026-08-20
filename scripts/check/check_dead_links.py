@@ -8,9 +8,9 @@
 
 仅依赖标准库，CI 无需额外安装。用法：
 
-    python3 scripts/check_dead_links.py                 # 扫描 ./docs 与根级 *.md
-    python3 scripts/check_dead_links.py --root . --strict-anchors
-    python3 scripts/check_dead_links.py --docs docs --base .
+    python3 scripts/check/check_dead_links.py                 # 扫描 ./docs 与根级 *.md
+    python3 scripts/check/check_dead_links.py --root . --strict-anchors
+    python3 scripts/check/check_dead_links.py --docs docs --base .
 
 链接解析规则：
 - http(s):// 外链跳过（不审计可达性）。

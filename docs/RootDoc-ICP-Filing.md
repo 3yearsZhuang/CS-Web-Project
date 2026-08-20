@@ -253,8 +253,8 @@
 | 运行状态 | `/status` 各组件状态明细；`/metrics/json` 性能指标 |
 | 异常监控 | 运行时异常自动记录至数据库，异常日志可查询分析 |
 | 日志管理 | 结构化日志（生产 JSON + 文件轮转），请求 ID 链路追踪 |
-| 数据备份 | 数据库备份脚本（`tools/scripts/backup_db.sh`） |
-| 安全扫描 | 安全扫描脚本（`tools/scripts/scan_security.py`） |
+| 数据备份 | 数据库备份脚本（`CS-Web-Backend/tools/scripts/db/backup_db.sh`） |
+| 安全扫描 | 安全扫描脚本（`CS-Web-Backend/tools/scripts/check/scan_security.py`） |
 | 密钥管理 | 密钥通过环境变量注入，不入代码库；定期轮换机制 |
 
 ---

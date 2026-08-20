@@ -2,10 +2,10 @@
 #
 # clean-artifacts.sh — 安全清理项目构建可再生产物与确定无用文件（范围 A+B）。
 #
-# 安全设计（防误删跟踪源码，避免 2026-08-19 把 tools/scripts/fe/build 当产物删的事故）：
+# 安全设计（防误删跟踪源码，避免 2026-08-19 把 tools/scripts/build 当产物删的事故）：
 #   1) 仅针对"构建/缓存/日志/临时"白名单模式，绝不按裸目录名一刀切。
 #   2) 对每个候选目标，先确认其【不被 git 跟踪】才删除；被跟踪的（如
-#      tools/scripts/fe/build 这类以 build 命名的源码目录）一律 SKIP 并告警。
+#      tools/scripts/build 这类以 build 命名的源码目录）一律 SKIP 并告警。
 #   3) 依赖目录 node_modules / .venv 默认不在范围（属 C 类，需 --with-deps 显式开启）。
 #   4) 默认 --dry-run 预览；--apply 才真删。强烈建议先 --dry-run 复核再 apply。
 #
