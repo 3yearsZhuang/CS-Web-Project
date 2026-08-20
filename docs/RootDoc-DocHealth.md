@@ -31,8 +31,8 @@
 | 根 `README.md` | 「以下能力在 0.9.8 中已具备」 | README.md L26 |
 | `RootDoc-Deploy.md` | 全文多处锚定「0.9.8」，最后更新 2026-08-08；`对应版本：0.9.8` | [RootDoc-Deploy.md](RootDoc-Deploy.md#L4-L5) |
 | `RootDoc-MigEval.md` | 章节标题「0.9.8 补录，2026-08-08」 | RootDoc-MigEval.md L180 |
-| `BackDoc-01-Arch` / `Conv` / `Infra` | 最后更新 2026-08-08、锚定 v0.9.8；`BackDoc-Infra` 断言「Alembic 单一 head `d3e4f5a6b7c8`」与后续新增迁移冲突 | [BackDoc-Infra.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/CS-Web-Backend/tools/docs/BackDoc-Infra.md#L182) |
-| `Onboarding.md` | 「截至 0.9.8，api-usage-stats 尚未注册」+ `[待填写：确认是否随 1.0.0 注册]` | [Onboarding.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/docs/Onboarding.md#L189) |
+| `BackDoc-01-Arch` / `Conv` / `Infra` | 最后更新 2026-08-08、锚定 v0.9.8；`BackDoc-Infra` 断言「Alembic 单一 head `d3e4f5a6b7c8`」与后续新增迁移冲突 | [BackDoc-Infra.md](../CS-Web-Backend/tools/docs/BackDoc-Infra.md) |
+| `Onboarding.md` | 「截至 0.9.8，api-usage-stats 尚未注册」+ `[待填写：确认是否随 1.0.0 注册]` | [Onboarding.md](Onboarding.md) |
 | `FrontDoc-Ops` / `02-Sec` / `i18n` | 最后更新 2026-08-05，落后于 2026-08-19/20 的工作台/契约变更 | — |
 
 **未决占位符**：`BackDoc-Infra.md`「表总数精确值 [待填写]」；`Onboarding.md` `[待填写：…]` —— 属未完成内容，不应出现在权威文档正文。

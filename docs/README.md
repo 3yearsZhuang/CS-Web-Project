@@ -26,7 +26,7 @@
 |---|---|---|
 | `CS-Web-Backend/tools/docs/` | [README.md](../CS-Web-Backend/tools/docs/README.md) | 后端 FastAPI 文档索引：`BackDoc-01-Arch.md`（架构 + 业务模块契约 Part B）、`BackDoc-02-Sec.md`（安全）、`BackDoc-03-Conv.md`（工程约定）、`BackDoc-Infra.md`（基础设施） |
 | `CS-Web-Frontend/tools/docs/` | [README.md](../CS-Web-Frontend/tools/docs/README.md) | 前端文档：`FrontDoc-01-Arch.md`（架构 + 业务模块契约 Part B + 前后端联动）、`FrontDoc-03-Conv.md`（编码规范，对标后端 BackDoc-03-Conv.md）、`FrontDoc-02-Sec.md`（安全）、`FrontDoc-UID.md`（UI 设计规范 + Markdown 编辑器 §14）、`FrontDoc-Ops.md`（运维）、`FrontDoc-i18n.md`（国际化迁移指南） |
-| `CS-Mobile/tools/docs/` | [README.md](../CS-Mobile/tools/docs/README.md) | 移动端文档：uni-app 单码双端架构/构建、ApiClient 薄层与 token 安全存储、U-02~U-04 依赖；`arch/` 归档 7 份移动端架构方案（高层架构/系统设计/UserStory/部署/安全/调研/资料摘要，G1~G5 审核通过，唯一权威） |
+| `CS-Mobile/tools/docs/` | `README.md`（移动端子仓库未在 GitHub 暴露，见本地 `CS-Mobile/tools/docs/`） | 移动端文档：uni-app 单码双端架构/构建、ApiClient 薄层与 token 安全存储、U-02~U-04 依赖；`arch/` 归档 7 份移动端架构方案（高层架构/系统设计/UserStory/部署/安全/调研/资料摘要，G1~G5 审核通过，唯一权威） |
 
 ---
 
