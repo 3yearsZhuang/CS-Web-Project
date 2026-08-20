@@ -30,9 +30,13 @@
 
 ### Fixed
 
+- **移动端便签/NoteBody 操作按钮不可见（hover 依赖）**：3 处 `opacity-0 group-hover:opacity-100`（tasks-and-notes 便签「转任务」/「删除」+ schema NoteBody「删除」）→ `opacity-50` 半透明常显 + `hover/focus` 增强——移动端无 hover 状态，原实现按钮永远不可见不可用；桌面端 hover 反馈不变。验证：playwright 移动端 375px 截图注入测试便签，两按钮常显可点；工作台 `group-hover:opacity-100` 零残留。
+
 - **发布脚本 `tag_and_release.sh` 中文 codename 崩溃修复**：根因是第 71 行 `perl -i -pe 's/.../"$VERSION"  if $. == 3;'`——替换串以 `"` 结尾后紧跟 `if` 修饰符，perl 把 `"  if $. == 3;` 误认为替换串延续，报 `Substitution replacement not terminated`（与中文 codename 无关，此前误判）。修复：统一改用 `s{}{}` 花括号分隔 + 前置 `if ($. == N)` 条件（兼容引号结尾替换串）；顺带把 codename 部分 perl 从双引号包裹（`$1` 会被 shell 提前展开为空）改为单引号拼接。模拟仓库三场景验证通过（中文 codename / 首次添加 codename / 无 codename 清空）。
 
 ### Changed
+
+- **工作台移动端响应式（骨架断点分离，2026-08-20）**：网格容器 `<lg` 断点从变尺寸积木网格切换为单列流式——`flex flex-col gap-3` / `lg:grid lg:grid-cols-6 lg:[grid-auto-flow:dense]`。根治移动端畸形（full 卡 `span 6` 在 2 列栅格下生成隐式列溢出、固定行高 `gridAutoRows` 挤压内容、`dense` 回填混乱——桌面积木规格按 6 列设计，天生不适配窄屏）。关键洞察：卡片内联 `gridColumn/gridRow/gridAutoRows` 在 flex 容器下自动失效，**卡片零改动**；cell 测量加 `display !== 'grid'` 防护（移动端不测量无意义 cell）。GitHub 热力图去掉 `min-w-[640px]` 固定宽度 → 53 列 `1fr` 等分容器（行高 10→8px），桌面 2×1 卡（~368px）与移动端均不再横向滚动。验证：playwright 实测移动端 375/390px `display:flex`（单列全宽堆叠，7 卡无畸形）、桌面 1280px `display:grid` 6 列（积木保留）；ts-check 10 基线零新增。
 
 - **三端模块化规范化重构（P2-9，D 方向首波收口，2026-08-19）**：① 前端 hooks 归位 `ui/hooks/`（admin/community/auth 三域 15 个 `use-*.ts`，符合 modules/README 既有约定）+ 模块复数化改名（`user→users`、`announcement→announcements`、`notification→notifications`，对齐冻结契约与 BFF 路由，消除单数/复数双轨制）+ profile 域归位（5 业务组件 + `useProfile` 自 `app/profile` 与 `users` 域迁入 `modules/profile/`）；② 后端 services 真包化（16 个平铺 service 收编 5 个域包 `auth/community/event/user/rbac`，消灭空壳包，`app.services.X → app.services.<域>.X` 全量更新）+ `api/v1/tools/` 子域收包（exam/resource/task/points/component_registry/feature_visibility，路由前缀不变，`contract-check` 契约零漂移）；③ 移动端资源域骨架（`src/modules/{auth,profile}` + `src/shared/` 集中层，弃用系统设计 M1–M6 用例域草案并文档标注）；④ 规范化固化：`scripts/check/check_module_naming.py` 门禁（三端模块名 ⊆ 契约资源名）接入根 CI（`make check-module-naming`）。违约点（FEArch §6.3 改名/新建目录 ×2、AGENTS.md services/api 命名 ×2）均经用户逐项授权；E 域注册表治理 / 微服务 / 独立 SDK 列入 P2-9 远期。
 - **目标 2 完整收口 + 规范文档建立（2026-08-19）**：① app/ 页面目录散落业务组件全部归位（20 文件：12 组件 + 4 hooks + 4 tests → `modules/{auth,notifications,tools,community}/ui/` 与 `ui/hooks/`，app/ 仅剩 Next.js 页面壳）；② 公告横幅跨层依赖根治（A2：`useAnnouncements` 归位 announcements 域 + banner 改纯 UI 壳 + 新增 `announcement-banner-client` 数据容器，公共层零业务依赖）；③ 建立 `docs/模块命名映射表.md`（三端模块 ↔ 契约资源映射 SSOT，命名规范/门禁/违约点红线/变更记录）并登记文档地图，`RootDoc-EngConv.md` 命名小节改索引、后端 `AGENTS.md`/前端 `modules/README`/移动端 `tools/docs/README` 纠偏同步（包化例外与资源域结构）。
