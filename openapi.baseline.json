@@ -683,6 +683,17 @@
         "title": "AnnouncementOut",
         "type": "object"
       },
+      "ArchiveRequest": {
+        "properties": {
+          "archived": {
+            "default": true,
+            "title": "Archived",
+            "type": "boolean"
+          }
+        },
+        "title": "ArchiveRequest",
+        "type": "object"
+      },
       "AuditLogItem": {
         "description": "单条审计日志出参。",
         "properties": {
@@ -2329,6 +2340,35 @@
         "title": "ForgotPasswordRequest",
         "type": "object"
       },
+      "ForkRequest": {
+        "properties": {
+          "from_message_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Message Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "title": "ForkRequest",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -2546,6 +2586,206 @@
         "title": "JoinReviewRequest",
         "type": "object"
       },
+      "LearningGoalCreateRequest": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "exam_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exam Id"
+          },
+          "preferred_slots": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 14,
+            "title": "Preferred Slots",
+            "type": "array"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "weekly_budget_minutes": {
+            "default": 300,
+            "maximum": 10080.0,
+            "minimum": 15.0,
+            "title": "Weekly Budget Minutes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "LearningGoalCreateRequest",
+        "type": "object"
+      },
+      "LearningGoalUpdateRequest": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "exam_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exam Id"
+          },
+          "preferred_slots": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 14,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Slots"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "pattern": "^(active|paused|completed)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "weekly_budget_minutes": {
+            "anyOf": [
+              {
+                "maximum": 10080.0,
+                "minimum": 15.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekly Budget Minutes"
+          }
+        },
+        "title": "LearningGoalUpdateRequest",
+        "type": "object"
+      },
+      "LearningPlanUpdateRequest": {
+        "properties": {
+          "defer_to": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Defer To"
+          },
+          "locked": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locked"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "pattern": "^(planned|completed|deferred|skipped)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "LearningPlanUpdateRequest",
+        "type": "object"
+      },
       "LlmConfigIn": {
         "description": "用户 LLM 配置（api_key 留空表示保留原值）。",
         "properties": {
@@ -2708,6 +2948,58 @@
           "user"
         ],
         "title": "MeResponse",
+        "type": "object"
+      },
+      "MistakeReviewRequest": {
+        "properties": {
+          "error_reason": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Reason"
+          },
+          "feedback": {
+            "pattern": "^(again|hard|good|easy)$",
+            "title": "Feedback",
+            "type": "string"
+          }
+        },
+        "required": [
+          "feedback"
+        ],
+        "title": "MistakeReviewRequest",
+        "type": "object"
+      },
+      "MistakeUpdateRequest": {
+        "properties": {
+          "error_reason": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Reason"
+          },
+          "status": {
+            "pattern": "^(new|reviewing|mastered)$",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "MistakeUpdateRequest",
         "type": "object"
       },
       "ModuleVisibility": {
@@ -3596,6 +3888,21 @@
           "type"
         ],
         "title": "RegistrationField",
+        "type": "object"
+      },
+      "RenameRequest": {
+        "properties": {
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "RenameRequest",
         "type": "object"
       },
       "ResetRequestOut": {
@@ -9073,6 +9380,16 @@
               "title": "Limit",
               "type": "integer"
             }
+          },
+          {
+            "in": "query",
+            "name": "include_archived",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include Archived",
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -9101,6 +9418,172 @@
           }
         ],
         "summary": "List Conversations",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      }
+    },
+    "/api/v1/auxilio/conversations/{conversation_id}": {
+      "delete": {
+        "operationId": "delete_conversation_api_v1_auxilio_conversations__conversation_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cascade",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Cascade",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Delete Conversation",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      },
+      "patch": {
+        "operationId": "update_conversation_api_v1_auxilio_conversations__conversation_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Update Conversation",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      }
+    },
+    "/api/v1/auxilio/conversations/{conversation_id}/archive": {
+      "post": {
+        "operationId": "archive_conversation_api_v1_auxilio_conversations__conversation_id__archive_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Archive Conversation",
         "tags": [
           "学习助手",
           "学习助手"
@@ -9154,6 +9637,63 @@
         ]
       }
     },
+    "/api/v1/auxilio/conversations/{conversation_id}/fork": {
+      "post": {
+        "description": "从当前用户会话的某条消息创建独立分支。",
+        "operationId": "fork_conversation_api_v1_auxilio_conversations__conversation_id__fork_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Fork Conversation",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      }
+    },
     "/api/v1/auxilio/conversations/{conversation_id}/messages": {
       "get": {
         "operationId": "list_messages_api_v1_auxilio_conversations__conversation_id__messages_get",
@@ -9194,6 +9734,565 @@
           }
         ],
         "summary": "List Messages",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      }
+    },
+    "/api/v1/auxilio/conversations/{conversation_id}/runs": {
+      "get": {
+        "description": "返回会话每轮 Agent 执行的状态、成本和消息关联。",
+        "operationId": "list_runs_api_v1_auxilio_conversations__conversation_id__runs_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "List Runs",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      }
+    },
+    "/api/v1/auxilio/goals": {
+      "get": {
+        "operationId": "list_learning_goals_api_v1_auxilio_goals_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "include_completed",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include Completed",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "List Learning Goals",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      },
+      "post": {
+        "operationId": "create_learning_goal_api_v1_auxilio_goals_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningGoalCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Create Learning Goal",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      }
+    },
+    "/api/v1/auxilio/goals/{goal_id}": {
+      "delete": {
+        "operationId": "delete_learning_goal_api_v1_auxilio_goals__goal_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "goal_id",
+            "required": true,
+            "schema": {
+              "title": "Goal Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Delete Learning Goal",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      },
+      "patch": {
+        "operationId": "update_learning_goal_api_v1_auxilio_goals__goal_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "goal_id",
+            "required": true,
+            "schema": {
+              "title": "Goal Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningGoalUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Update Learning Goal",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      }
+    },
+    "/api/v1/auxilio/mistakes": {
+      "get": {
+        "description": "返回当前用户错题快照；过滤在服务边界内完成所有权隔离。",
+        "operationId": "list_mistakes_api_v1_auxilio_mistakes_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tag",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tag"
+            }
+          },
+          {
+            "in": "query",
+            "name": "due_only",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Due Only",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "List Mistakes",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      }
+    },
+    "/api/v1/auxilio/mistakes/{mistake_id}": {
+      "patch": {
+        "operationId": "update_mistake_api_v1_auxilio_mistakes__mistake_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "mistake_id",
+            "required": true,
+            "schema": {
+              "title": "Mistake Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MistakeUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Update Mistake",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      }
+    },
+    "/api/v1/auxilio/mistakes/{mistake_id}/review": {
+      "post": {
+        "operationId": "review_mistake_api_v1_auxilio_mistakes__mistake_id__review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "mistake_id",
+            "required": true,
+            "schema": {
+              "title": "Mistake Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MistakeReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Review Mistake",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      }
+    },
+    "/api/v1/auxilio/plan": {
+      "get": {
+        "operationId": "list_learning_plan_api_v1_auxilio_plan_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "plan_date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Plan Date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "generate",
+            "required": false,
+            "schema": {
+              "default": true,
+              "title": "Generate",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "List Learning Plan",
+        "tags": [
+          "学习助手",
+          "学习助手"
+        ]
+      }
+    },
+    "/api/v1/auxilio/plan/{item_id}": {
+      "patch": {
+        "operationId": "update_learning_plan_api_v1_auxilio_plan__item_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningPlanUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Update Learning Plan",
         "tags": [
           "学习助手",
           "学习助手"
