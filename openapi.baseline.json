@@ -519,6 +519,138 @@
         "title": "AdminUserUpdate",
         "type": "object"
       },
+      "AgentInboxItemOut": {
+        "description": "建议收件箱出参。",
+        "properties": {
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "estimatedMinutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimatedminutes"
+          },
+          "expiresAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expiresat"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "payload": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payload"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "resolvedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolvedat"
+          },
+          "snoozedUntil": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snoozeduntil"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "title": "Updatedat",
+            "type": "string"
+          },
+          "userId": {
+            "title": "Userid",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "type",
+          "source",
+          "title",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "AgentInboxItemOut",
+        "type": "object"
+      },
       "AnnouncementInput": {
         "description": "创建/更新公告输入。",
         "properties": {
@@ -1869,6 +2001,28 @@
             ],
             "title": "Cancelledat"
           },
+          "displayName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Displayname"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
           "eventId": {
             "title": "Eventid",
             "type": "integer"
@@ -2538,6 +2692,36 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "InboxStatusActionIn": {
+        "additionalProperties": false,
+        "description": "用户对建议的处理动作：accept / dismiss / snooze。\n\nmodel_config 显式声明（In 入参非 TZModel，不享受全局 from_attributes）。",
+        "properties": {
+          "action": {
+            "description": "accept | dismiss | snooze",
+            "title": "Action",
+            "type": "string"
+          },
+          "snooze_minutes": {
+            "anyOf": [
+              {
+                "maximum": 10080.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "snooze 时的延后分钟数",
+            "title": "Snooze Minutes"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "InboxStatusActionIn",
         "type": "object"
       },
       "JoinApplicationInput": {
@@ -8271,6 +8455,209 @@
         ]
       }
     },
+    "/api/v1/agent-inbox": {
+      "get": {
+        "description": "我的建议收件箱（读取时惰性回收 snooze 到期与过期项）。",
+        "operationId": "list_inbox_api_v1_agent_inbox_get",
+        "parameters": [
+          {
+            "description": "按状态过滤",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按状态过滤",
+              "title": "Status"
+            }
+          },
+          {
+            "description": "按建议类型过滤",
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按建议类型过滤",
+              "title": "Type"
+            }
+          },
+          {
+            "description": "跳过的记录数（与 page 互斥）",
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "description": "跳过的记录数（与 page 互斥）",
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "每页返回的最大记录数",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "description": "每页返回的最大记录数",
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码（1-based，提供时与 page_size 一起计算 skip/limit）",
+              "title": "Page"
+            }
+          },
+          {
+            "description": "每页大小（提供时覆盖 limit）",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页大小（提供时覆盖 limit）",
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AgentInboxItemOut"
+                  },
+                  "title": "Response List Inbox Api V1 Agent Inbox Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "List Inbox",
+        "tags": [
+          "Agent建议收件箱"
+        ]
+      }
+    },
+    "/api/v1/agent-inbox/{item_id}/status": {
+      "patch": {
+        "description": "处理建议：accept / dismiss / snooze（+snoozeMinutes）。",
+        "operationId": "update_inbox_status_api_v1_agent_inbox__item_id__status_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InboxStatusActionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentInboxItemOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Update Inbox Status",
+        "tags": [
+          "Agent建议收件箱"
+        ]
+      }
+    },
     "/api/v1/announcements": {
       "get": {
         "description": "生效公告（公开）。带登录态时按角色定向过滤。",
@@ -12297,7 +12684,7 @@
     },
     "/api/v1/community/tags": {
       "get": {
-        "description": "聚合公开文章（published）中出现过的全部标签，去重排序后返回。\n\n供前端 Feed 页标签云使用；标签云为空时不视为错误。",
+        "description": "聚合公开文章（published）中出现过的全部标签，去重排序后返回。\n\n供前端 Feed 页标签云使用；标签云为空时不视为错误。\n\n实现：数据库侧用 ``jsonb_array_elements_text`` 展开 + DISTINCT 去重，\n不再把全表 tags 列拉回 Python 遍历（文章量增长后原实现是明显的读放大）。",
         "operationId": "list_tags_api_v1_community_tags_get",
         "responses": {
           "200": {
@@ -12672,7 +13059,7 @@
     },
     "/api/v1/events": {
       "get": {
-        "description": "活动列表（status/search/tag 筛选 + 分页，含报名人数）。",
+        "description": "活动列表（status/month/search/tag 筛选 + 分页，含报名人数）。",
         "operationId": "list_events_api_v1_events_get",
         "parameters": [
           {
@@ -12689,6 +13076,22 @@
                 }
               ],
               "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "month",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Month"
             }
           },
           {
