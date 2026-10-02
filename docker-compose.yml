@@ -74,6 +74,14 @@ services:
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
     expose:
       - "8000"
+    # ER-34 补全：/readyz 探 DB 就绪（503=未就绪）。此前 backend 无探针，
+    # cs-website 的 `condition: service_healthy` 门禁形同虚设，后端起不来时 BFF 全量 502。
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import os,urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/readyz', timeout=3).status==200 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
     depends_on:
       db:
         condition: service_healthy

@@ -13,7 +13,7 @@
     python3 scripts/check/check_dead_links.py --docs docs --base .
 
 链接解析规则：
-- http(s):// 外链跳过（不审计可达性）。
+- http(s):// 外链与 file:// 绝对内链跳过（前者不审计可达性；后者为 IDE 可点击绝对路径，路径存在性由 IDE 保证，不纳入仓库内链审计）。
 - 相对路径基于「当前文件所在目录」解析；以 ``/`` 开头基于仓库根。
 - 锚点 slug 近似 GitHub/CommonMark：小写拉丁、空格转连字符、保留 CJK 与
   ``-_``，去除其余标点；标题归一化后比对。
@@ -104,8 +104,8 @@ def audit(base: Path, docs_dir: Path, strict_anchors: bool) -> tuple[int, int]:
         for rx in (LINK_RE, REF_RE):
             for m in rx.finditer(text):
                 target = m.group("target").strip()
-                # 跳过外链与纯锚点（同文件锚点不跨文件审计）
-                if target.startswith(("http://", "https://", "mailto:")):
+                # 跳过外链、file:// 绝对内链与纯锚点（同文件锚点不跨文件审计）
+                if target.startswith(("http://", "https://", "mailto:", "file://")):
                     continue
                 if target.startswith("#"):
                     anchor = target[1:]

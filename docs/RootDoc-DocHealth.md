@@ -12,7 +12,7 @@
 > - 文档规范与分类体系 → [RootDoc-WritingGuide.md](RootDoc-WritingGuide.md)（Reference）。
 > - 架构决策与演进 → [RootDoc-ADR.md](RootDoc-ADR.md)（Explanation）。
 > - 文档所有权矩阵 → [README.md](README.md) §2。
-> - 已完成的治理动作与变更记录 → [CHANGELOG.md](CHANGELOG.md)。
+> - 已完成的治理动作与变更记录 → [CHANGELOG.md](../CHANGELOG.md)。
 
 > **治理红线**：
 > - MUST NOT 在未经 Diátaxis 分类标注的情况下创建新文档；所有文档 MUST 在头部声明 T/H/R/E 类型
@@ -156,4 +156,4 @@
 
 ---
 
-> ↩ **返回根级文档地图**：[README.md](README.md) · **文档规范**：[RootDoc-WritingGuide.md](RootDoc-WritingGuide.md) · **架构决策**：[RootDoc-ADR.md](RootDoc-ADR.md) · **变更记录**：[CHANGELOG.md](CHANGELOG.md)
+> ↩ **返回根级文档地图**：[README.md](README.md) · **文档规范**：[RootDoc-WritingGuide.md](RootDoc-WritingGuide.md) · **架构决策**：[RootDoc-ADR.md](RootDoc-ADR.md) · **变更记录**：[CHANGELOG.md](../CHANGELOG.md)

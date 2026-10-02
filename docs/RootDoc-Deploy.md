@@ -91,7 +91,7 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:2333/login   # A.2-3 →
 
 关键不变量：
 - 后端容器 **MUST NOT** 映射宿主机端口；只靠前端 BFF 经内网 `backend:8000` 直连。
-- 前端容器端口映射 **MUST** 默认 `127.0.0.1:2333:3000`；禁止 `0.0.0.0` 裸暴露（HTTPS 走反代）。
+- 前端容器端口映射 **MUST** 默认 `127.0.0.1:2333:2333`（容器内 `PORT=2333`，与宿主机同端口；不要写成 3000）；禁止 `0.0.0.0` 裸暴露（HTTPS 走反代）。
 
 ### B.2 操作步骤（6 步）
 
@@ -108,7 +108,7 @@ make setup        # 生成根级 .env（docker compose 读这个）
 #  （可选）LLM_* 项按 RootDoc-EngConv §4 的矩阵启用；默认 none 不影响部署
 
 # B.2-3 一键全栈起（首次 build 需要 5–15 分钟下载基础镜像）
-make up           # = docker compose up -d --build（db + backend + redis + worker + frontend 全部）
+make up           # = docker compose up -d --build（db + backend + migrate + redis + worker + frontend 全部）
 
 # B.2-4 本机服务器验证（确认容器内链路通，此时还没配反代）
 curl -s http://127.0.0.1:2333/api/health     # B.2-4a → {"status":"ok"}
@@ -152,7 +152,7 @@ curl -sI https://your-domain.com/api/health    # B.2-6b → HTTP/2 200
 
 - B.2-4a/b 在服务器本机全 200；
 - B.2-6a/b 外网 HTTPS 全 200 + HSTS 头出现；
-- `make ps` 5 个服务 STATE 均为 Up（db healthy / backend healthy / frontend healthy / worker Up / redis Up）；
+- `make ps` 6 个服务状态符合预期（db / backend / redis / worker / frontend 均 healthy，migrate 为 Exited (0)）；
 - 浏览器开 `https://your-domain.com` → 注册/登录 流程走通（验证码走真实邮件服务，需要后端 `.env` 的 SMTP_* 已填；未填时 SMTP 失败会在后端日志打 warn，不影响其他功能）；
 - Secure Cookie 生效：F12 Application → Cookies → 你的域名 → `auth_session` 列 `Secure/HttpOnly/SameSite=Lax` 三个勾 ✓。
 
@@ -162,7 +162,7 @@ curl -sI https://your-domain.com/api/health    # B.2-6b → HTTP/2 200
 |---|---|
 | B.2-4a 报 502 Bad Gateway | 前端容器 `cs-website` 未就绪；`make logs frontend --tail 50` 看 next build 是否完成；首次构建久等即可 |
 | HTTPS 访问 400 / 无限重定向登录页 | `TRUST_PROXY` 仍为 false；改 `.env` 后 `make rebuild frontend` 重启；或反代未传 `X-Forwarded-Proto: https` |
-| 反代 502 端口 2333 不通 | 宿主机防火墙（ufw/firewalld）禁止反代连 2333；或 compose 端口映射漏了 `127.0.0.1:2333:3000`（双端口别写反） |
+| 反代 502 端口 2333 不通 | 宿主机防火墙（ufw/firewalld）禁止反代连 2333；或 compose 端口映射漏了 `127.0.0.1:2333:2333`（容器内外同为 2333，别写成 3000） |
 | 上传文件 413 Request Entity Too Large | nginx `client_max_body_size` 未加；或前端 `next.config.ts` 未开 body size；或后端 nginx/反代两者都要加最小值中最大那方 |
 
 ---
@@ -188,25 +188,28 @@ docker compose exec -T backend curl -s -H "Authorization: Bearer <superuser-toke
 
 > 端点挂在后端 `root_router`，路径是 `/health`、`/readyz`（**不**带 `/api/v1`）。前端 BFF 的 `/api/health` 就是转发到后端 `/health`，所以 C-1 同时验了 BFF 转发链。
 
-### C.2 探针配置（给 docker compose / Kubernetes 用；以下为 compose 已推荐写法）
+### C.2 探针配置（docker compose 实配，2026-09-13 起与 `docker-compose.yml` 同步）
 
-在 `docker-compose.yml` 中，以下两项 **SHOULD** 已有（缺失时补上并 `make up` 重启）：
+`docker-compose.yml` 中 backend 与 frontend 均已内置探针（backend 此前缺失导致 `service_healthy` 依赖门禁失效，已补）：
 
 ```yaml
 services:
   backend:
+    # /readyz 探 DB 就绪（503=未就绪）；镜像内无 wget/curl，用 python 标准库探
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8000/readyz"]
-      interval: 15s
+      test: ["CMD-SHELL", "python -c \"import os,urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/readyz', timeout=3).status==200 else 1)\""]
+      interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 6
       start_period: 30s
   frontend:
+    # Next.js BFF 无内置 /health，探首页 HTTP 状态作 liveness（ER-34）
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
-      interval: 20s
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:2333/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))\""]
+      interval: 15s
       timeout: 5s
-      retries: 3
+      retries: 6
+      start_period: 30s
 ```
 
 ### C.3 成功标准
@@ -221,7 +224,7 @@ services:
 |---|---|
 | C-4 长期 503 | `make logs backend --tail 50` 查 DB 连接错误；根 `.env` 的 `DATABASE_HOST=db` 是否正确 |
 | C-5/C-6 401 | 少了 Bearer；或用户没 `system:monitor` 权限；后端直调临时用 `docker compose exec -T backend curl http://localhost:8000/metrics/json` 跳过鉴权也行 |
-| healthcheck 一直 starting → unhealthy | 容器里没装 `wget`；换 `["CMD-SHELL", "curl -fs http://localhost:8000/readyz || exit 1"]` |
+| healthcheck 一直 starting → unhealthy | backend 探针走 python 标准库（镜像无 wget/curl）；若自行改用 wget 会因命令缺失失败。先 `docker compose exec backend python -c "import urllib.request;print(urllib.request.urlopen('http://127.0.0.1:8000/readyz').status)"` 确认业务本身是否 200 |
 
 ---
 

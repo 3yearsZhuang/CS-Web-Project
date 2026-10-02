@@ -19,6 +19,8 @@
 | [RootDoc-ModuleMap.md](RootDoc-ModuleMap.md) | 三端业务模块 ↔ API 契约映射 SSOT（2026-08-19：命名规范 / 三端落点 / 门禁 / 违约点红线 / 变更记录，配套 `make check-module-naming`；2026-08-20 由 `模块命名映射表.md` 改名） |
 | [RootDoc-ICP-Filing.md](RootDoc-ICP-Filing.md) | ICP 备案填报信息（原 `.codebuddy/` 迁入，2026-08-20：服务内容描述 / 基本信息表 / 填报指引） |
 | [RootDoc-DocHealth.md](RootDoc-DocHealth.md) | 文档结构健康诊断与合并方案（2026-08-20：重复/过度引用/分散/失准 四维取证 + 逆向目标结构 + P0~P3 合并瘦身清单；含原 DocEval/DupAudit 结论） |
+| [RootDoc-DocsAsCode.md](RootDoc-DocsAsCode.md) | 文档即代码（Docs-as-Code）工程标准（2026-08-24：核心原则 / 生命周期 / Definition of Done / 工具链与 CI 门禁全景 / 生成 vs 手写红线 / 质量度量） |
+| [RootDoc-AgentEval.md](RootDoc-AgentEval.md) | Aervox-harness 与 Agent 路线结合评估（2026-09-14：AG 路线逐项映射 / 四种结合方式 / 许可证与成熟度风险 / 落地路径；AG-P3/P5 设计输入 SSOT） |
 
 ## 子仓库文档索引（原地保留，非迁移）
 
@@ -26,7 +28,7 @@
 |---|---|---|
 | `CS-Web-Backend/tools/docs/` | [README.md](../CS-Web-Backend/tools/docs/README.md) | 后端 FastAPI 文档索引：`BackDoc-01-Arch.md`（架构 + 业务模块契约 Part B）、`BackDoc-02-Sec.md`（安全）、`BackDoc-03-Conv.md`（工程约定）、`BackDoc-Infra.md`（基础设施） |
 | `CS-Web-Frontend/tools/docs/` | [README.md](../CS-Web-Frontend/tools/docs/README.md) | 前端文档：`FrontDoc-01-Arch.md`（架构 + 业务模块契约 Part B + 前后端联动）、`FrontDoc-03-Conv.md`（编码规范，对标后端 BackDoc-03-Conv.md）、`FrontDoc-02-Sec.md`（安全）、`FrontDoc-UID.md`（UI 设计规范 + Markdown 编辑器 §14）、`FrontDoc-Ops.md`（运维）、`FrontDoc-i18n.md`（国际化迁移指南） |
-| `CS-Mobile/tools/docs/` | `README.md`（移动端子仓库未在 GitHub 暴露，见本地 `CS-Mobile/tools/docs/`） | 移动端文档：uni-app 单码双端架构/构建、ApiClient 薄层与 token 安全存储、U-02~U-04 依赖；`arch/` 归档 7 份移动端架构方案（高层架构/系统设计/UserStory/部署/安全/调研/资料摘要，G1~G5 审核通过，唯一权威） |
+| `CS-Mobile/tools/docs/` | `README.md`（**子仓库已冻结 2026-09-14**：骨架阶段无投入计划，文档不再随根仓演进同步；见根 `docs/项目待办v2.md` INFRA-01） | 移动端文档：uni-app 单码双端架构/构建、ApiClient 薄层与 token 安全存储、U-02~U-04 依赖；`arch/` 归档 7 份移动端架构方案（高层架构/系统设计/UserStory/部署/安全/调研/资料摘要，G1~G5 审核通过，唯一权威） |
 
 ---
 

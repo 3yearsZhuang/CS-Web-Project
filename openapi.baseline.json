@@ -1079,6 +1079,35 @@
         "title": "ComponentGuideInput",
         "type": "object"
       },
+      "ComponentGuideOut": {
+        "properties": {
+          "antiPatterns": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Antipatterns",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "useCases": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Usecases",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ComponentGuideOut",
+        "type": "object"
+      },
       "ComponentItemInput": {
         "properties": {
           "category": {
@@ -1123,6 +1152,96 @@
         "title": "ComponentItemInput",
         "type": "object"
       },
+      "ComponentItemOut": {
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "guide": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ComponentGuideOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "migrationStatus": {
+            "title": "Migrationstatus",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "sortOrder": {
+            "title": "Sortorder",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "title": "Updatedat",
+            "type": "string"
+          },
+          "variants": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ComponentVariantOut"
+            },
+            "title": "Variants",
+            "type": "array"
+          },
+          "visibilityOpen": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visibilityopen"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "category",
+          "migrationStatus",
+          "sortOrder",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "ComponentItemOut",
+        "type": "object"
+      },
       "ComponentMigrationStatusInput": {
         "description": "迁移状态更新输入：PATCH 单个 item 的 migrationStatus。",
         "properties": {
@@ -1137,14 +1256,51 @@
         "title": "ComponentMigrationStatusInput",
         "type": "object"
       },
-      "ComponentVariantInput": {
+      "ComponentMigrationStatusOutput": {
+        "description": "迁移状态更新结果：携带旧状态与可见性联动结果，供治理事件审计。",
+        "properties": {
+          "migrationStatus": {
+            "title": "Migrationstatus",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "oldMigrationStatus": {
+            "title": "Oldmigrationstatus",
+            "type": "string"
+          },
+          "visibilityKey": {
+            "default": "",
+            "title": "Visibilitykey",
+            "type": "string"
+          },
+          "visibilityOpened": {
+            "default": false,
+            "title": "Visibilityopened",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "oldMigrationStatus",
+          "migrationStatus"
+        ],
+        "title": "ComponentMigrationStatusOutput",
+        "type": "object"
+      },
+      "ComponentVariantOut": {
         "properties": {
           "color": {
             "title": "Color",
             "type": "string"
           },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
           "isEnabled": {
-            "default": true,
             "title": "Isenabled",
             "type": "boolean"
           },
@@ -1158,11 +1314,13 @@
           }
         },
         "required": [
+          "id",
           "size",
           "color",
-          "state"
+          "state",
+          "isEnabled"
         ],
-        "title": "ComponentVariantInput",
+        "title": "ComponentVariantOut",
         "type": "object"
       },
       "ComponentVariantPresetInput": {
@@ -2292,9 +2450,9 @@
         "type": "object"
       },
       "FocusSessionIn": {
-        "description": "前端完成一轮专注后的上报。",
+        "description": "前端完成一轮专注后的上报。\n\ncamel_config()：JSON 入参走 camelCase（durationSeconds），与全站 camelCase 传输契约一致；\npopulate_by_name=True 同时保留 snake_case 兼容（迁移期旧调用方/测试不破）。",
         "properties": {
-          "duration_seconds": {
+          "durationSeconds": {
             "exclusiveMinimum": 0.0,
             "maximum": 14400.0,
             "title": "Duration Seconds",
@@ -2306,7 +2464,7 @@
             "title": "Phase",
             "type": "string"
           },
-          "sound_source": {
+          "soundSource": {
             "anyOf": [
               {
                 "maxLength": 40,
@@ -2320,7 +2478,7 @@
           }
         },
         "required": [
-          "duration_seconds"
+          "durationSeconds"
         ],
         "title": "FocusSessionIn",
         "type": "object"
@@ -2584,6 +2742,45 @@
           "status"
         ],
         "title": "JoinReviewRequest",
+        "type": "object"
+      },
+      "LeaderboardEntry": {
+        "properties": {
+          "balance": {
+            "title": "Balance",
+            "type": "integer"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "level_title": {
+            "title": "Level Title",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "user_id",
+          "balance",
+          "level",
+          "level_title"
+        ],
+        "title": "LeaderboardEntry",
         "type": "object"
       },
       "LearningGoalCreateRequest": {
@@ -3556,6 +3753,92 @@
         "title": "PermissionUpdate",
         "type": "object"
       },
+      "PointsProfileOut": {
+        "properties": {
+          "balance": {
+            "title": "Balance",
+            "type": "integer"
+          },
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "level_title": {
+            "title": "Level Title",
+            "type": "string"
+          },
+          "transactions": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/PointsTransactionOut"
+            },
+            "title": "Transactions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "balance",
+          "level",
+          "level_title"
+        ],
+        "title": "PointsProfileOut",
+        "type": "object"
+      },
+      "PointsTransactionOut": {
+        "properties": {
+          "amount": {
+            "title": "Amount",
+            "type": "integer"
+          },
+          "balance_after": {
+            "title": "Balance After",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "source_type": {
+            "title": "Source Type",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "amount",
+          "reason",
+          "source_type",
+          "balance_after",
+          "created_at"
+        ],
+        "title": "PointsTransactionOut",
+        "type": "object"
+      },
       "ProfileResponse": {
         "description": "GET /profile 响应：完整资料 + 活动参与记录。",
         "properties": {
@@ -4417,6 +4700,126 @@
           "expiresAt"
         ],
         "title": "SessionOut",
+        "type": "object"
+      },
+      "SubmitProofIn": {
+        "description": "完成提交的可选证明材料链接（TOOLS-GOV Slice E 落库）。",
+        "properties": {
+          "submission_url": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submission Url"
+          }
+        },
+        "title": "SubmitProofIn",
+        "type": "object"
+      },
+      "TaskClaimOut": {
+        "properties": {
+          "claim_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Claim Note"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "review_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Note"
+          },
+          "reviewed_by": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed By"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "submission_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submission Url"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "integer"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "task_id",
+          "user_id",
+          "status",
+          "created_at"
+        ],
+        "title": "TaskClaimOut",
         "type": "object"
       },
       "TaskInput": {
@@ -15981,28 +16384,6 @@
     "/api/v1/tools/admin/tasks/claims/pending": {
       "get": {
         "operationId": "pending_claims_api_v1_tools_admin_tasks_claims_pending_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "skip",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "title": "Skip",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -16013,16 +16394,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -16038,6 +16409,7 @@
     },
     "/api/v1/tools/admin/tasks/claims/{claim_id}/approve": {
       "post": {
+        "description": "通过认领（触发积分联动，见 service.review_claim）。",
         "operationId": "approve_claim_api_v1_tools_admin_tasks_claims__claim_id__approve_post",
         "parameters": [
           {
@@ -16055,7 +16427,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Approve Claim Api V1 Tools Admin Tasks Claims  Claim Id  Approve Post"
+                  "$ref": "#/components/schemas/TaskClaimOut"
                 }
               }
             },
@@ -16118,7 +16490,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Reject Claim Api V1 Tools Admin Tasks Claims  Claim Id  Reject Post"
+                  "$ref": "#/components/schemas/TaskClaimOut"
                 }
               }
             },
@@ -16250,6 +16622,104 @@
         ]
       }
     },
+    "/api/v1/tools/admin/tasks/{task_id}/close": {
+      "post": {
+        "operationId": "close_task_api_v1_tools_admin_tasks__task_id__close_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "title": "Task Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Close Task Api V1 Tools Admin Tasks  Task Id  Close Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Close Task",
+        "tags": [
+          "任务"
+        ]
+      }
+    },
+    "/api/v1/tools/admin/tasks/{task_id}/publish": {
+      "post": {
+        "operationId": "publish_task_api_v1_tools_admin_tasks__task_id__publish_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "title": "Task Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Publish Task Api V1 Tools Admin Tasks  Task Id  Publish Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Publish Task",
+        "tags": [
+          "任务"
+        ]
+      }
+    },
     "/api/v1/tools/auxilio": {
       "get": {
         "operationId": "auxilio_analysis_api_v1_tools_auxilio_get",
@@ -16280,44 +16750,20 @@
     "/api/v1/tools/components": {
       "get": {
         "operationId": "list_components_api_v1_tools_components_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "q",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Q"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response List Components Api V1 Tools Components Get"
+                  "items": {
+                    "$ref": "#/components/schemas/ComponentItemOut"
+                  },
+                  "title": "Response List Components Api V1 Tools Components Get",
+                  "type": "array"
                 }
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "summary": "List Components",
@@ -16338,11 +16784,11 @@
           "required": true
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Create Component Api V1 Tools Components Post"
+                  "$ref": "#/components/schemas/ComponentItemOut"
                 }
               }
             },
@@ -16380,7 +16826,7 @@
             "required": true,
             "schema": {
               "title": "Component Id",
-              "type": "string"
+              "type": "integer"
             }
           }
         ],
@@ -16425,7 +16871,7 @@
             "required": true,
             "schema": {
               "title": "Component Id",
-              "type": "string"
+              "type": "integer"
             }
           }
         ],
@@ -16434,7 +16880,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get Component Api V1 Tools Components  Component Id  Get"
+                  "$ref": "#/components/schemas/ComponentItemOut"
                 }
               }
             },
@@ -16465,7 +16911,7 @@
             "required": true,
             "schema": {
               "title": "Component Id",
-              "type": "string"
+              "type": "integer"
             }
           }
         ],
@@ -16484,7 +16930,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Update Component Api V1 Tools Components  Component Id  Put"
+                  "$ref": "#/components/schemas/ComponentItemOut"
                 }
               }
             },
@@ -16522,7 +16968,7 @@
             "required": true,
             "schema": {
               "title": "Component Id",
-              "type": "string"
+              "type": "integer"
             }
           }
         ],
@@ -16554,7 +17000,8 @@
         ]
       },
       "post": {
-        "operationId": "create_guide_api_v1_tools_components__component_id__guide_post",
+        "description": "指南 upsert（service 仅有 update_guide；不存在则创建）。",
+        "operationId": "update_guide_api_v1_tools_components__component_id__guide_post",
         "parameters": [
           {
             "in": "path",
@@ -16562,7 +17009,7 @@
             "required": true,
             "schema": {
               "title": "Component Id",
-              "type": "string"
+              "type": "integer"
             }
           }
         ],
@@ -16581,7 +17028,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Create Guide Api V1 Tools Components  Component Id  Guide Post"
+                  "$ref": "#/components/schemas/ComponentItemOut"
                 }
               }
             },
@@ -16603,7 +17050,7 @@
             "OAuth2PasswordBearer": []
           }
         ],
-        "summary": "Create Guide",
+        "summary": "Update Guide",
         "tags": [
           "组件注册表"
         ]
@@ -16611,6 +17058,7 @@
     },
     "/api/v1/tools/components/{component_id}/migration-status": {
       "get": {
+        "description": "派生自 ComponentItemOut（service 无独立读取入口；old == current）。",
         "operationId": "get_migration_status_api_v1_tools_components__component_id__migration_status_get",
         "parameters": [
           {
@@ -16619,7 +17067,7 @@
             "required": true,
             "schema": {
               "title": "Component Id",
-              "type": "string"
+              "type": "integer"
             }
           }
         ],
@@ -16628,7 +17076,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get Migration Status Api V1 Tools Components  Component Id  Migration Status Get"
+                  "$ref": "#/components/schemas/ComponentMigrationStatusOutput"
                 }
               }
             },
@@ -16651,6 +17099,7 @@
         ]
       },
       "put": {
+        "description": "更新迁移状态；达到 migrated 时联动开放对应可见性模块（service 内闭环）。",
         "operationId": "set_migration_status_api_v1_tools_components__component_id__migration_status_put",
         "parameters": [
           {
@@ -16659,7 +17108,7 @@
             "required": true,
             "schema": {
               "title": "Component Id",
-              "type": "string"
+              "type": "integer"
             }
           }
         ],
@@ -16678,7 +17127,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Set Migration Status Api V1 Tools Components  Component Id  Migration Status Put"
+                  "$ref": "#/components/schemas/ComponentMigrationStatusOutput"
                 }
               }
             },
@@ -16716,7 +17165,7 @@
             "required": true,
             "schema": {
               "title": "Component Id",
-              "type": "string"
+              "type": "integer"
             }
           }
         ],
@@ -16725,7 +17174,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response List Variants Api V1 Tools Components  Component Id  Variants Get"
+                  "items": {
+                    "$ref": "#/components/schemas/ComponentVariantOut"
+                  },
+                  "title": "Response List Variants Api V1 Tools Components  Component Id  Variants Get",
+                  "type": "array"
                 }
               }
             },
@@ -16747,8 +17200,8 @@
           "组件注册表"
         ]
       },
-      "post": {
-        "operationId": "create_variant_api_v1_tools_components__component_id__variants_post",
+      "patch": {
+        "operationId": "toggle_variant_api_v1_tools_components__component_id__variants_patch",
         "parameters": [
           {
             "in": "path",
@@ -16756,121 +17209,7 @@
             "required": true,
             "schema": {
               "title": "Component Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ComponentVariantInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Create Variant Api V1 Tools Components  Component Id  Variants Post"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Create Variant",
-        "tags": [
-          "组件注册表"
-        ]
-      }
-    },
-    "/api/v1/tools/components/{component_id}/variants/preset": {
-      "post": {
-        "operationId": "apply_preset_api_v1_tools_components__component_id__variants_preset_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "component_id",
-            "required": true,
-            "schema": {
-              "title": "Component Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ComponentVariantPresetInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Apply Preset Api V1 Tools Components  Component Id  Variants Preset Post"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Apply Preset",
-        "tags": [
-          "组件注册表"
-        ]
-      }
-    },
-    "/api/v1/tools/components/{component_id}/variants/toggle": {
-      "post": {
-        "operationId": "toggle_variant_api_v1_tools_components__component_id__variants_toggle_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "component_id",
-            "required": true,
-            "schema": {
-              "title": "Component Id",
-              "type": "string"
+              "type": "integer"
             }
           }
         ],
@@ -16889,7 +17228,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Toggle Variant Api V1 Tools Components  Component Id  Variants Toggle Post"
+                  "items": {
+                    "$ref": "#/components/schemas/ComponentVariantOut"
+                  },
+                  "title": "Response Toggle Variant Api V1 Tools Components  Component Id  Variants Patch",
+                  "type": "array"
                 }
               }
             },
@@ -16917,9 +17260,9 @@
         ]
       }
     },
-    "/api/v1/tools/components/{component_id}/variants/{variant_id}": {
-      "put": {
-        "operationId": "update_variant_api_v1_tools_components__component_id__variants__variant_id__put",
+    "/api/v1/tools/components/{component_id}/variants/preset": {
+      "post": {
+        "operationId": "apply_variant_preset_api_v1_tools_components__component_id__variants_preset_post",
         "parameters": [
           {
             "in": "path",
@@ -16927,16 +17270,7 @@
             "required": true,
             "schema": {
               "title": "Component Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "variant_id",
-            "required": true,
-            "schema": {
-              "title": "Variant Id",
-              "type": "string"
+              "type": "integer"
             }
           }
         ],
@@ -16944,7 +17278,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ComponentVariantInput"
+                "$ref": "#/components/schemas/ComponentVariantPresetInput"
               }
             }
           },
@@ -16955,7 +17289,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Update Variant Api V1 Tools Components  Component Id  Variants  Variant Id  Put"
+                  "items": {
+                    "$ref": "#/components/schemas/ComponentVariantOut"
+                  },
+                  "title": "Response Apply Variant Preset Api V1 Tools Components  Component Id  Variants Preset Post",
+                  "type": "array"
                 }
               }
             },
@@ -16977,7 +17315,7 @@
             "OAuth2PasswordBearer": []
           }
         ],
-        "summary": "Update Variant",
+        "summary": "Apply Variant Preset",
         "tags": [
           "组件注册表"
         ]
@@ -17305,6 +17643,7 @@
     },
     "/api/v1/tools/points/leaderboard": {
       "get": {
+        "description": "积分排行榜（按余额倒序，limit 控制返回条数）。",
         "operationId": "leaderboard_api_v1_tools_points_leaderboard_get",
         "parameters": [
           {
@@ -17333,7 +17672,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Leaderboard Api V1 Tools Points Leaderboard Get"
+                  "items": {
+                    "$ref": "#/components/schemas/LeaderboardEntry"
+                  },
+                  "title": "Response Leaderboard Api V1 Tools Points Leaderboard Get",
+                  "type": "array"
                 }
               }
             },
@@ -17363,13 +17706,14 @@
     },
     "/api/v1/tools/points/me": {
       "get": {
+        "description": "我的积分档案（余额/等级 + 最近流水）。",
         "operationId": "my_points_api_v1_tools_points_me_get",
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response My Points Api V1 Tools Points Me Get"
+                  "$ref": "#/components/schemas/PointsProfileOut"
                 }
               }
             },
@@ -17389,6 +17733,7 @@
     },
     "/api/v1/tools/points/me/history": {
       "get": {
+        "description": "积分流水分页（时间倒序）。",
         "operationId": "my_history_api_v1_tools_points_me_history_get",
         "parameters": [
           {
@@ -17558,10 +17903,58 @@
         "tags": [
           "资源"
         ]
+      },
+      "post": {
+        "description": "普通用户提交资源（入待审核池，由管理员审核）。",
+        "operationId": "submit_resource_api_v1_tools_resources_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Submit Resource Api V1 Tools Resources Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Submit Resource",
+        "tags": [
+          "资源"
+        ]
       }
     },
     "/api/v1/tools/resources/upload": {
       "post": {
+        "description": "上传文件并创建待审核资源（标题取文件名，file_url 指向存储路径）。",
         "operationId": "upload_resource_api_v1_tools_resources_upload_post",
         "requestBody": {
           "content": {
@@ -17652,6 +18045,7 @@
     },
     "/api/v1/tools/resources/{resource_id}/download": {
       "get": {
+        "description": "返回资源文件地址（仅审核通过且带文件的资源对外开放）。",
         "operationId": "download_resource_api_v1_tools_resources__resource_id__download_get",
         "parameters": [
           {
@@ -17687,62 +18081,6 @@
           }
         },
         "summary": "Download Resource",
-        "tags": [
-          "资源"
-        ]
-      }
-    },
-    "/api/v1/tools/resources/{resource_id}/rate": {
-      "post": {
-        "operationId": "rate_resource_api_v1_tools_resources__resource_id__rate_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "resource_id",
-            "required": true,
-            "schema": {
-              "title": "Resource Id",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "score",
-            "required": true,
-            "schema": {
-              "title": "Score",
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Rate Resource Api V1 Tools Resources  Resource Id  Rate Post"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Rate Resource",
         "tags": [
           "资源"
         ]
@@ -17892,6 +18230,7 @@
     },
     "/api/v1/tools/tasks/claims/me": {
       "get": {
+        "description": "``/tasks/claimed/me`` 的等价别名（前端 BFF 使用本路径）。",
         "operationId": "my_claims_alias_api_v1_tools_tasks_claims_me_get",
         "responses": {
           "200": {
@@ -17917,8 +18256,9 @@
       }
     },
     "/api/v1/tools/tasks/claims/{claim_id}/submit": {
-      "get": {
-        "operationId": "submit_proof_api_v1_tools_tasks_claims__claim_id__submit_get",
+      "post": {
+        "description": "用户提交完成（认领 → submitted），可选携带证明材料链接（Slice E 落库）。\n\n注：BFF 还会发送 note 字段，暂无落点（claim_note 语义属认领备注），保持忽略。",
+        "operationId": "submit_proof_api_v1_tools_tasks_claims__claim_id__submit_post",
         "parameters": [
           {
             "in": "path",
@@ -17928,23 +18268,31 @@
               "title": "Claim Id",
               "type": "integer"
             }
-          },
-          {
-            "in": "query",
-            "name": "proof",
-            "required": true,
-            "schema": {
-              "title": "Proof",
-              "type": "string"
-            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/SubmitProofIn"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Submit Proof Api V1 Tools Tasks Claims  Claim Id  Submit Get"
+                  "$ref": "#/components/schemas/TaskClaimOut"
                 }
               }
             },
@@ -18015,6 +18363,45 @@
       }
     },
     "/api/v1/tools/tasks/{task_id}/claim": {
+      "delete": {
+        "description": "按任务维度取消本人认领（BFF 以 taskId 发起）。",
+        "operationId": "cancel_claim_api_v1_tools_tasks__task_id__claim_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "title": "Task Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Cancel Claim",
+        "tags": [
+          "任务"
+        ]
+      },
       "post": {
         "operationId": "claim_task_api_v1_tools_tasks__task_id__claim_post",
         "parameters": [
@@ -18033,7 +18420,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Claim Task Api V1 Tools Tasks  Task Id  Claim Post"
+                  "$ref": "#/components/schemas/TaskClaimOut"
                 }
               }
             },

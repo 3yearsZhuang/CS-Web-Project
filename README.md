@@ -14,7 +14,7 @@
 FztbuCS-Project/
 ├── CS-Web-Backend/        # 子仓库(submodule)：FastAPI 后端（REST API + PostgreSQL + Alembic）
 ├── CS-Web-Frontend/       # 子仓库(submodule)：Next.js 前端（UI + BFF 薄转发）
-├── CS-Mobile/             # 子仓库(submodule)：uni-app 移动端（单码双端：Android APK + 微信小程序，Vue3+Vite+TS）
+├── CS-Mobile/             # 子仓库(submodule)：uni-app 移动端（**已冻结 2026-09-14**：骨架阶段，无投入计划；见 docs/项目待办v2.md INFRA-01）
 ├── docker-compose.yml     # 根级全栈编排（db + backend + redis + worker + frontend）
 ├── .env.example           # 全栈环境变量模板
 ├── Makefile               # 统一命令入口
@@ -386,7 +386,7 @@ git submodule update --remote --merge
 # 子仓库内的改动请进入各自目录操作并独立提交/推送
 cd CS-Web-Backend && git pull && git push
 
-# CS-Mobile 移动端子仓库（uni-app 单码双端）用法：
+# CS-Mobile 移动端子仓库（**已冻结 2026-09-14**：骨架阶段仅登录/首页两个页面，无投入计划；以下命令仅在解冻后使用）：
 cd CS-Mobile
 pnpm install        # 安装依赖（首次）
 pnpm run dev:mp-weixin    # 微信小程序开发（HBuilderX/CLI 亦可）

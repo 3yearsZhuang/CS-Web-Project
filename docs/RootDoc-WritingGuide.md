@@ -70,6 +70,7 @@
 | [RootDoc-ADR.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/docs/RootDoc-ADR.md) | **E** 解释 | 架构决策记录（讲为什么） |
 | [RootDoc-Deploy.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/docs/RootDoc-Deploy.md) | **H** 操作 | 生产部署步骤 |
 | [RootDoc-DocHealth.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/docs/RootDoc-DocHealth.md) | R | 文档健康度报告（事实清单） |
+| [RootDoc-DocsAsCode.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/docs/RootDoc-DocsAsCode.md) | R | 文档即代码工程标准（生命周期 / DoD / 工具链 / CI 门禁 / 度量） |
 | [RootDoc-EngConv.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/docs/RootDoc-EngConv.md) | R+L4 | 跨仓工程约定（启用 RFC 2119） |
 | [RootDoc-FEArch.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/docs/RootDoc-FEArch.md) | E+L3 | 前端架构解释（叠加 Arc42） |
 | [RootDoc-ICP-Filing.md](file:///Users/3yearszhuang/Documents/FztbuCS-Project/docs/RootDoc-ICP-Filing.md) | H | ICP 备案操作指南 |

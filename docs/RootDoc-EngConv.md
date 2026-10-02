@@ -1,7 +1,7 @@
 # RootDoc-EngConv：跨仓通用工程约定（命名 / 版本 / 安全红线 / Makefile / 所有权矩阵）
 
 > 更新人：3yearsZ
-> 更新日：2026-08-20
+> 更新日：2026-08-24
 > 版本：1.0.1（版本基线对齐 1.0.1；冻结契约 `/api/v1`、版本三源同步、Alembic 线性链、禁硬编码密钥、DDD 分层）
 > Diátaxis：R（Reference · 规范参考 · 三仓通用工程约定 L0 唯一权威）
 > 适用读者：全仓贡献者、后端/前端/移动端 reviewer、发布负责人、运维侧部署人员
@@ -9,7 +9,7 @@
 >
 > **SSOT（唯一权威）声明**：本文档是 FztbuCS monorepo **三仓通用工程约定 L0** 的唯一权威输入。三仓内部（CS-Web-Backend / CS-Web-Frontend / CS-Mobile）的实现级约定以各自 `-03-Conv.md` 为权威；三仓安全实现级约束以 `-02-Sec.md` 为权威（本文档仅收录**跨仓共享的通用安全红线**，不重述实现细节）；命名门禁完整映射以 [RootDoc-ModuleMap.md](./RootDoc-ModuleMap.md) 为唯一权威。
 >
-> **关联索引**：根仓方法论总览 → [README.md](../README.md)；完整资源域命名门禁 → [RootDoc-ModuleMap.md](./RootDoc-ModuleMap.md)；派生事实自动化脚本 → `tools/gen_doc_facts.py` + 根仓 `Makefile`；后端实现约定 → [BackDoc-03-Conv.md](../CS-Web-Backend/tools/docs/BackDoc-03-Conv.md)；前端实现约定 → [FrontDoc-03-Conv.md](../CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md)；移动端实现约定 → [MobileDoc-03-Conv.md](../CS-Mobile/tools/docs/MobileDoc-03-Conv.md)
+> **关联索引**：根仓方法论总览 → [README.md](../README.md)；完整资源域命名门禁 → [RootDoc-ModuleMap.md](./RootDoc-ModuleMap.md)；文档即代码工程标准（生命周期 / DoD / 工具链 / CI 门禁） → [RootDoc-DocsAsCode.md](./RootDoc-DocsAsCode.md)；派生事实自动化脚本 → `tools/gen_doc_facts.py` + 根仓 `Makefile`；后端实现约定 → [BackDoc-03-Conv.md](../CS-Web-Backend/tools/docs/BackDoc-03-Conv.md)；前端实现约定 → [FrontDoc-03-Conv.md](../CS-Web-Frontend/tools/docs/FrontDoc-03-Conv.md)；移动端实现约定 → [MobileDoc-03-Conv.md](../CS-Mobile/tools/docs/MobileDoc-03-Conv.md)
 
 ---
 
@@ -59,7 +59,7 @@ FztbuCS monorepo 由三仓 + 一文档仓协作：后端（FastAPI + SQLAlchemy 
 | **数据库列名** | 蛇形；外键 `{singular}_id`（`user_id`、`exam_id`）；时间戳 `created_at`、`updated_at`（DATETIME 后端 TZ=UTC 存，UI 层转本地时区） | |
 | **JSON 响应字段** | 蛇形：与表列一致，BFF 层不做字段风格转换，**仅前端 `lib/api` 层统一 snake_case→camelCase 转换** | |
 | **枚举命名** | 后端 `UserRole(str, Enum)` PascalCase；JSON 值 snake_case（`"club_leader"`）；前端/移动端复用，禁止本地重新定义副本 | |
-| **文档分类号** | `RootDoc-*` 根仓 L0；`BackDoc-01-Arch`、`BackDoc-02-Sec`、`BackDoc-03-Conv` 子仓 L1/L2；FrontDoc/MobileDoc 同理；禁止随意新增 `<Repo>Doc-04-*` | 完整目录 [RootDoc-Catalog.md](./RootDoc-Catalog.md) |
+| **文档分类号** | `RootDoc-*` 根仓 L0；`BackDoc-01-Arch`、`BackDoc-02-Sec`、`BackDoc-03-Conv` 子仓 L1/L2；FrontDoc/MobileDoc 同理；禁止随意新增 `<Repo>Doc-04-*` | 完整目录 [README.md](./README.md) |
 
 ### 1.3 约束（RFC2119 分层）
 
@@ -72,7 +72,7 @@ FztbuCS monorepo 由三仓 + 一文档仓协作：后端（FastAPI + SQLAlchemy 
 6. 外键列 **MUST** `{singular}_id`；多对多关联表 **MUST** `{a}_{b}_association`（如 `user_role_association`），禁止无命名规则的多对多中间表。
 7. `created_at` / `updated_at` **MUST** 使用后端 UTC DATETIME；**MUST NOT** 在数据库端使用 `CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP` 自动更新（统一由 SQLAlchemy `server_default` + `onupdate` 控制）。
 8. 枚举 JSON 值 **MUST** snake_case；**MUST NOT** 返回 PascalCase（避免 UI/契约层漂移）。
-9. 文档分类号 **MUST** 严格按 §1.2.2 第 10 条；新增文档 MUST 在 `RootDoc-Catalog.md` 登记；**MUST NOT** 私自创建 `<Repo>Doc-04-*`、`Doc-*` 等乱序分类号。
+9. 文档分类号 **MUST** 严格按 §1.2.2 第 10 条；新增文档 MUST 在 `README.md` 登记；**MUST NOT** 私自创建 `<Repo>Doc-04-*`、`Doc-*` 等乱序分类号。
 10. 根仓 docs 目录 **MUST** 仅保留 L0 跨仓文档 + 引用索引；子仓内部文档 **MUST** 位于 `<Repo>/tools/docs/`，**MUST NOT** 散落在子仓根目录、`app/`、`src/` 业务目录。
 
 **MUST NOT（禁止事项）：**
@@ -103,7 +103,7 @@ FztbuCS monorepo 由三仓 + 一文档仓协作：后端（FastAPI + SQLAlchemy 
 - [ ] 共享术语：代码/文档 grep 0 处术语不一致（社团/协会、考试/测评 等）
 - [ ] `/api/v1` 冻结契约：三端路径/字段/枚举 100% 对齐；无自定义差异
 - [ ] 数据库对象：蛇形规范检查；无 PascalCase / 缩写 / 单复数混乱
-- [ ] 文档分类号：`RootDoc-Catalog.md` 登记齐全，无乱序 `<Repo>Doc-04-*`
+- [ ] 文档分类号：`README.md` 登记齐全，无乱序 `<Repo>Doc-04-*`
 - [ ] 子仓文档位置：`<Repo>/tools/docs/`；根 docs 仅 L0 + 索引
 
 ---
@@ -341,7 +341,7 @@ FztbuCS monorepo 三仓 MUST 提供统一入口 `Makefile`；根仓再汇总成�
 3. **MUST NOT** 在不通知受影响 Owner 的情况下修改他人负责模块的「公共接口」（services 公开方法、DTO、枚举、路由前缀）。
 4. **MUST NOT** 引入「双重标准」：某条通用安全红线在后端遵守、前端/移动端不遵守（例：后端日志脱敏、前端却 console.log(token)）。
 5. **MUST NOT** 「为了快」绕过 CI / pre-commit / 门禁合入；效率让步于质量与安全。
-6. **MUST NOT** 发布版本后未同步更新 CHANGELOG.md / RootDoc-Catalog.md / 派生事实；版本发布 MUST 配套所有派生事实同步。
+6. **MUST NOT** 发布版本后未同步更新 CHANGELOG.md / README.md / 派生事实；版本发布 MUST 配套所有派生事实同步。
 7. **MUST NOT** 同一功能模块的接口文档、实现代码、测试代码分布在 3 个互不相关的目录；按「资源域聚合」就近放置。
 
 **SHOULD（建议事项）：**
@@ -381,7 +381,7 @@ FztbuCS monorepo 三仓 MUST 提供统一入口 `Makefile`；根仓再汇总成�
 
 ### §6.2 命名门禁（§1 相关）
 
-- [ ] 新模块/新域：RootDoc-ModuleMap.md 8 项登记完成；RootDoc-Catalog.md 新文档已登记
+- [ ] 新模块/新域：RootDoc-ModuleMap.md 8 项登记完成；README.md 新文档已登记
 - [ ] 术语：代码/文档 grep 0 处术语不一致；`association` / `exam` / `post` 统一
 - [ ] `/api/v1` 冻结契约：三端路径/字段/枚举 100% 对齐；无 breaking change
 - [ ] 数据库对象：蛇形规范检查；无 PascalCase / 缩写 / 单复数混乱

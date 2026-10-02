@@ -9,9 +9,11 @@ name: Root CI (contract / version / docs)
 #   3) 版本四源一致（ER-33）、文档死链（ER-09）、模块命名（P2-9）。
 #
 # checkout 说明：根仓 .gitmodules 声明了 CS-Web-Backend / CS-Web-Frontend / CS-Mobile
-# 三个子模块，其中 CS-Mobile 仓库在 GitHub 上不存在，`submodules: recursive` 会在
-# checkout 阶段直接失败（历史 CI 必红主因）。故此处改为手动选择性 init 后端+前端，
-# 跳过 CS-Mobile；模块命名门禁对缺失目录已容错（collect_dir_modules 对不存在目录返回空）。
+# 三个子模块。CS-Mobile 已于 2026-09-14 决策冻结（代码仅 724 行/契约覆盖 4/192，无投入
+# 计划；见 docs/项目待办v2.md INFRA-01），CI 检查全部跳过属**有意行为**而非仓库缺失——
+# 公网 runner 匿名 HTTPS 无法克隆该（私有）仓库，`submodules: recursive` 会 checkout
+# 失败（历史 CI 必红主因）。故此处手动选择性 init 后端+前端，跳过 CS-Mobile；
+# 模块命名门禁对缺失目录已容错（collect_dir_modules 对不存在目录返回空）。
 
 on:
   pull_request:
@@ -49,7 +51,8 @@ jobs:
 
       - name: Checkout backend & frontend submodules (skip CS-Mobile)
         # 用 HTTPS 改写替代 SSH 子模块 URL；后端/前端子模块均为 PUBLIC，克隆无需凭据。
-        # CS-Mobile 在 GitHub 上不存在，必须跳过，否则 checkout 失败。
+        # CS-Mobile 已冻结（2026-09-14 决策，见 docs/项目待办v2.md INFRA-01）；
+        # 私有仓公网 runner 匿名克隆必失败，跳过是有意行为。
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
           git submodule update --init --depth 1 CS-Web-Backend

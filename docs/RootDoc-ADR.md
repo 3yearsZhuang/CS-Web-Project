@@ -9,7 +9,7 @@
 
 > **SSOT 分工声明**：
 > - 本文档是「**跨仓库架构决策记录（ADR）、演进背景、边界上下文**」的唯一权威（SSOT）。
-> - 完整 ADR 决策历史索引 → 根 [CHANGELOG.md](CHANGELOG.md)（含 ADR-001 ~ ADR-019 的完整记录表）。
+> - 完整 ADR 决策历史索引 → 根 [CHANGELOG.md](../CHANGELOG.md)（含 ADR-001 ~ ADR-019 的完整记录表）。
 > - 当前架构视图（模块依赖、运行时序列、部署拓扑）→ 各子仓 `-01-Arch.md`（Arc42 架构总览）。
 > - 模块契约详情 → `BackDoc-ModuleContracts.md`（Reference 类型，RFC2119 约束）。
 > - 工程约定与红线 → `RootDoc-EngConv.md` / 各子仓 `-02-Sec` / `-03-Conv`。
@@ -40,7 +40,7 @@
 
 ## 2. 决策时间线（ADR 索引与动机）
 
-> 完整 ADR 决策记录（ADR-001 ~ ADR-019）见 [CHANGELOG.md](CHANGELOG.md)。下表为 SSOT 索引，聚焦当前 Phase 3 生效的关键决策。
+> 完整 ADR 决策记录（ADR-001 ~ ADR-019）见 [CHANGELOG.md](../CHANGELOG.md)。下表为 SSOT 索引，聚焦当前 Phase 3 生效的关键决策。
 
 ### 2.1 Phase 1 决策（已收官，作为演进背景）
 
@@ -195,6 +195,7 @@
 | **事件驱动** | 完整版 | 引入消息队列（Redis Streams / RabbitMQ）替代当前的同步调用链，提升解耦与韧性 |
 | **SSO/OAuth** | 完整版 | 微信登录 / Google 登录 / 企业 SSO 集成 |
 | **国际化** | MVP 持续 | i18n 词条管理（见 `FrontDoc-03-Conv.md` §6） |
+| **Agent 路线与 Aervox-harness 协同** | AG-P3/P5 启动时 | 同作者姊妹项目（思隅，TS/Electron 桌宠 Agent）已完成建议收件箱/自动化裁决/审批账本/Skills 渐进披露等 AG-P3/P5 对应实现并成文（AVX-HAR-001）；结合方式定为「规范移植 + MCP 互联」，评估结论与逐项映射见 [RootDoc-AgentEval.md](RootDoc-AgentEval.md)（唯一权威） |
 
 ### 5.3 一句话总结
 
@@ -202,4 +203,4 @@
 
 ---
 
-> ↩ **返回根级文档地图**：[README.md](README.md) · **完整 ADR 历史**：[CHANGELOG.md](CHANGELOG.md) · **当前架构视图**：[FrontDoc-01-Arch.md](../CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md) · **后端架构**：[BackDoc-01-Arch.md](../CS-Web-Backend/tools/docs/BackDoc-01-Arch.md) · **移动端架构**：[MobileDoc-01-Arch.md](../CS-Mobile/tools/docs/MobileDoc-01-Arch.md) · **工程约定**：[RootDoc-EngConv.md](RootDoc-EngConv.md)
+> ↩ **返回根级文档地图**：[README.md](README.md) · **完整 ADR 历史**：[CHANGELOG.md](../CHANGELOG.md) · **当前架构视图**：[FrontDoc-01-Arch.md](../CS-Web-Frontend/tools/docs/FrontDoc-01-Arch.md) · **后端架构**：[BackDoc-01-Arch.md](../CS-Web-Backend/tools/docs/BackDoc-01-Arch.md) · **移动端架构**：[MobileDoc-01-Arch.md](../CS-Mobile/tools/docs/MobileDoc-01-Arch.md) · **工程约定**：[RootDoc-EngConv.md](RootDoc-EngConv.md)
