@@ -42,6 +42,10 @@
 
 - **i18n·BFF 硬编码中文冻结门禁（2026-09-14）**：新增前端检查脚本 `tools/scripts/check/check-bff-copy.mjs` + 存量基线 `bff-copy-baseline.json`（153 个 BFF 文件 / **180 行**真实存量，注释行已剥离；修正前口径 362 行系 JSDoc 续行误报）。门禁只拦增量：基线外新增含中文代码行即 CI 红；存量消除后 `--update` 收缩基线。接线：前端 `check:bff-copy` + 根 `make check`（新增 `check-i18n-copy` 目标，顺带补齐 `.PHONY` 漏登记的 `gen-doc-facts`/`check-docs-links`/`gen-api-docs`）。本次自查新入基线 1 行（`points/route.ts` 的 `normalizeError` 兜底文案，与既有错误文案模式一致，迁移归 P1-8b 批次）。
 
+### Changed
+
+- **Dependabot 版本更新停用，改为仅安全更新（2026-10-04）**：两子仓 `.github/dependabot.yml` 删除（后端 `KashiwagiEri233/CS-Web-Backend` master 直提 `86ac61c`；前端 `3yearsZhuang/CS-Web-Frontend` 分支保护规则要求走 PR，经 [PR #75](https://github.com/3yearsZhuang/CS-Web-Frontend/pull/75) 合并 `da43df2`）——停用每周一 09:00 自动提版本升级 PR 的机制（单仓上限 10 个堆积，且 2026-08-25 批次曾只 bump `pyproject.toml` 未重生成锁文件引发 P0 锁漂移，见 Fixed 2026-09-14 条）。前端仓已开启 Dependabot alerts + security updates（`vulnerability-alerts`/`automated-security-fixes` 均 204）：今后仅当依赖存在已知漏洞才自动提修复 PR。后端仓 alerts 当前为关（404）且当前账号无 admin 权限，security updates 开关须 owner 在 Settings → Code security 手动开启。存量 18 个版本升级 PR（后端 #20–#29、前端 #55–#69）已附说明关闭。
+
 ### Fixed
 
 - **P1-8c 管理端报名列表补报名人信息（2026-10-03）**：`EventRegistrationOut` 补 `displayName`/`email` 可选字段（TZModel 自动 camel），`list_event_registrations` 经新增 `user_repo.list_by_ids`（单次 IN 查询）批量回填，display_name 无值回退 username（与用户公开主页口径一致）；此前前端 `admin-events-panel` CSV 导出读 `r.displayName`/`r.email` 恒 null。新增集成测试 `test_admin_registration_list_fills_attendee_info`；契约基线随 AG-P3-01 一并重生成。
