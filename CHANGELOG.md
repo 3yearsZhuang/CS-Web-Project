@@ -21,6 +21,8 @@
 
 - **AG-P3-05 事件触发引擎（2026-10-05）**：AG-P3-01/02/06 三块基建正式接通——`AgentTriggerService` 跨用户扫描启用规则（单条失败不阻断），逐条经 CR-032 裁决器放行后采集素材信号，生成收件箱建议（幂等键 `rule:{id}:{yyyymmdd}` + 冷却双重防线，不会反复生成同一建议），`mark_fired` 回写冷却。素材采集器 v1：review_due（到期错题数）/ resource_new（24h 内 approved 资源，condition.techTag 过滤 + 排除本人）/ goal_stalled（active 目标 + N 天无专注）；exam_finished / community_match 随域事件接入（引擎优雅跳过）。触发类型→建议类型映射（resource_new→resource_recommend 等）+ 默认标题模板（action_payload.title 可覆盖）。cron `agent_trigger_cron`（每 30 分钟，AGENT_SWEEPS_ENABLED 总开关）。测试：resource_new 全链路（生成/映射/payload/去重/冷却）+ goal_stalled + 停用与无信号 + 开关短路 5 用例。验证：全量 pytest / mypy 246 文件零错误 / black / flake8。
 
+- **AG-P3-04 前后端全链路：每周复盘（2026-10-05）**：复用简报素材管线聚合到周窗口（配置时区周一为起点）。后端 `agent_weekly_reviews`（迁移 `f4a5b6c7d8e9` 单 head，(user_id, week_start) 唯一去重）——六节素材：专注分钟 / 新增错题 / approved 认领（completed_at 窗口）/ 社区新帖 / 计划达成（LearningPlanItem 按 status 计数）/ 下周建议（规则派生，数字可追溯）；单节失败 null + failed 静默降级。API `GET /agent-weekly-review?weekStart=`。前端工作台 `agent-weekly` widget（2x2）：五节计数卡 + 计划达成 + 下周建议列表 + 失败降级 + 重试。测试：后端 2 用例 + 前端 BFF 契约 2 用例与 widget 3 用例。验证：mypy 251 文件零错误 / vitest 59 文件 380 passed / 契约 198→199 路由 contract-check OK。
+
 - **AG-P3-01 建议收件箱前端切片（2026-10-05）**
 - **AG-P3-01 建议收件箱前端切片（2026-10-05）**：工作台新增 `agent-inbox` widget（后端切片 #34 已合并）——BFF `GET /api/agent-inbox`（分页/过滤透传、裸数组→{items}）+ `PATCH /api/agent-inbox/[id]/status`（camel→snake body 映射，非法 action 400）；`src/modules/agent/` 模块（AgentInboxItem 类型 + useAgentInbox hook：pending 加载/accept/dismiss/snooze 30 分钟，处理后本地移除）；widget 展示类型徽标/标题/理由/预计耗时 + 空态/错误重试。i18n 三处同步（agentInbox* 11 键 + inboxType* 5 键）。附带修复：workbench-card 的 DnaCard 改深路径导入（barrel 拖 server-only monitoring 链）。测试：BFF 契约 5 用例 + widget 4 用例（next-intl 稳定引用覆写 + 按 URL 分发打桩）。验证：ts-check 零错误 / eslint 全绿 / vitest 53 文件 358 passed。
 

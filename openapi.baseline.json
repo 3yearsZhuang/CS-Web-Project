@@ -1031,6 +1031,60 @@
         "title": "AgentRuleUpdateIn",
         "type": "object"
       },
+      "AgentWeeklyReviewOut": {
+        "description": "周复盘出参。",
+        "properties": {
+          "content": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "title": "Updatedat",
+            "type": "string"
+          },
+          "userId": {
+            "title": "Userid",
+            "type": "integer"
+          },
+          "weekStart": {
+            "format": "date",
+            "title": "Weekstart",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "weekStart",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "AgentWeeklyReviewOut",
+        "type": "object"
+      },
       "AnnouncementInput": {
         "description": "创建/更新公告输入。",
         "properties": {
@@ -9420,6 +9474,64 @@
         "summary": "Set Enabled",
         "tags": [
           "Agent自动化规则"
+        ]
+      }
+    },
+    "/api/v1/agent-weekly-review": {
+      "get": {
+        "description": "我的每周复盘（当周不存在则生成；单节失败不影响读取）。",
+        "operationId": "get_weekly_review_api_v1_agent_weekly_review_get",
+        "parameters": [
+          {
+            "description": "周起始日（周一，默认本周）",
+            "in": "query",
+            "name": "weekStart",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "周起始日（周一，默认本周）",
+              "title": "Weekstart"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentWeeklyReviewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Get Weekly Review",
+        "tags": [
+          "Agent每周复盘"
         ]
       }
     },
