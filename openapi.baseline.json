@@ -638,6 +638,60 @@
         "title": "AgentAutomationRuleOut",
         "type": "object"
       },
+      "AgentBriefingOut": {
+        "description": "简报出参：分节内容 + 状态（failed 时前端静默降级）。",
+        "properties": {
+          "briefDate": {
+            "format": "date",
+            "title": "Briefdate",
+            "type": "string"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "title": "Updatedat",
+            "type": "string"
+          },
+          "userId": {
+            "title": "Userid",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "briefDate",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "AgentBriefingOut",
+        "type": "object"
+      },
       "AgentInboxItemOut": {
         "description": "建议收件箱出参。",
         "properties": {
@@ -8778,6 +8832,64 @@
         "summary": "Reset Password Default",
         "tags": [
           "管理员-用户管理"
+        ]
+      }
+    },
+    "/api/v1/agent-briefing": {
+      "get": {
+        "description": "我的每日学习简报（当日不存在则生成；生成失败不影响读取）。",
+        "operationId": "get_briefing_api_v1_agent_briefing_get",
+        "parameters": [
+          {
+            "description": "简报日期（默认今天，配置时区）",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "简报日期（默认今天，配置时区）",
+              "title": "Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentBriefingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Get Briefing",
+        "tags": [
+          "Agent每日简报"
         ]
       }
     },

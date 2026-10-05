@@ -17,6 +17,8 @@
 
 - **AG-P3-02 前端切片：自动化规则管理页（2026-10-05）**：`/tools/agent-rules`（工具区标准布局）+ `src/modules/agent/ui/rules-panel.tsx`——规则列表 / 逐条启停 / 新建编辑表单（触发类型下拉、静音时段、冷却分钟、每小时水位）/ 删除；BFF 三文件（GET/POST 列表与创建、PATCH/DELETE 详情、PATCH enabled），入参 camel→snake 白名单映射（后端 schema extra=forbid 禁透传未知键）；`useAgentRules` hook；收件箱 widget footer 增「管理规则」入口。i18n 三处同步 agentRules* 21 键。测试：BFF 契约 5 用例 + 面板 5 用例。验证：ts-check 零错误 / eslint 全绿 / vitest 55 文件 374 passed；diff-coverage 79.89% → 补失败路径用例后达标。
 
+- **AG-P3-03 前端切片：每日学习简报 widget（2026-10-05）**：工作台新增 `agent-briefing` widget（1x2）——五节计数卡（到期复习/专注分钟/进行中任务/社区新帖/待处理建议）；后端 `status=failed` 时静默降级为提示（验收：生成失败不影响工作台）；BFF `GET /api/agent-briefing`（date 透传）；i18n 三处同步 agentBriefing* 10 键。测试：BFF 契约 2 用例 + widget 3 用例。验证：ts-check 零错误 / eslint 全绿 / vitest 57 文件 375 passed。
+
 - **AG-P3-01 建议收件箱前端切片（2026-10-05）**
 - **AG-P3-01 建议收件箱前端切片（2026-10-05）**：工作台新增 `agent-inbox` widget（后端切片 #34 已合并）——BFF `GET /api/agent-inbox`（分页/过滤透传、裸数组→{items}）+ `PATCH /api/agent-inbox/[id]/status`（camel→snake body 映射，非法 action 400）；`src/modules/agent/` 模块（AgentInboxItem 类型 + useAgentInbox hook：pending 加载/accept/dismiss/snooze 30 分钟，处理后本地移除）；widget 展示类型徽标/标题/理由/预计耗时 + 空态/错误重试。i18n 三处同步（agentInbox* 11 键 + inboxType* 5 键）。附带修复：workbench-card 的 DnaCard 改深路径导入（barrel 拖 server-only monitoring 链）。测试：BFF 契约 5 用例 + widget 4 用例（next-intl 稳定引用覆写 + 按 URL 分发打桩）。验证：ts-check 零错误 / eslint 全绿 / vitest 53 文件 358 passed。
 
