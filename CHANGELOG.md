@@ -13,6 +13,9 @@
 
 ### Added
 
+- **AG-P3-02 自动化规则模型 + CR-032 防打扰裁决器（2026-10-05）**：`agent_automation_rules` 全链路（迁移 `d2e3f4a5b6c7` 单 head）——依 RootDoc-AgentEval 1.0.2 的上游输入（AVX-HAR-001 v0.7.6 / CR-032 已落地裁决器）移植。规则含 trigger_type 白名单（review_due/exam_finished/goal_stalled/community_match/resource_new，对齐 AG-P3-05 触发器清单）、condition/action JSONB、**裁决器三参数**（静音时段 HH:MM 支持跨午夜 / 冷却分钟 / 每小时频次水位）、enabled 默认 False（「默认不开启高频通知」）。`arbitrate()` 裁决链：启停 → 静音时段 → 冷却 → 频次水位；频次统计复用收件箱建议幂等键前缀 `rule:{id}:`（与 AG-P3-01 联动，零额外表）；`mark_fired()` 供 AG-P3-05 触发器放行后回写。API：`GET/POST /agent-rules`、`PATCH /{id}`、`PATCH /{id}/enabled`、`DELETE /{id}`（所有权校验）。用户级一键熔断随 AG-P3-07 投递策略设计。集成测试 3 用例（CRUD/所有权/校验 + 裁决器三参数全矩阵 + 纯函数边界）。验证：全量 pytest / mypy 240 文件零错误 / black / flake8 / 契约基线重生成 contract-check OK（193→197 路由）。
+
+- **AG-P3-01 建议收件箱前端切片（2026-10-05）**
 - **AG-P3-01 建议收件箱前端切片（2026-10-05）**：工作台新增 `agent-inbox` widget（后端切片 #34 已合并）——BFF `GET /api/agent-inbox`（分页/过滤透传、裸数组→{items}）+ `PATCH /api/agent-inbox/[id]/status`（camel→snake body 映射，非法 action 400）；`src/modules/agent/` 模块（AgentInboxItem 类型 + useAgentInbox hook：pending 加载/accept/dismiss/snooze 30 分钟，处理后本地移除）；widget 展示类型徽标/标题/理由/预计耗时 + 空态/错误重试。i18n 三处同步（agentInbox* 11 键 + inboxType* 5 键）。附带修复：workbench-card 的 DnaCard 改深路径导入（barrel 拖 server-only monitoring 链）。测试：BFF 契约 5 用例 + widget 4 用例（next-intl 稳定引用覆写 + 按 URL 分发打桩）。验证：ts-check 零错误 / eslint 全绿 / vitest 53 文件 358 passed。
 
 - **AG-P3-06 起步切片：arq 定时 sweep（2026-10-05）**：复用既有 maintenance_cron 模式（Redis 锁集群单点 + 薄包装层）交付两个 sweep——① `agent_inbox_sweep_cron`（每 15 分钟）：AG-P3-01 收件箱定时回收（snoozed 到期回 pending、pending 过期转 expired），读路径惰性回收之外的兜底；② `event_auto_archive_cron`（每日 00:10）：过期活动归档，兑现上游读路径移除 auto_archive 时「供定时任务调用」的 docstring 约定。配置 `AGENT_SWEEPS_ENABLED` 总开关（.env.example 同步）。集成测试 3 用例（状态迁移全矩阵/开关短路/事件归档）。验证：全量 pytest / mypy 235 文件零错误 / black / flake8；既有 cron 注册清单测试同步扩展。
