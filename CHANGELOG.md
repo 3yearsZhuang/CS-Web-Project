@@ -7,6 +7,16 @@
 
 ---
 
+## [Unreleased]
+
+> 进行中 / 下一波次变更累积区；发版时由 `scripts/tag_and_release.sh` 自动转为具体版本号 + 日期。已闭环项不在此滞留（见 `docs/项目待办v2.md`）。
+
+### Added
+
+- **AG-P3-01 建议收件箱前端切片（2026-10-05）**：工作台新增 `agent-inbox` widget（后端切片 #34 已合并）——BFF `GET /api/agent-inbox`（分页/过滤透传、裸数组→{items}）+ `PATCH /api/agent-inbox/[id]/status`（camel→snake body 映射，非法 action 400）；`src/modules/agent/` 模块（AgentInboxItem 类型 + useAgentInbox hook：pending 加载/accept/dismiss/snooze 30 分钟，处理后本地移除）；widget 展示类型徽标/标题/理由/预计耗时 + 空态/错误重试。i18n 三处同步（agentInbox* 11 键 + inboxType* 5 键）。附带修复：workbench-card 的 DnaCard 改深路径导入（barrel 拖 server-only monitoring 链）。测试：BFF 契约 5 用例 + widget 4 用例（next-intl 稳定引用覆写 + 按 URL 分发打桩）。验证：ts-check 零错误 / eslint 全绿 / vitest 53 文件 358 passed。
+
+- **AG-P3-06 起步切片：arq 定时 sweep（2026-10-05）**：复用既有 maintenance_cron 模式（Redis 锁集群单点 + 薄包装层）交付两个 sweep——① `agent_inbox_sweep_cron`（每 15 分钟）：AG-P3-01 收件箱定时回收（snoozed 到期回 pending、pending 过期转 expired），读路径惰性回收之外的兜底；② `event_auto_archive_cron`（每日 00:10）：过期活动归档，兑现上游读路径移除 auto_archive 时「供定时任务调用」的 docstring 约定。配置 `AGENT_SWEEPS_ENABLED` 总开关（.env.example 同步）。集成测试 3 用例（状态迁移全矩阵/开关短路/事件归档）。验证：全量 pytest / mypy 235 文件零错误 / black / flake8；既有 cron 注册清单测试同步扩展。
+
 ## [1.0.2] - 2026-10-05
 
 > 进行中 / 下一波次变更累积区；发版时由 `scripts/tag_and_release.sh` 自动转为具体版本号 + 日期。已闭环项不在此滞留（见 `docs/项目待办v2.md`）。
