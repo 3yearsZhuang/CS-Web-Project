@@ -19,6 +19,8 @@
 
 - **AG-P3-03 前端切片：每日学习简报 widget（2026-10-05）**：工作台新增 `agent-briefing` widget（1x2）——五节计数卡（到期复习/专注分钟/进行中任务/社区新帖/待处理建议）；后端 `status=failed` 时静默降级为提示（验收：生成失败不影响工作台）；BFF `GET /api/agent-briefing`（date 透传）；i18n 三处同步 agentBriefing* 10 键。测试：BFF 契约 2 用例 + widget 3 用例。验证：ts-check 零错误 / eslint 全绿 / vitest 57 文件 375 passed。
 
+- **AG-P3-05 事件触发引擎（2026-10-05）**：AG-P3-01/02/06 三块基建正式接通——`AgentTriggerService` 跨用户扫描启用规则（单条失败不阻断），逐条经 CR-032 裁决器放行后采集素材信号，生成收件箱建议（幂等键 `rule:{id}:{yyyymmdd}` + 冷却双重防线，不会反复生成同一建议），`mark_fired` 回写冷却。素材采集器 v1：review_due（到期错题数）/ resource_new（24h 内 approved 资源，condition.techTag 过滤 + 排除本人）/ goal_stalled（active 目标 + N 天无专注）；exam_finished / community_match 随域事件接入（引擎优雅跳过）。触发类型→建议类型映射（resource_new→resource_recommend 等）+ 默认标题模板（action_payload.title 可覆盖）。cron `agent_trigger_cron`（每 30 分钟，AGENT_SWEEPS_ENABLED 总开关）。测试：resource_new 全链路（生成/映射/payload/去重/冷却）+ goal_stalled + 停用与无信号 + 开关短路 5 用例。验证：全量 pytest / mypy 246 文件零错误 / black / flake8。
+
 - **AG-P3-01 建议收件箱前端切片（2026-10-05）**
 - **AG-P3-01 建议收件箱前端切片（2026-10-05）**：工作台新增 `agent-inbox` widget（后端切片 #34 已合并）——BFF `GET /api/agent-inbox`（分页/过滤透传、裸数组→{items}）+ `PATCH /api/agent-inbox/[id]/status`（camel→snake body 映射，非法 action 400）；`src/modules/agent/` 模块（AgentInboxItem 类型 + useAgentInbox hook：pending 加载/accept/dismiss/snooze 30 分钟，处理后本地移除）；widget 展示类型徽标/标题/理由/预计耗时 + 空态/错误重试。i18n 三处同步（agentInbox* 11 键 + inboxType* 5 键）。附带修复：workbench-card 的 DnaCard 改深路径导入（barrel 拖 server-only monitoring 链）。测试：BFF 契约 5 用例 + widget 4 用例（next-intl 稳定引用覆写 + 按 URL 分发打桩）。验证：ts-check 零错误 / eslint 全绿 / vitest 53 文件 358 passed。
 
