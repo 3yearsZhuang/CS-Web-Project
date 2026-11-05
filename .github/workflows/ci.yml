@@ -93,3 +93,8 @@ jobs:
       - name: Module naming sync (P2-9)
         # 三端模块名 ⊆ 契约资源名；CS-Mobile 缺失时对其自动容错（返回空集）。
         run: python3 scripts/check/check_module_naming.py
+
+      - name: Doc facts drift (head / version / contract size)
+        # 文档中的派生事实（Alembic head、契约路由数/资源数）必须与代码一致；
+        # --dry-run 只报告不改写；漂移 / 迁移链分叉 / 事实不可解析即失败（见 docs/RootDoc-DocsAsCode.md）。
+        run: python3 scripts/doc/gen_doc_facts.py --dry-run

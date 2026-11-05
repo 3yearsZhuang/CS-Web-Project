@@ -1,8 +1,8 @@
 # RootDoc-DocsAsCode｜文档即代码（Docs-as-Code）工程标准（Reference · 文档工程治理 L0 唯一权威）
 
 > 更新人：3yearsZ
-> 更新日：2026-08-24
-> 版本：1.0.0
+> 更新日：2026-11-05
+> 版本：1.1.0
 > Diátaxis：R（Reference · 回答「是什么」，提供文档工程全流程的事实定义：核心原则、生命周期、Definition of Done、工具链、CI 门禁、生成规则、质量度量；不包含可执行步骤）
 > 适用读者：文档作者 / Reviewer / CI 维护者 / 发布负责人 / 文档 Owner
 > 变更触发：文档工程流程调整 / 工具链或脚本增减 / CI 文档门禁变更 / 质量度量口径变化
@@ -85,10 +85,10 @@
 
 | 脚本 / 目标 | 检查内容 | 调用方式 | 门禁级别 |
 |-------------|----------|----------|----------|
-| `scripts/doc/gen_doc_facts.py` | 派生事实：Alembic head / 版本四源 / 三端模块↔契约 / 测试存在 | `make gen-doc-facts`（同步）/ `make check-doc-facts`（只查） | 发布门禁 |
+| `scripts/doc/gen_doc_facts.py` | 派生事实：Alembic head（按迁移模块属性建图，多 head/解析失败即失败）/ 版本四源 / 契约规模（路由数·资源数）/ 三端模块↔契约 / 测试存在 | `make gen-doc-facts`（同步）/ `make check-doc-facts`（只查，漂移即失败） | 发布门禁 + 根 CI 门禁 |
 | `scripts/check/check_dead_links.py` | 文档内部链接死链审计（ER-09） | `make check-docs-links` | CI 门禁 |
 | `scripts/check/check_version_sync.py` | 版本四源一致：`pyproject.toml` / `__init__.py` / `package.json` / `uv.lock`（ER-33） | `make check-version` | CI 门禁 |
-| `scripts/check/check_module_naming.py` | 三端业务模块名 ⊆ 契约资源名（P2-9） | `make check-module-naming` | CI 门禁 |
+| `scripts/check/check_module_naming.py` | 三端业务模块名 ⊆ 契约资源名 ∪ 域合并映射 `DOMAIN_ALIASES`（P2-9）；映射值须真实存在于契约 | `make check-module-naming` | CI 门禁 |
 | `scripts/check/check_gitignore_sync.py` | `.gitignore` 公共段一致性（C-8 / N-04） | `make check-gitignore-sync` | 自检 |
 | `CS-Web-Backend/tools/scripts/contract/export_openapi.py` | API 契约冻结 / 基线比对（G3 / ER-04） | `make contract-check` / `make contract-baseline` | CI 门禁 |
 | 前端契约快照比对 | 前端内嵌 `openapi.baseline.json` 与根基线逐字节一致 | 根 CI diff 步骤 | CI 门禁 |
@@ -106,7 +106,8 @@
 | 前端契约快照同步 | 前端快照 vs 根基线逐字节一致 | G3 |
 | 版本四源一致 | `pyproject.toml` / `__init__.py` / `package.json` / `uv.lock` | ER-33 |
 | 文档死链 | 内部链接指向不存在文件即失败 | ER-09 |
-| 模块命名对齐 | 三端模块名 ⊆ 契约资源名 | P2-9 |
+| 模块命名对齐 | 模块名 ⊆ 契约资源名 ∪ 域合并映射 | P2-9 |
+| 派生事实漂移 | Alembic head / 契约规模与文档不一致即失败 | DocsAsCode §7 |
 
 ---
 
@@ -129,8 +130,8 @@
 | 版本四源漂移 | 四处版本号不一致项 | `make check-version` | 0 |
 | 契约漂移 | 当前 OpenAPI vs 冻结基线差异 | `make contract-check` | 0 diff |
 | 契约快照漂移 | 根基线 vs 前端快照差异 | 根 CI diff 步骤 | 0 |
-| 模块命名越界 | 三端模块名 ∉ 契约资源名 | `make check-module-naming` | 0 |
-| 派生事实漂移 | `gen_doc_facts --dry-run` 报告项 | `make check-doc-facts` | 0 |
+| 模块命名越界 | 模块名 ∉ 契约资源名 ∪ 域合并映射（`DOMAIN_ALIASES`） | `make check-module-naming` | 0 |
+| 派生事实漂移 | `gen_doc_facts --dry-run` 报告项（head / 版本 / 契约规模）；解析失败或迁移链分叉同样计失败 | `make check-doc-facts` | 0 |
 | 文档健康度 | 版本锚定 / 引用密度 / 内容重复 | 每月人工 + 脚本复核 | 见 [RootDoc-DocHealth.md](RootDoc-DocHealth.md) |
 
 ---

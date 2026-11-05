@@ -19283,6 +19283,7 @@
     },
     "/api/v1/tools/resources/{resource_id}": {
       "get": {
+        "description": "资源详情：默认只开放已审核通过；作者本人或持管理权限者可预览任意状态。",
         "operationId": "get_resource_api_v1_tools_resources__resource_id__get",
         "parameters": [
           {
@@ -19317,6 +19318,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "summary": "Get Resource",
         "tags": [
           "资源"

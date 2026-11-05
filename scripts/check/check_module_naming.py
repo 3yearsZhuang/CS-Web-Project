@@ -34,6 +34,19 @@ def api_resources() -> set[str]:
     return segs
 
 
+# 资源 → 模块 的多对一映射（2026-11 引入）。
+# 背景：契约按 URL 资源切分，同一业务域可能铺开成多个并列资源（如 Agent 域 =
+# agent-briefing / agent-inbox / agent-rules / agent-weekly-review），而代码按域收敛为
+# 一个模块（src/modules/agent/、app/api/v1/agent_*.py）。旧规则「模块名必须等于资源名」
+# 对这种形状无解，只能二选一：把域拆成 4 个模块（违背域内聚），或每次新增子资源就让门禁红。
+# 新规则：模块集合 ⊆（资源集合 ∪ 映射键集合），映射的取值必须真实存在于契约资源中，
+# 即"允许域合并，但不允许凭空造名"。映射本身登记在 RootDoc-ModuleMap.md，此处为机器可读副本。
+DOMAIN_ALIASES: dict[str, set[str]] = {
+    # 模块名 -> 被它有条件吸收的契约资源
+    "agent": {"agent-briefing", "agent-inbox", "agent-rules", "agent-weekly-review"},
+}
+
+
 def collect_dir_modules(base: Path) -> set[str]:
     """收集目录下的一级子目录名（模块目录）。"""
     if not base.is_dir():
@@ -64,8 +77,28 @@ def main() -> int:
     be = collect_backend_v1()
 
     errors: list[str] = []
+
+    # 映射健全性：别名吸收的资源必须真实存在（防止改名后映射变成僵尸白名单）
+    for alias, absorbed in DOMAIN_ALIASES.items():
+        zombie = sorted(absorbed - resources)
+        if zombie:
+            errors.append(
+                f"DOMAIN_ALIASES['{alias}'] 指向不存在的契约资源: {zombie}"
+                "（资源改名/删除后须同步更新映射）"
+            )
+
+    allowed = resources | set(DOMAIN_ALIASES)
+
+    def _matches(name: str) -> bool:
+        """模块名是否落到契约资源或域映射上。
+
+        Python 模块名只能用下划线（`agent_briefing.py`），URL 资源名用连字符
+        （`/api/v1/agent-briefing`）——同一资源的两种书写被视为等价。
+        """
+        return name in allowed or name.replace("_", "-") in allowed
+
     for label, mods in (("前端 src/modules", fe), ("移动端 src/modules", mo), ("后端 app/api/v1", be)):
-        extra = sorted(mods - resources)
+        extra = sorted(m for m in mods if not _matches(m))
         if extra:
             errors.append(f"{label} 存在不在契约中的模块名: {extra}")
 
@@ -74,11 +107,13 @@ def main() -> int:
         for e in errors:
             print("  -", e)
         print(f"  契约资源名（{len(resources)}）: {sorted(resources)}")
+        print(f"  域合并映射（{len(DOMAIN_ALIASES)}）: {sorted(DOMAIN_ALIASES)}")
         return 1
 
     print(
         f"[check-module-naming] OK（前端 {len(fe)} / 移动端 {len(mo)} / "
-        f"后端 {len(be)} 模块名全部对齐契约，共 {len(resources)} 个资源）"
+        f"后端 {len(be)} 模块名全部对齐契约，共 {len(resources)} 个资源"
+        f" + {len(DOMAIN_ALIASES)} 个域合并映射）"
     )
     return 0
 
