@@ -118,21 +118,60 @@ check_container() {
   banner "1/6 容器状态"
 
   local unhealthy=()
-  # 取所有容器状态列
-  while IFS=$'\t' read -r name state; do
-    [[ -z "$name" ]] && continue
-    if [[ "$state" == Up*"(healthy)"* ]] || [[ "$state" == Up* ]]; then
-      ok "[$name] $state"
-    else
-      unhealthy+=("$name: $state")
-      fail "[$name] $state"
-    fi
-  done < <(docker compose -f "$COMPOSE_FILE" ps --format '{{.Name}}\t{{.State}}')
+  local expected=() missing=()
+  local ps_output ps_rc=0
 
-  if [[ ${#unhealthy[@]} -eq 0 ]]; then
-    record "container" "PASS" "全部容器正常"
+  # 期望的常驻服务（migrate 为一次性任务，不在此列：跑完即退出是正常状态）
+  expected=(db redis backend worker cs-website)
+
+  # 捕获 ps 输出与退出码：docker 不可用 / compose 文件缺失时不能静默判 PASS
+  ps_output=$(docker compose -f "$COMPOSE_FILE" ps --format '{{.Name}}\t{{.Service}}\t{{.State}}' 2>/dev/null) || ps_rc=$?
+  if [[ "$ps_rc" -ne 0 ]]; then
+    record "container" "FAIL" "docker compose ps 执行失败（exit $ps_rc）：docker daemon 不可用或 $COMPOSE_FILE 缺失"
+    fail "docker compose ps 执行失败（exit $ps_rc）"
+    return
+  fi
+
+  # 空列表 = 栈未启动，必须判失败（此前空数组被当成「全部正常」）
+  if [[ -z "$ps_output" ]]; then
+    record "container" "FAIL" "没有任何容器（栈未启动）"
+    fail "没有任何容器运行（栈未启动）"
+    return
+  fi
+
+  local seen_services=""
+  while IFS=$'\t' read -r name service state; do
+    [[ -z "$name" ]] && continue
+    seen_services+=" $service"
+    # State 是 "running"/"exited"/"restarting" 等；健康态在 {{.Health}}，此前误用 Up 前缀匹配 State
+    case "$state" in
+      running*) ok "[$name] $state" ;;
+      *)
+        unhealthy+=("$name: $state")
+        fail "[$name] $state"
+        ;;
+    esac
+  done <<< "$ps_output"
+
+  # 期望服务缺位检测（有容器但少了某个常驻服务 → 判失败）
+  local svc
+  for svc in "${expected[@]}"; do
+    if ! grep -qw "$svc" <<< "$seen_services"; then
+      missing+=("$svc")
+    fi
+  done
+
+  if [[ ${#unhealthy[@]} -eq 0 && ${#missing[@]} -eq 0 ]]; then
+    record "container" "PASS" "全部容器正常（$(wc -w <<< "$seen_services" | tr -d ' ') 个运行中）"
   else
-    record "container" "FAIL" "${unhealthy[*]}"
+    local detail=""
+    [[ ${#unhealthy[@]} -gt 0 ]] && detail="${unhealthy[*]}"
+    if [[ ${#missing[@]} -gt 0 ]]; then
+      # 缺位必须即时可见（record 的 detail 只在 --json 输出，终端会看不到）
+      fail "缺少常驻服务: ${missing[*]}"
+      detail="${detail:+$detail; }缺少服务: ${missing[*]}"
+    fi
+    record "container" "FAIL" "$detail"
   fi
 }
 
@@ -143,8 +182,16 @@ check_health() {
 
   local failed=()
 
+  # 容器是否在跑：用 State 精确判定（"Up" 前缀匹配不上 exited/restarting，且 ps 失败会被误读）。
+  _svc_running() {
+    local svc="$1" st
+    st=$(docker compose -f "$COMPOSE_FILE" ps --format '{{.Service}}\t{{.State}}' 2>/dev/null \
+         | awk -F'\t' -v s="$svc" '$1==s {print $2}')
+    [[ "$st" == running* ]]
+  }
+
   # 后端 /health（容器内探测，见 lib/health-probe.sh —— 与 update.sh 共用）
-  if docker compose -f "$COMPOSE_FILE" ps backend | grep -q "Up"; then
+  if _svc_running backend; then
     if probe_backend_health "$COMPOSE_FILE" "$HEALTH_CONNECT_TIMEOUT"; then
       ok "backend /health → 200"
     else
@@ -152,11 +199,13 @@ check_health() {
       failed+=("backend /health")
     fi
   else
-    warn "backend 容器未运行，跳过 /health 检查"
+    # 服务本应常驻却被跳过检查 = 故障，不是「通过」
+    fail "backend 容器未运行（/health 无法检查）"
+    failed+=("backend 未运行")
   fi
 
   # 后端 /readyz（探 DB + Redis）
-  if docker compose -f "$COMPOSE_FILE" ps backend | grep -q "Up"; then
+  if _svc_running backend; then
     local rz_body
     if rz_body=$(docker compose -f "$COMPOSE_FILE" exec -T backend python -c \
       "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8000/readyz',timeout=$HEALTH_CONNECT_TIMEOUT).read().decode(),end='')" 2>/dev/null); then
@@ -168,7 +217,7 @@ check_health() {
   fi
 
   # 前端 /api/health（容器内探测，转发后端 /health，见 lib/health-probe.sh）
-  if docker compose -f "$COMPOSE_FILE" ps cs-website | grep -q "Up"; then
+  if _svc_running cs-website; then
     if probe_frontend_health "$COMPOSE_FILE" "$HEALTH_CONNECT_TIMEOUT"; then
       ok "frontend /api/health → 200"
     else
@@ -176,7 +225,8 @@ check_health() {
       failed+=("frontend /api/health")
     fi
   else
-    warn "cs-website 容器未运行，跳过前端检查"
+    fail "cs-website 容器未运行（/api/health 无法检查）"
+    failed+=("cs-website 未运行")
   fi
 
   if [[ ${#failed[@]} -eq 0 ]]; then
@@ -194,8 +244,12 @@ check_endpoints() {
   local errors=()
 
   for svc in backend cs-website; do
-    if ! docker compose -f "$COMPOSE_FILE" ps "$svc" | grep -q "Up"; then
-      warn "$svc 未运行，跳过 5xx 检查"
+    local svc_state
+    svc_state=$(docker compose -f "$COMPOSE_FILE" ps --format '{{.Service}}\t{{.State}}' 2>/dev/null \
+                | awk -F'\t' -v s="$svc" '$1==s {print $2}')
+    if [[ "$svc_state" != running* ]]; then
+      fail "[$svc] 未运行，无法检查 5xx"
+      errors+=("$svc 未运行")
       continue
     fi
     local count
