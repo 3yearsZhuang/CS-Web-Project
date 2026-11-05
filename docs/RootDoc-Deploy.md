@@ -2,7 +2,7 @@
 
 > 更新人：3yearsZ
 > 更新日：2026-08-20
-> 版本：1.0.1 · 七夕（子模块指针 cfa270a / 884f68a / ceb1f9b；版本三源同步：pyproject / __init__.py / package.json）
+> 版本：1.0.1 · 七夕（子仓库指针不在此写死——以根目录 `git submodule status` 输出为准；版本四源同步：pyproject / __init__.py / package.json / uv.lock）
 > Diátaxis：H（How-to · 目标导向 · 每个场景解决一个具体部署/运维问题；不教原理，只给可复制的命令序列与验收标准）
 > 适用读者：已完成 Onboarding 的部署管理员、负责发布/回滚/迁移的 release owner、生产环境 SRE；不适合第一次接触项目的新人（新人先做 [Onboarding.md](Onboarding.md) Tutorial）
 > 变更触发：新增/调整 Makefile 部署入口 / docker compose 服务拓扑 / 健康检查端点 / 备份恢复脚本 / SLO 目标 / 外部反向代理接入方式 / CI 分工或门禁
@@ -296,9 +296,12 @@ docker compose up -d db
 sleep 10 && docker compose ps   # db Up (healthy)
 
 # E.1-2 用 backend 备份脚本的 --restore 模式（读生产 .env 连接参数）
-./CS-Web-Backend/tools/scripts/db/backup_db.sh --restore /opt/cs-backup/domefff_2026-08-20_0300.sql.gz
+# 安全闸：脚本拒绝恢复到非 *_tmp/_probe/_test/_drill 的库名；真要在生产库上恢复须显式确认。
+RESTORE_ALLOW_OVERWRITE_PROD=1 \
+  ./CS-Web-Backend/tools/scripts/db/backup_db.sh --restore /opt/cs-backup/domefff_2026-08-20_0300.sql.gz
 
-# E.1-3 脚本内部已自动重建序列；手动确认所有自增序列对齐最大值（可选，脚本已做但二次验更稳）
+# E.1-3 脚本已自动对齐所有自增序列（pg_restore 不会推进 serial，不重置会让后续 INSERT 撞主键）。
+#       下列 SQL 为二次核对（可选）；脚本已做，结果应与 max(id) 一致。
 docker compose exec -T db psql -U postgres -d domefff -c "
   SELECT tbl.relname AS table_name,
          setval(pg_get_serial_sequence(tbl.relname,'id'),
@@ -327,6 +330,8 @@ docker compose up -d db
 ```
 
 > 如果必须保留 seed 数据（极端场景）：走 `RootDoc-MigEval.md` §4 的「按 email/username 去重 + INSERT ... ON CONFLICT DO NOTHING」策略（步骤多，这里不展开；恢复 MUST 优先 A 模式最小化人为错误）。
+
+> **演练要求（MUST）**：正式恢复前先恢复到独立演练库（库名以 `_drill` / `_probe` 结尾）并核对表数、关键表行数与 `alembic_version` head；确认无误后再切生产。`--clean` 会先 DROP 再重建对象，目标库名解析错即为数据事故。
 
 ### E.3 5 张关键表行数对账（恢复成功 MUST 全通过）
 

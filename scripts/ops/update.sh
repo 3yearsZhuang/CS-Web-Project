@@ -126,8 +126,11 @@ detect_changes() {
     changed+=("backend" "frontend")
   fi
 
-  # 输出结果
-  echo "${changed[@]}"
+  # 输出结果：**每个服务一行**。调用方用 mapfile 逐行读取；
+  # 若用 echo "${changed[@]}" 会压成单行 "backend frontend"，逐行循环匹配不到 → 误判无变更。
+  if [[ ${#changed[@]} -gt 0 ]]; then
+    printf '%s\n' "${changed[@]}"
+  fi
 }
 
 # ---- 确定要构建的服务 ----
@@ -136,12 +139,14 @@ BUILD_SERVICES=""
 if [[ -n "$TARGET" ]]; then
   case "$TARGET" in
     all)
-      BUILD_SERVICES="backend worker cs-website"
-      info "强制重建全部服务"
+      # migrate 与 backend/worker 共用同一镜像定义，必须一起重建，
+      # 否则新应用跑旧迁移镜像（schema 与应用版本脱节）。
+      BUILD_SERVICES="backend worker migrate cs-website"
+      info "强制重建全部服务（含 migrate）"
       ;;
     backend)
-      BUILD_SERVICES="backend worker"
-      info "仅更新后端（含 worker）"
+      BUILD_SERVICES="backend worker migrate"
+      info "仅更新后端（含 worker + migrate）"
       ;;
     frontend)
       BUILD_SERVICES="cs-website"
@@ -154,7 +159,7 @@ else
 
   for svc in "${CHANGED[@]}"; do
     case "$svc" in
-      backend)  BUILD_SERVICES="$BUILD_SERVICES backend worker" ;;
+      backend)  BUILD_SERVICES="$BUILD_SERVICES backend worker migrate" ;;
       frontend) BUILD_SERVICES="$BUILD_SERVICES cs-website" ;;
     esac
   done
@@ -202,19 +207,33 @@ check_health() {
 info "健康检查..."
 
 # 后端 /health（容器内探测，见 lib/health-probe.sh）
+HEALTH_FAILED=0
+
 if echo "$BUILD_SERVICES" | grep -qw "backend"; then
-  check_health probe_backend_health \
-    "后端" || warn "后端健康检查未通过，请检查日志: docker compose logs backend"
+  if ! check_health probe_backend_health "后端"; then
+    fail "后端健康检查未通过，请检查日志: docker compose logs backend"
+    HEALTH_FAILED=1
+  fi
 fi
 
 # 前端 /api/health（容器内探测，转发到后端 /health）
 if echo "$BUILD_SERVICES" | grep -qw "cs-website"; then
-  check_health probe_frontend_health \
-    "前端" || warn "前端健康检查未通过，请检查日志: docker compose logs cs-website"
+  if ! check_health probe_frontend_health "前端"; then
+    fail "前端健康检查未通过，请检查日志: docker compose logs cs-website"
+    HEALTH_FAILED=1
+  fi
 fi
 
 # ---- 总结 ----
 echo ""
+if [[ "$HEALTH_FAILED" -ne 0 ]]; then
+  fail "更新未通过验收：容器已切换但健康检查失败（不是「更新完成」）"
+  info "已更新: ${BUILD_SERVICES}"
+  echo ""
+  echo "  排查:   docker compose logs -f backend cs-website"
+  echo "  快速回滚: 见文档 RootDoc-Deploy.md §六 回滚"
+  exit 1
+fi
 ok "更新完成！"
 info "已更新: ${BUILD_SERVICES}"
 echo ""
