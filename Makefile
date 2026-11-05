@@ -30,7 +30,7 @@ BACKEND_PY := $(CURDIR)/CS-Web-Backend/.venv/bin/python
 BACKEND_PORT := 9000
 FRONTEND_PORT := 2333
 
-.PHONY: dev-up dev-backend dev-frontend dev-logs dev-down restart-frontend setup up down logs ps rebuild status contract-baseline contract-check check-version check check-contract check-docs check-fe-boundary check-version-group check-module-naming check-gitignore-sync check-i18n-copy gen-api-docs gen-doc-facts check-docs-links deps-export clean-artifacts mobile-install mobile-dev mobile-build
+.PHONY: dev-up dev-backend dev-frontend dev-logs dev-down restart-frontend setup up down logs ps rebuild status contract-baseline contract-check check-version check check-contract check-docs check-fe-boundary check-version-group check-module-naming check-gitignore-sync check-i18n-copy check-bff-handler gen-api-docs gen-doc-facts check-docs-links deps-export clean-artifacts mobile-install mobile-dev mobile-build
 
 # 本地开发统一用后台进程托管（不依赖 tmux，开箱即用）。
 # 前后端各自 nohup 后台运行，PID 写入 .dev.pid，日志落盘 .dev-*.log。
@@ -142,7 +142,7 @@ mobile-build:
 # make check-version-group 仅版本四源一致
 # make check-gitignore-sync 仅 .gitignore 公共段一致性
 # 下列原子目标（contract-baseline 等）保留为别名，CI / 旧习惯仍可调用。
-check: check-contract check-docs check-fe-boundary check-version-group check-module-naming check-gitignore-sync check-i18n-copy
+check: check-contract check-docs check-fe-boundary check-version-group check-module-naming check-gitignore-sync check-i18n-copy check-bff-handler
 	@echo ">>> 全部自检通过 ✅"
 
 # 契约类（G3：API 契约冻结）
@@ -161,6 +161,10 @@ check-fe-boundary: check-bff-boundary
 # 前端 i18n 类（BFF 硬编码中文冻结门禁；存量基线 bff-copy-baseline.json，--update 收缩）
 check-i18n-copy:
 	cd CS-Web-Frontend && pnpm run check:bff-copy
+
+# 前端 BFF 统一接线类（routeHandler 工厂采用度；存量按文件冻结，新增手抄即失败）
+check-bff-handler:
+	cd CS-Web-Frontend && pnpm run check:bff-handler
 
 # 版本类（ER-33：版本四源一致）
 check-version-group: check-version

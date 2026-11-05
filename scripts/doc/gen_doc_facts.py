@@ -38,43 +38,93 @@ def resolve(rel: str) -> Path:
 
 
 # ---- 1) Alembic head ----
-def _revision_pair(text: str) -> tuple[str, str | None] | None:
-    "从迁移文件文本提取 (revision, down_revision)。down_revision 兼容 docstring Revises: 与 Python 属性。"
-    rm = re.search(r"Revision ID:\s*(\S+)", text)
-    if not rm:
-        return None
-    rid = rm.group(1)
-    down: str | None = None
-    dm = re.search(r"Revises:\s*([^\s]+)", text)
-    if dm:
-        down = None if dm.group(1) in ("None", "") else dm.group(1)
+# 解析口径（2026-11 修复）：revision / down_revision 必须以 **Python 模块属性**为准，
+# 不能依赖 docstring 里的「Revision ID: / Revises:」。历史教训：9 个新迁移只写了
+# 属性、没写 docstring，旧实现直接跳过它们 → 报告 head=f7a8b9c0d1e2（真实 f4a5b6c7d8e9），
+# 且多 head 时「取字典序最大」把分叉错误静默吞掉。故：
+#   1) 属性优先，docstring 仅作属性缺失时的兜底；
+#   2) 一个迁移文件解析不出 revision → 直接判定事实不可信（fail closed）；
+#   3) head 数 ≠ 1 → 判定迁移分叉（fail closed），不再挑选。
+_REVISION_ATTR = re.compile(
+    r"^[ \t]*revision[ \t]*(?::[^=\n]+)?=[ \t]*['\"]([0-9a-zA-Z_]+)['\"]", re.M
+)
+_DOWN_ATTR = re.compile(r"^[ \t]*down_revision[ \t]*(?::[^=\n]+)?=[ \t]*(.+)$", re.M)
+
+
+def _parse_down(raw: str) -> tuple[list[str], bool]:
+    """解析 down_revision 赋值右侧。返回 (父 revision 列表, 是否合法)。
+
+    合法形态：None / "abc" / ("a", "b") / ["a", "b"]。
+    **merge 节点必须返回全部父**——只取第一个父会把第二个父误判成 head
+    （进而把合法合并节点报成「迁移链分叉」）。
+    """
+    rhs = raw.split("#", 1)[0].strip()
+    if rhs in ("None", ""):
+        return [], True
+    single = re.fullmatch(r"['\"]([0-9a-zA-Z_]+)['\"]", rhs)
+    if single:
+        return [single.group(1)], True
+    seq = re.fullmatch(r"[\(\[]\s*(.*?)\s*[\)\]]", rhs, re.S)
+    if seq:
+        items = re.findall(r"['\"]([0-9a-zA-Z_]+)['\"]", seq.group(1))
+        return items, True
+    return [], False
+
+
+def _revision_pair(text: str) -> tuple[tuple[str, list[str]], str | None]:
+    """提取 (revision, [down_revision...]) 与文件内解析问题描述（None 表示正常）。
+
+    down_revision 支持多父（merge 节点），因此返回列表而非单值。
+    """
+    rid: str | None = None
+    m = _REVISION_ATTR.search(text)
+    if m:
+        rid = m.group(1)
     else:
-        dm2 = re.search(r"down_revision\s*[^=]*=\s*['\"]([^'\"]+)['\"]", text)
-        if dm2:
-            down = dm2.group(1)
-    return rid, down
+        dm = re.search(r"Revision ID:\s*(\S+)", text)
+        if dm:
+            rid = dm.group(1)
+    if not rid:
+        return ("", []), "缺少 revision（属性与 docstring 均未找到）"
+
+    downs: list[str] = []
+    d = _DOWN_ATTR.search(text)
+    if d:
+        parents, ok = _parse_down(d.group(1))
+        if not ok:
+            return (rid, downs), f"down_revision 形态无法解析: {d.group(1).strip()[:60]}"
+        downs.extend(parents)
+    else:
+        dm = re.search(r"Revises:\s*([^\s]+)", text)  # docstring 兜底
+        if dm and dm.group(1) not in ("None", ""):
+            downs.append(dm.group(1))
+    return (rid, downs), None
 
 
-def alembic_head() -> str:
-    """从 alembic/versions/*.py 解析 revision/down_revision 图，返回 head（无子节点者）。"""
-    versions = (BACKEND / "alembic" / "versions").glob("*.py")
+def alembic_heads() -> tuple[list[str], list[str]]:
+    """从 alembic/versions/*.py 建 revision 图，返回 (heads, problems)。
+
+    problems 非空（解析失败）或多 head，均由调用方判定为事实不可信。
+    """
     has_child: set[str] = set()
     all_revs: set[str] = set()
-    for f in versions:
-        pair = _revision_pair(f.read_text(encoding="utf-8", errors="ignore"))
-        if not pair:
+    problems: list[str] = []
+    for f in sorted((BACKEND / "alembic" / "versions").glob("*.py")):
+        pair, err = _revision_pair(f.read_text(encoding="utf-8", errors="ignore"))
+        rid, downs = pair
+        if err:
+            problems.append(f"{f.name}: {err}")
             continue
-        rid, down = pair
         all_revs.add(rid)
-        if down:
-            has_child.add(down)  # down 是某个节点的父（有子）
+        has_child.update(downs)  # down 是某个节点的父（有子）
     heads = sorted(r for r in all_revs if r not in has_child)
-    # 线性链约定：多 head 时选「最近的」——以 Create Date 最新者（见 Alembic 单一 head 约定）
-    if not heads:
-        return ""
-    if len(heads) == 1:
-        return heads[0]
-    return heads[-1]  # 兜底：取字典序最大；正常应单 head
+    if not all_revs:
+        problems.append("未解析到任何 revision（alembic/versions 为空或全部解析失败）")
+    elif len(heads) != 1:
+        problems.append(
+            "迁移链分叉：head 数为 %d（必须单 head）→ %s" % (len(heads), ", ".join(heads))
+        )
+    return heads, problems
 
 
 # ---- 需要同步 head 的文档行 ----
@@ -86,11 +136,41 @@ HEAD_TARGETS = [
 ]
 
 
-def sync_alembic_head(head: str, check_only: bool) -> int:
-    "替换各目标文档中的 head 引用。返回改动处数。"
+def _disp(path: Path) -> str:
+    """文档路径展示：仓库内用相对路径，仓库外（测试/临时目录）退回绝对路径。"""
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def _head_drift(path: Path, head: str) -> list[str]:
+    """返回该文档中与当前 head 不一致的行（为空表示已同步）。"""
+    if not path.exists():
+        return []
+    stale: list[str] = []
+    for i, ln in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if not HEAD_MARKERS.search(ln):
+            continue
+        hexes = HEAD_LINE.findall(ln)
+        # 恰好一个 hex 才算 head 引用；多 hex 行（迁移清单）不参与判定
+        if len(hexes) == 1 and hexes[0] != head:
+            stale.append(f"{_disp(path)}:{i} 引用 {hexes[0]} ≠ 当前 head {head}")
+    return stale
+
+
+def sync_alembic_head(head: str, check_only: bool) -> tuple[int, list[str]]:
+    """替换各目标文档中的 head 引用。返回 (改动处数, 漂移清单)。
+
+    check_only=True 时只报告漂移、不改写文档（供 `make check-doc-facts` 门禁使用）。
+    """
     changed = 0
+    drift: list[str] = []
     for path in HEAD_TARGETS:
         if not path.exists():
+            continue
+        if check_only:
+            drift.extend(_head_drift(path, head))
             continue
         text = path.read_text(encoding="utf-8")
         lines = text.splitlines(keepends=True)
@@ -108,10 +188,9 @@ def sync_alembic_head(head: str, check_only: bool) -> int:
                 out.append(new_ln)
             else:
                 out.append(ln)
-        if not check_only and changed_lines_needed(out, text):
+        if changed_lines_needed(out, text):
             path.write_text("".join(out), encoding="utf-8")
-        # 供外层判断：与实际比较在新旧函数内处理
-    return changed
+    return changed, drift
 
 
 def changed_lines_needed(out: list[str], orig: str) -> bool:
@@ -167,6 +246,65 @@ def contract_resources() -> set[str]:
     return res
 
 
+def contract_size() -> tuple[int, int]:
+    """返回 (契约路由数, 契约资源数)，口径与 check_module_naming.py 一致。"""
+    data = json.loads((ROOT / "openapi.baseline.json").read_text(encoding="utf-8"))
+    routes = sum(1 for p in data.get("paths", {}) if p.startswith("/api/v1/"))
+    return routes, len(contract_resources())
+
+
+# 需要在文档中同步的契约规模行：只认带「路由」「个契约资源」后缀的数字，
+# 且该行同一句式只出现一次（避免误伤区间 / 迁移清单 / 历史记录）。
+ROUTE_COUNT_RE = re.compile(r"\d+(?=\s*路由)")
+RESOURCE_COUNT_RE = re.compile(r"\d+(?=\s*个契约资源)")
+CONTRACT_SIZE_TARGETS = [ROOT / "docs/RootDoc-ModuleMap.md"]
+
+
+def _contract_size_drift(routes: int, resources: int) -> list[str]:
+    drift: list[str] = []
+    for path in CONTRACT_SIZE_TARGETS:
+        if not path.exists():
+            continue
+        for i, ln in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            for pat, want, label in (
+                (ROUTE_COUNT_RE, routes, "路由数"),
+                (RESOURCE_COUNT_RE, resources, "资源数"),
+            ):
+                found = pat.findall(ln)
+                if len(found) == 1 and found[0] != str(want):
+                    drift.append(
+                        f"{_disp(path)}:{i} {label} = {found[0]} ≠ 当前 {want}"
+                    )
+            if len(ROUTE_COUNT_RE.findall(ln)) > 1:
+                drift.append(
+                    f"{_disp(path)}:{i} 单行出现多个「路由数」，无法自动同步（需人工改写）"
+                )
+    return drift
+
+
+def sync_contract_size(routes: int, resources: int) -> int:
+    """把契约规模同步进文档，返回改动处数。"""
+    changed = 0
+    for path in CONTRACT_SIZE_TARGETS:
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        out: list[str] = []
+        for ln in text.splitlines(keepends=True):
+            new = ln
+            if len(ROUTE_COUNT_RE.findall(ln)) == 1:
+                new = ROUTE_COUNT_RE.sub(str(routes), new)
+            if len(RESOURCE_COUNT_RE.findall(ln)) == 1:
+                new = RESOURCE_COUNT_RE.sub(str(resources), new)
+            if new != ln:
+                changed += 1
+            out.append(new)
+        if changed_lines_needed(out, text):
+            path.write_text("".join(out), encoding="utf-8")
+    return changed
+
+
+
 def module_dirs(kind: str) -> set[str]:
     base = {"backend": BACKEND / "app/api/v1",
             "frontend": FRONTEND / "src/modules",
@@ -179,7 +317,21 @@ def module_dirs(kind: str) -> set[str]:
 
 def check_modules() -> list[str]:
     "返回越界/缺失模块报告行（信息性）。"
+
+    def _matches(name: str, allowed: set[str]) -> bool:
+        # 与 check_module_naming.py 同口径：下划线写法与连字符契约资源名等价
+        return name in allowed or name.replace("_", "-") in allowed
+
     contract = contract_resources()
+    # 域合并映射与门禁同源，避免两处规则漂移（导入失败时退化为纯资源比对）
+    try:
+        sys.path.insert(0, str(ROOT / "scripts" / "check"))
+        from check_module_naming import DOMAIN_ALIASES  # type: ignore
+
+        allowed = contract | set(DOMAIN_ALIASES)
+    except Exception:  # noqa: BLE001 - 文档脚本不应因门禁模块缺失而崩溃
+        allowed = contract
+
     backend = {d for d in module_dirs("backend") if d != "tools"}  # tools 为子域包
     tools_path = BACKEND / "app/api/v1/tools"
     tools_sub = {d.name for d in tools_path.glob("*") if d.is_dir() and not d.name.startswith(("__", "."))} if tools_path.is_dir() else set()
@@ -188,7 +340,7 @@ def check_modules() -> list[str]:
     mobile = module_dirs("mobile")
     lines: list[str] = []
     for kind, mods in (("backend", backend), ("frontend", frontend), ("mobile", mobile)):
-        extra = sorted(mods - contract)
+        extra = sorted(m for m in mods if not _matches(m, allowed))
         if extra:
             lines.append(f"  [{kind}] 越界(不在契约): {', '.join(extra)}")
     return lines
@@ -214,14 +366,23 @@ def check_tests() -> list[str]:
 
 def main() -> int:
     check_only = "--dry-run" in sys.argv
-    head = alembic_head()
-    print(f"=== DOC-FACTS（head={head}，dry-run={check_only}）===")
+    heads, head_problems = alembic_heads()
+    head = heads[0] if len(heads) == 1 else ""
+    print(f"=== DOC-FACTS（head={head or '无法确定'}，dry-run={check_only}）===")
 
-    changed = 0
+    # 事实不可信（解析失败 / 多 head）→ 直接失败，不再"挑一个"继续跑
+    if head_problems:
+        print("[alembic head] 事实不可信：")
+        for p in head_problems:
+            print(f"  - {p}")
+        return 2
+
+    drift: list[str] = []
     if check_only:
         print(f"[alembic head] 当前 = {head}")
+        _, drift = sync_alembic_head(head, check_only=True)
     else:
-        changed = sync_alembic_head(head, check_only=False)
+        changed, _ = sync_alembic_head(head, check_only=False)
         print(f"[alembic head] 同步文档改动 {changed} 行")
 
     bad = check_versions()
@@ -232,15 +393,29 @@ def main() -> int:
     if not mod:
         print("  OK（三端模块 ⊆ 契约资源）")
 
+    routes, resources = contract_size()
+    if check_only:
+        drift.extend(_contract_size_drift(routes, resources))
+    else:
+        n = sync_contract_size(routes, resources)
+        print(f"[契约规模] {routes} 路由 / {resources} 资源；同步文档改动 {n} 行")
+    if check_only:
+        print(f"[契约规模] 当前 = {routes} 路由 / {resources} 资源")
+
     print("[tests]")
     for t in check_tests():
         print(t)
 
+    if drift:
+        print("[drift] 文档派生事实与代码不一致：")
+        for d in drift:
+            print(f"  - {d}")
+
     if check_only:
         print("\n(--dry-run 未改写文档)")
 
-    bare = head and not bad and not mod
-    return 0 if bare else 2 if (bad or mod) else 0
+    ok = not bad and not mod and not drift
+    return 0 if ok else 2
 
 
 if __name__ == "__main__":

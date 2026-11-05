@@ -130,9 +130,9 @@
 
 ## 4. 当前状态与结论
 
-### 4.1 现行 PostgreSQL 迁移链（2026-08-20）
+### 4.1 现行 PostgreSQL 迁移链（2026-11-05）
 
-当前迁移链为单一线性链，head（最新迁移）为 **`e5f6a7b8c9d0`**：
+当前迁移链为单一线性链，head（最新迁移）为 **`f4a5b6c7d8e9`**：
 
 ```text
 … → a3b4c5d6e7f8(chinese_fts_zhparser)
@@ -140,8 +140,23 @@
   → c2d3e4f5a6b7(add_focus_sessions)
   → d3e4f5a6b7c8(add_llm_usage_logs+llm_configs)
   → d4e5f6a7b8c9(add_chat_events_trajectory)
-  → e5f6a7b8c9d0(add_user_llm_feature_toggles)  ← HEAD
+  → e5f6a7b8c9d0(add_user_llm_feature_toggles)
+  → f7a8b9c0d1e2(add_agent_runs_and_conversation_branches)
+  → a8b9c0d1e2f3(add_conversation_lifecycle)
+  → b9c0d1e2f3a4(add_learning_wrong_answers)
+  → c0d1e2f3a4b5(add_review_streak)
+  → e2f3a4b5c6d7(add_learning_goals)
+  → f3a4b5c6d7e8(add_learning_plan_items)
+  → b8c9d0e1f2a3(add_task_claims_submission_url)
+  → c1d2e3f4a5b6(add_agent_inbox_items)
+  → d2e3f4a5b6c7(add_agent_automation_rules)
+  → e3f4a5b6c7d8(add_agent_daily_briefings)
+  → f4a5b6c7d8e9(add_agent_weekly_reviews)      ← HEAD
 ```
+
+> 完整 34 个 revision 的权威图以 `CS-Web-Backend/alembic/versions/` 为准；本表只列**架构相关节点**，
+> head 值由 `make check-doc-facts`（`scripts/doc/gen_doc_facts.py`）从迁移文件属性派生并校验，
+> 出现漂移即门禁失败 —— 手工改表前先跑 `make gen-doc-facts`。
 
 | 迁移 ID | 内容 | 日期 |
 |---|---|---|
@@ -150,7 +165,18 @@
 | `c2d3e4f5a6b7` | `focus_sessions`（番茄钟） | 2026-08-08 |
 | `d3e4f5a6b7c8` | `llm_usage_logs` + `llm_configs` | 2026-08-08 |
 | `d4e5f6a7b8c9` | `chat_events` Trajectory 事件日志 | 2026-08-19 |
-| `e5f6a7b8c9d0` | `llm_configs` 用户级功能开关 ← **HEAD** | 2026-08-20 |
+| `e5f6a7b8c9d0` | `llm_configs` 用户级功能开关 | 2026-08-20 |
+| `f7a8b9c0d1e2` | `agent_runs` + 会话分支元数据 | 2026-08-25 |
+| `a8b9c0d1e2f3` | 会话归档 / 软删除时间戳 | 2026-08-25 |
+| `b9c0d1e2f3a4` | 用户错题快照与复习状态 | 2026-08-25 |
+| `c0d1e2f3a4b5` | 间隔复习连续计数 | 2026-08-25 |
+| `e2f3a4b5c6d7` | 学习目标与每周学习预算 | 2026-08-25 |
+| `f3a4b5c6d7e8` | 自适应学习计划条目 | 2026-08-25 |
+| `b8c9d0e1f2a3` | `task_claims.submission_url` | 2026-10-03 |
+| `c1d2e3f4a5b6` | Agent 建议收件箱（AG-P3-01） | 2026-10-03 |
+| `d2e3f4a5b6c7` | Agent 自动化规则（AG-P3-02） | 2026-10-05 |
+| `e3f4a5b6c7d8` | Agent 每日简报（AG-P3-03） | 2026-10-06 |
+| `f4a5b6c7d8e9` | Agent 每周复盘（AG-P3-04） ← **HEAD** | 2026-10-06 |
 
 ### 4.2 架构定位
 

@@ -2,7 +2,7 @@
 
 > 计算机协会官网平台 · 前后端分离 + 根级编排
 
-> **当前真实进度（2026-08-20）**：版本 **1.0.1 · 七夕（2026-08-19 发布）**。后端 FastAPI + PostgreSQL 为唯一业务数据源；前端为纯 BFF 薄转发层（`src/modules/*/server/`、`src/shared/db`、本地审计等直连层已整体删除，B1 闭环；审计走后端 `POST /api/v1/audit/logs`，E2E 经后端 API 建号）。完整待办见 `docs/项目待办v2.md`。
+> **当前真实进度**：版本线见下方「版本号单一源」表（四处文件为准，此处不写死数字，避免与代码漂移）。后端 FastAPI + PostgreSQL 为唯一业务数据源；前端为纯 BFF 薄转发层（`src/modules/*/server/`、`src/shared/db`、本地审计等直连层已整体删除，B1 闭环；审计走后端 `POST /api/v1/audit/logs`，E2E 经后端 API 建号）。完整待办见 `docs/项目待办v2.md`，变更记录见 `CHANGELOG.md`。
 
 本仓库为**编排/部署仓库（monorepo 外层）**，通过 Git 子仓库(submodule) 收敛前后端两个独立源码仓库，并在根级统一管理全栈容器编排与启动命令。
 
@@ -23,7 +23,7 @@ FztbuCS-Project/
 
 ## 核心特性
 
-> 以下能力在 **1.0.1** 中已具备；认证相关接口统一前缀 `/api/v1`，完整契约见后端 Swagger 与仓库根 `openapi.baseline.json`。
+> 以下能力已具备（版本线见下方「版本号单一源」表；每项能力的落地版本以 `CHANGELOG.md` 为准）；认证相关接口统一前缀 `/api/v1`，完整契约见后端 Swagger 与仓库根 `openapi.baseline.json`。
 
 - **统一工作台（Workbench）**：个人数据聚合视图，集中呈现 GitHub 贡献热力图、API 调用统计、番茄钟专注记录、LLM 用量等（端点见「使用示例 · 工作台」）。
 - **Auxilio 学习助手**：SSE 流式对话，支持会话管理与 Skills 工具调用；前端「助手对话」入口即对应其接口。
@@ -43,6 +43,7 @@ FztbuCS-Project/
 git clone <root-repo-url> FztbuCS-Project
 cd FztbuCS-Project
 git submodule update --init --recursive
+mise install   # 按根目录 .mise.toml 自动装齐 Node 22 / pnpm 9 / Python 3.13 / uv（未装 mise 先看「环境要求」）
 ```
 
 ### 本地开发（并行起前后端）
@@ -104,7 +105,7 @@ make down         # 停止
 
 - 改版本号**四处同步**：前端 `package.json` + 后端 `pyproject.toml` + 后端 `app/__init__.py.__version__` + 后端 `uv.lock`（依赖锁定随版本一起更新）；**移动端 CS-Mobile 为第五处**：`package.json.version` 与 `src/manifest.json.versionName/versionCode` 同步更新。
 - 变更记录（唯一权威）：[`CHANGELOG.md`](CHANGELOG.md)，按 Keep a Changelog 维护，全量记录各版本显著变更（0.9.8 起含工作台 / Auxilio 等新增能力；2026-08-17 起并入原 `docs/项目演变历史.md`）。
-- 当前语义版本线：`1.0.1`（2026-08-19 发布）；后续演进见根 `CHANGELOG.md`。
+- 当前语义版本线**不在此手写**：以本节「版本号单一源」表的四处文件为唯一取值来源（`python3 scripts/check/check_version_sync.py` 会打印当前版本并校验一致性）；发版记录见根 `CHANGELOG.md`。
 
 **架构一句话**
 
@@ -147,6 +148,7 @@ A：不能。前端仅 BFF 转发，业务数据全在后端 PG。
 | 工具 | 版本 | 用途 |
 |---|---|---|
 | Git | 较新版本 | 拉取含子仓库(submodule) 的仓库 |
+| mise（推荐） | 近期版本 | 项目工具链版本管理：克隆后 `mise install` 按根目录 `.mise.toml` 一键装齐下列版本（子模块目录同样生效）；不装则按下表自行安装 |
 | Python | **3.13+**（与 `CS-Web-Backend/pyproject.toml` 一致；3.9 会因 `X \| None` 语法失败） | 后端运行 / 测试 |
 | Node.js | **22+**（与 `CS-Web-Frontend/package.json` 的 `engines.node: ">=22"` 一致） | 前端运行 / 构建 |
 | pnpm | 9.0.0 | 前端包管理（CI 锁定此版本，`package.json` 已禁 npm/yarn） |

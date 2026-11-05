@@ -1,0 +1,10 @@
+# 项目工具链版本（与 README「环境要求」表保持一致，该表为单一事实源）
+# mise 会向上查找本文件：在 CS-Web-Backend / CS-Web-Frontend / CS-Mobile 子目录中同样生效。
+# 首次使用：mise install（自动装齐下列工具）
+# 版本口径与 CI 对齐：.github/workflows/e2e.yml（node 22）、ci.yml（python 3.13）
+
+[tools]
+node = "22" # CS-Web-Frontend engines.node >=22；e2e CI 同为 22
+python = "3.13" # CS-Web-Backend requires-python >=3.13；ci.yml 同为 3.13
+pnpm = "9.0.0" # CS-Web-Frontend packageManager: pnpm@9.0.0（CI 锁定此版本）
+uv = "0.12.1" # make lock 用（uv.lock / requirements*.lock 由该版本生成）

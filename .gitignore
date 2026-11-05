@@ -52,7 +52,23 @@ appendonlydir/
 # 构建/CI 临时错误日志（散落根目录的非源码产物；本地排障用，不入库）
 *_err.txt
 
+# ---- 根级专属段 ----
+# 以下条目仅根级适用（子仓库无需同步；`make check-gitignore-sync` 只校验上方公共段）
+
+# pnpm 本地内容寻址存储（`pnpm --store-dir .pnpm-store` 产物）。纯缓存、可重建，
+# 含数万硬链接文件，绝不入库。
+.pnpm-store/
+
+# Python 字节码缓存（根级 scripts/ 下的检查与派生脚本被 import 时会生成）
+__pycache__/
+*.py[cod]
+
+# 一次性改码脚本（patch*.py / *_migration_script.py）：逻辑已落在源码，
+# 留在根目录会误导新人以为仍需执行。小写后缀显式列出，避免大小写不敏感文件系统漏配。
+patch*.py
+*_migration_script.py
+
 # 注：pgdata 等为 Docker 命名卷，由 Docker 管理，
 # 不落在工作区目录，无需在此忽略。
 
-# ---- 根级无源码，公共段即全部；语言专属段见子模块 .gitignore ----
+# ---- 根级无源码，公共段即全部；子仓库语言专属段见各自 .gitignore ----
