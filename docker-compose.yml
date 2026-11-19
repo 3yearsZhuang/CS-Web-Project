@@ -16,7 +16,13 @@
 services:
   # ============ 后端 FastAPI（BFF 转发目标）============
   db:
-    image: postgres:16-alpine
+    # 与 CS-Web-Backend/docker-compose.yml 保持一致：统一使用自建的
+    # PostgreSQL 18 + zhparser 镜像，保证中文全文检索可用、开发与生产版本一致。
+    # 直接用官方 postgres:16-alpine 会静默回退到 simple 分词（无中文分词能力）。
+    build:
+      context: ./CS-Web-Backend
+      dockerfile: docker/db/Dockerfile
+    image: fztbucs/pg18-zhparser:latest
     container_name: cs-backend-db
     restart: unless-stopped
     # 资源约束（ER-35）
@@ -27,7 +33,9 @@ services:
       POSTGRES_USER: ${DATABASE_USER:-postgres}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?请在 .env 中设置 DATABASE_PASSWORD}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      # PG18 起官方镜像改用「挂载父目录」的约定：数据落在 /var/lib/postgresql/18/docker，
+      # 便于 pg_upgrade --link，避免挂载点跨越数据目录。挂 /data 子路径会触发启动报错。
+      - pgdata:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-postgres} -d ${DATABASE_NAME:-domefff}"]
       interval: 5s
@@ -97,6 +105,9 @@ services:
     # prod 日志持久化（ER-40）
     volumes:
       - logs:/app/logs
+      # 用户上传与社区图片持久化（容器重建不丢数据）
+      - uploads:/app/uploads
+      - appdata:/app/data
     networks:
       - cs-net
 
@@ -182,6 +193,9 @@ services:
     cpus: "0.5"
     volumes:
       - logs:/app/logs
+      # 与 backend 共享上传/数据目录，异步任务写入对 backend 可见
+      - uploads:/app/uploads
+      - appdata:/app/data
     networks:
       - cs-net
 
@@ -231,6 +245,9 @@ volumes:
   pgdata:
   # prod 日志持久化（ER-40）：backend/worker 的 /app/logs 挂载此卷
   logs:
+  # 用户上传（uploads/resources）与用户数据（data/avatars、data/community-images）
+  uploads:
+  appdata:
 
 networks:
   cs-net:
