@@ -23,7 +23,7 @@ services:
       context: ./CS-Web-Backend
       dockerfile: docker/db/Dockerfile
     image: fztbucs/pg18-zhparser:latest
-    container_name: cs-backend-db
+    container_name: cs-db
     restart: unless-stopped
     # 资源约束（ER-35）
     mem_limit: 512m
@@ -145,10 +145,14 @@ services:
     mem_limit: 256m
     cpus: "0.5"
     healthcheck:
+      # 高负载时引擎调度 docker exec 会明显变慢（实测单次可达 30s），
+      # 原 timeout:3s 会把健康的 Redis 误判为 unhealthy，进而触发
+      # backend 的 redis_probe 拒绝启动 → 无限重启循环。
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 12
+      interval: 15s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
     networks:
       - cs-net
 
