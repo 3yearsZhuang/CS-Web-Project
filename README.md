@@ -445,3 +445,9 @@ docs: 补充 README 使用示例
 
 - 跨项目/编排层文档统一在根 `docs/`（单一权威、零漂移）：`RootDoc-FEArch`（前端方法论，以 CS-Web-Frontend 真实结构为锚）、`RootDoc-EngConv`（通用工程规范）、`RootDoc-Deploy`（全栈部署/运维）、`RootDoc-MigEval`（迁移评估）、`Onboarding`（新开发者/管理员上手）、`api-reference`（API 参考，由 openapi 契约自动生成）、`CHANGELOG`（变更记录唯一权威，2026-08-17 起并入原 `项目演变历史`）、`项目待办v2`——完整清单与说明见文档地图。
 - 前后端专项文档保留在各子仓库(submodule)：后端 `CS-Web-Backend/tools/docs/`（入口 `README.md`）、前端 `CS-Web-Frontend/tools/docs/`（入口 `README.md`）。
+
+## 许可证
+
+本项目采用 [MIT License](LICENSE) 开源，Copyright (c) 2026 3yearsZ。
+
+许可证覆盖本仓库根目录下的编排层内容（文档、`Makefile`、`docker-compose*.yml`、`scripts/`、`docs/` 等）。`CS-Web-Backend`、`CS-Web-Frontend`、`CS-Mobile` 为独立仓库的子仓库(submodule)，各子仓库的授权以其自身声明为准；如需整体统一为 MIT，请在各子仓库分别补充 `LICENSE` 文件。
